@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<title>This tests that controls are properly updated when muted content attribute is changed.</title>
+<audio controls muted></audio>
+<video controls muted></video>
+<script>
+  var audio = document.querySelector('audio');
+  audio.src = '../content/test.oga';
+
+  var video = document.querySelector('video');
+  video.src = '../content/test.ogv';
+</script>
+</html>

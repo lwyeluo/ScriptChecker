@@ -1,0 +1,10 @@
+include_rules = [
+    "+..",
+    "+third_party/blink/renderer/bindings",
+    "+third_party/blink/renderer/core",
+    "+third_party/blink/renderer/modules",
+    "+mojo/public",
+    "+third_party/blink/renderer/controller",
+    "+web",
+    "+third_party/blink/public/web",
+]
