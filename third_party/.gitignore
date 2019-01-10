@@ -138,11 +138,14 @@
 /nacl_sdk_binaries/
 /netty-tcnative/src
 /netty4/src
-/node/linux
-/node/mac
+/node/linux/*
+!/node/linux/node-linux-x64.tar.gz.sha1
+/node/mac/*
+!/node/mac/node-darwin-x64.tar.gz.sha1
 /node/node_modules
 /node/*.tar.gz
-/node/win
+/node/win/*
+!/node/win/node.exe.sha1
 /nss
 /objenesis/lib/
 /omaha/src/omaha
