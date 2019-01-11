@@ -7,7 +7,6 @@
 #include "base/single_thread_task_runner.h"
 #include "base/threading/thread_task_runner_handle.h"
 #include "content/public/common/browser_side_navigation_policy.h"
-#include "base/debug/stack_trace.h"
 
 namespace content {
 
@@ -158,7 +157,6 @@ std::unique_ptr<ThrottlingURLLoader> ThrottlingURLLoader::CreateLoaderAndStart(
     network::mojom::URLLoaderClient* client,
     const net::NetworkTrafficAnnotationTag& traffic_annotation,
     scoped_refptr<base::SingleThreadTaskRunner> task_runner) {
-  LOG(INFO) << ">>> [renderer][frame] ThrottlingURLLoader::CreateLoaderAndStart";
   std::unique_ptr<ThrottlingURLLoader> loader(new ThrottlingURLLoader(
       std::move(throttles), client, traffic_annotation));
   loader->Start(std::move(factory), routing_id, request_id, options,
@@ -413,9 +411,6 @@ void ThrottlingURLLoader::OnStartLoadingResponseBody(
     mojo::ScopedDataPipeConsumerHandle body) {
   DCHECK_EQ(DEFERRED_NONE, deferred_stage_);
   DCHECK(!loader_cancelled_);
-
-  LOG(INFO) << ">>> [IPC] ThrottlingURLLoader::OnStartLoadingResponseBody";
-
   forwarding_client_->OnStartLoadingResponseBody(std::move(body));
 }
 

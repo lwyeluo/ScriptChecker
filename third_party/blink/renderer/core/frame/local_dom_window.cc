@@ -100,8 +100,6 @@
 #include "third_party/blink/renderer/platform/scroll/scrollbar_theme.h"
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
 
-#include "thread"
-
 namespace blink {
 
 // Timeout for link preloads to be used after window.onload
@@ -292,9 +290,6 @@ void LocalDOMWindow::AcceptLanguagesChanged() {
 Document* LocalDOMWindow::CreateDocument(const String& mime_type,
                                          const DocumentInit& init,
                                          bool force_xhtml) {
-    LOG(INFO) << ">>> [renderer] LocalDOMWindow::CreateDocument, thread_id is " << std::this_thread::get_id();
-    //base::debug::StackTrace().Print();
-
   Document* document = nullptr;
   if (force_xhtml) {
     // This is a hack for XSLTProcessor. See

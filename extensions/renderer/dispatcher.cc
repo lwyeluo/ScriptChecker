@@ -118,8 +118,6 @@
 #include "ui/base/resource/resource_bundle.h"
 #include "v8/include/v8.h"
 
-#include "base/debug/stack_trace.h"
-
 using blink::WebDocument;
 using blink::WebScopedUserGesture;
 using blink::WebSecurityPolicy;
@@ -288,8 +286,6 @@ void Dispatcher::DidCreateScriptContext(
     blink::WebLocalFrame* frame,
     const v8::Local<v8::Context>& v8_context,
     int world_id) {
-    LOG(INFO) << "\tenter Dispatcher::DidCreateScriptContext. World id is " << world_id;
-
   const base::TimeTicks start_time = base::TimeTicks::Now();
 
   ScriptContext* context =
@@ -746,7 +742,6 @@ void Dispatcher::RegisterNativeHandlers(
     Dispatcher* dispatcher,
     ExtensionBindingsSystem* bindings_system,
     V8SchemaRegistry* v8_schema_registry) {
-    LOG(INFO) << "\t register messaging_natives & runtime modules in Dispatcher::RegisterNativeHandlers";
   module_system->RegisterNativeHandler(
       "chrome",
       std::unique_ptr<NativeHandler>(new ChromeNativeHandler(context)));
@@ -934,8 +929,6 @@ void Dispatcher::OnCancelSuspend(const std::string& extension_id) {
 
 void Dispatcher::OnDeliverMessage(const PortId& target_port_id,
                                   const Message& message) {
-    LOG(INFO) << ">>> [extension][EXT] receive ExtensionMsg_DeliverMessage. [portid, msg, pid] = " << target_port_id.port_number
-              << ", " << message.data << ", " << getpid();
   bindings_system_->GetMessagingService()->DeliverMessage(
       *script_context_set_, target_port_id, message,
       NULL);  // All render frames.
@@ -948,10 +941,6 @@ void Dispatcher::OnDispatchOnConnect(
     const ExtensionMsg_ExternalConnectionInfo& info,
     const std::string& tls_channel_id) {
   DCHECK(!target_port_id.is_opener);
-
-  LOG(INFO) << ">>> [extension][EXT] receive ExtensionMsg_DispatchOnConnect. [source_id, source_url, channel_name] = "
-            << info.source_id << ", " << info.source_url.GetContent() << ", " << channel_name;
-
   bindings_system_->GetMessagingService()->DispatchOnConnect(
       *script_context_set_, target_port_id, channel_name, source, info,
       tls_channel_id,

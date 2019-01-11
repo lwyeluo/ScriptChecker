@@ -65,8 +65,6 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
-#include "thread"
-
 namespace blink {
 
 void ScriptController::Trace(blink::Visitor* visitor) {
@@ -344,11 +342,6 @@ v8::Local<v8::Value> ScriptController::EvaluateScriptInMainWorld(
       !GetFrame()->GetDocument()->CanExecuteScripts(kAboutToExecuteScript))
     return v8::Local<v8::Value>();
 
-  LOG(INFO) << "??? [V8] Run a JS code in MainWorld??";
-  LOG(INFO) << "\tThe current ThreadID is [" << base::PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "]";
-  LOG(INFO) << "\tJS code is: " << source_code.Source();
-  LOG(INFO) << "\tThe isolate addr is: " << GetIsolate();
-
   // TODO(dcheng): Clean this up to not use ScriptState, to match
   // executeScriptInIsolatedWorld.
   ScriptState* script_state = ToScriptStateForMainWorld(GetFrame());
@@ -376,10 +369,6 @@ void ScriptController::ExecuteScriptInIsolatedWorld(
     Vector<v8::Local<v8::Value>>* results) {
   DCHECK_GT(world_id, 0);
 
-  LOG(INFO) << "??? [V8] Run a JS code in Content Script??";
-  LOG(INFO) << "\tThe current ThreadID is [" << base::PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "]";
-  LOG(INFO) << "\tThe isolate addr is: " << GetIsolate();
-
   scoped_refptr<DOMWrapperWorld> world =
       DOMWrapperWorld::EnsureIsolatedWorld(GetIsolate(), world_id);
   LocalWindowProxy* isolated_world_window_proxy = WindowProxy(*world);
@@ -392,8 +381,6 @@ void ScriptController::ExecuteScriptInIsolatedWorld(
       v8::Array::New(GetIsolate(), sources.size());
 
   for (size_t i = 0; i < sources.size(); ++i) {
-    LOG(INFO) << "\tJS code is: " << sources[i].Source();
-
     v8::Local<v8::Value> evaluation_result =
         ExecuteScriptAndReturnValue(context, sources[i]);
     if (evaluation_result.IsEmpty())

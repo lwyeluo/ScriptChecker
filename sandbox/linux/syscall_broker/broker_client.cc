@@ -43,8 +43,6 @@ int BrokerClient::Access(const char* pathname, int mode) const {
   if (!pathname)
     return -EFAULT;
 
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Access";
-
   if (fast_check_in_client_ &&
       !CommandAccessIsSafe(allowed_command_set_, broker_permission_list_,
                            pathname, mode, nullptr)) {
@@ -56,8 +54,6 @@ int BrokerClient::Access(const char* pathname, int mode) const {
 int BrokerClient::Mkdir(const char* pathname, int mode) const {
   if (!pathname)
     return -EFAULT;
-
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Mkdir";
 
   if (fast_check_in_client_ &&
       !CommandMkdirIsSafe(allowed_command_set_, broker_permission_list_,
@@ -71,8 +67,6 @@ int BrokerClient::Open(const char* pathname, int flags) const {
   if (!pathname)
     return -EFAULT;
 
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Open";
-
   if (fast_check_in_client_ &&
       !CommandOpenIsSafe(allowed_command_set_, broker_permission_list_,
                          pathname, flags, nullptr, nullptr)) {
@@ -84,8 +78,6 @@ int BrokerClient::Open(const char* pathname, int flags) const {
 int BrokerClient::Readlink(const char* path, char* buf, size_t bufsize) const {
   if (!path || !buf)
     return -EFAULT;
-
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Readlink";
 
   if (fast_check_in_client_ &&
       !CommandReadlinkIsSafe(allowed_command_set_, broker_permission_list_,
@@ -128,8 +120,6 @@ int BrokerClient::Rename(const char* oldpath, const char* newpath) const {
   if (!oldpath || !newpath)
     return -EFAULT;
 
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Rename";
-
   if (fast_check_in_client_ &&
       !CommandRenameIsSafe(allowed_command_set_, broker_permission_list_,
                            oldpath, newpath, nullptr, nullptr)) {
@@ -162,8 +152,6 @@ int BrokerClient::Rmdir(const char* path) const {
   if (!path)
     return -EFAULT;
 
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Rmdir";
-
   if (fast_check_in_client_ &&
       !CommandRmdirIsSafe(allowed_command_set_, broker_permission_list_, path,
                           nullptr)) {
@@ -175,8 +163,6 @@ int BrokerClient::Rmdir(const char* path) const {
 int BrokerClient::Stat(const char* pathname, struct stat* sb) const {
   if (!pathname || !sb)
     return -EFAULT;
-
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Stat";
 
   if (fast_check_in_client_ &&
       !CommandStatIsSafe(allowed_command_set_, broker_permission_list_,
@@ -190,8 +176,6 @@ int BrokerClient::Stat64(const char* pathname, struct stat64* sb) const {
   if (!pathname || !sb)
     return -EFAULT;
 
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Stat64";
-
   if (fast_check_in_client_ &&
       !CommandStatIsSafe(allowed_command_set_, broker_permission_list_,
                          pathname, nullptr)) {
@@ -203,8 +187,6 @@ int BrokerClient::Stat64(const char* pathname, struct stat64* sb) const {
 int BrokerClient::Unlink(const char* path) const {
   if (!path)
     return -EFAULT;
-
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Unlink";
 
   if (fast_check_in_client_ &&
       !CommandUnlinkIsSafe(allowed_command_set_, broker_permission_list_, path,
@@ -220,8 +202,6 @@ int BrokerClient::PathOnlySyscall(BrokerCommand syscall_type,
   write_pickle.WriteInt(syscall_type);
   write_pickle.WriteString(pathname);
   RAW_CHECK(write_pickle.size() <= kMaxMessageLength);
-
-  LOG(INFO) << ">>> [sandbox] BrokerClient::PathOnlySyscall";
 
   int returned_fd = -1;
   uint8_t reply_buf[kMaxMessageLength];
@@ -251,8 +231,6 @@ int BrokerClient::PathAndFlagsSyscall(BrokerCommand syscall_type,
   write_pickle.WriteInt(flags);
   RAW_CHECK(write_pickle.size() <= kMaxMessageLength);
 
-  LOG(INFO) << ">>> [sandbox] BrokerClient::Mkdir";
-
   int returned_fd = -1;
   uint8_t reply_buf[kMaxMessageLength];
   ssize_t msg_len = SendRecvRequest(write_pickle, 0, reply_buf,
@@ -279,8 +257,6 @@ int BrokerClient::PathAndFlagsSyscallReturningFD(BrokerCommand syscall_type,
   // For this "remote system call" to work, we need to handle any flag that
   // cannot be sent over a Unix socket in a special way.
   // See the comments around kCurrentProcessOpenFlagsMask.
-
-    LOG(INFO) << ">>> [sandbox] BrokerClient::PathAndFlagsSyscallReturningFD";
 
   int recvmsg_flags = 0;
   if (syscall_type == COMMAND_OPEN && (flags & kCurrentProcessOpenFlagsMask)) {
@@ -332,8 +308,6 @@ int BrokerClient::StatFamilySyscall(BrokerCommand syscall_type,
   write_pickle.WriteString(pathname);
   RAW_CHECK(write_pickle.size() <= kMaxMessageLength);
 
-  LOG(INFO) << ">>> [sandbox] BrokerClient::StatFamilySyscall";
-
   int returned_fd = -1;
   uint8_t reply_buf[kMaxMessageLength];
   ssize_t msg_len = SendRecvRequest(write_pickle, 0, reply_buf,
@@ -367,7 +341,6 @@ ssize_t BrokerClient::SendRecvRequest(const base::Pickle& request_pickle,
                                       uint8_t* reply_buf,
                                       size_t reply_buf_size,
                                       int* returned_fd) const {
-    LOG(INFO) << ">>> [sandbox] BrokerClient::SendRecvRequest";
   ssize_t msg_len = base::UnixDomainSocket::SendRecvMsgWithFlags(
       ipc_channel_.get(), reply_buf, reply_buf_size, recvmsg_flags, returned_fd,
       request_pickle);

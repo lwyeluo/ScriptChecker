@@ -300,11 +300,6 @@ bool SharedMemory::MapAt(off_t offset, size_t bytes) {
     }
   }
 #endif
-
-  if(getpid() == 1) {
-    LOG(INFO) << ">>> [SHM] tell me who you are!!!";
-  }
-
   memory_ = mmap(nullptr, bytes, PROT_READ | (read_only_ ? 0 : PROT_WRITE),
                  MAP_SHARED, shm_.GetHandle(), offset);
 

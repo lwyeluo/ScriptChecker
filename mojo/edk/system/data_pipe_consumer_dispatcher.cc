@@ -228,10 +228,6 @@ MojoResult DataPipeConsumerDispatcher::BeginReadData(const void** buffer,
   *buffer_num_bytes = bytes_to_read;
   two_phase_max_bytes_read_ = bytes_to_read;
 
-  LOG(INFO) << ">>> [IPC] DataPipeConsumerDispatcher::BeginReadData";
-  LOG(INFO) << "\tData pipe consumer " << pipe_id_ << " read from [control_port="
-            << control_port_.name() << "]";
-
   if (had_new_data)
     watchers_.NotifyState(GetHandleSignalsStateNoLock());
 
@@ -394,9 +390,6 @@ DataPipeConsumerDispatcher::Deserialize(const void* data,
     DLOG(ERROR) << "Failed to deserialize shared buffer handle.";
     return nullptr;
   }
-
-  LOG(INFO) << ">>> [IPC] DataPipeConsumerDispatcher::Deserialize. "
-               "Prepare to create DataPipeConsumerDispatcher as well as shared memory.";
 
   scoped_refptr<DataPipeConsumerDispatcher> dispatcher =
       new DataPipeConsumerDispatcher(node_controller, port, ring_buffer,
@@ -581,9 +574,6 @@ void DataPipeConsumerDispatcher::UpdateSignalsStateNoLock() {
         bytes_available_ += m->num_bytes;
       }
     } while (message_event);
-    LOG(INFO) << ">>> [IPC] DataPipeConsumerDispatcher::UpdateSignalsStateNoLock";
-    LOG(INFO) << "\tData pipe consumer " << pipe_id_ << " is aware that some bytes were written. [control_port="
-              << control_port_.name() << "]";
   }
 
   bool has_new_data = bytes_available_ != previous_bytes_available;

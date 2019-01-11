@@ -36,9 +36,6 @@
 #include "third_party/blink/public/web/web_frame.h"
 #include "third_party/blink/public/web/web_local_frame.h"
 #include "third_party/blink/public/web/web_view.h"
-#include "url/gurl.h"
-
-#include "thread"
 
 namespace extensions {
 
@@ -147,7 +144,6 @@ void ScriptInjectionManager::RFOHelper::DidCreateNewDocument() {
 }
 
 void ScriptInjectionManager::RFOHelper::DidCreateDocumentElement() {
-    LOG(INFO) << ">>> [renderer][EXT] ScriptInjectionManager::RFOHelper::DidCreateDocumentElement";
   ExtensionFrameHelper::Get(render_frame())
       ->ScheduleAtDocumentStart(
           base::Bind(&ScriptInjectionManager::RFOHelper::StartInjectScripts,
@@ -432,10 +428,6 @@ void ScriptInjectionManager::TryToInject(
     UserScript::RunLocation run_location,
     ScriptsRunInfo* scripts_run_info,
     scoped_refptr<AsyncScriptsRunInfo> async_run_info) {
-
-    LOG(INFO) << ">>> [renderer][Thread] In TryToInject.";
-    LOG(INFO) << "\tThe current ThreadID is [" << base::PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "]";
-
   // Try to inject the script. If the injection is waiting (i.e., for
   // permission), add it to the list of pending injections. If the injection
   // has blocked, add it to the list of running injections.

@@ -415,9 +415,6 @@ bool Connector::ReadSingleMessage(MojoResult* read_result) {
   // during message dispatch.
   base::WeakPtr<Connector> weak_self = weak_self_;
 
-  if(getpid() == 1 && base::PlatformThread::CurrentId() == 1)
-    LOG(INFO) << ">>> [IPC] Connector::ReadSingleMessage. Prepare to get message.";
-
   Message message;
   const MojoResult rv = ReadMessage(message_pipe_.get(), &message);
   *read_result = rv;
@@ -441,9 +438,6 @@ bool Connector::ReadSingleMessage(MojoResult* read_result) {
     // This emits just full class name, and is inferior to mojo tracing.
     TRACE_EVENT0("mojom", heap_profiler_tag_);
 #endif
-
-    if(getpid() == 1 && base::PlatformThread::CurrentId() == 1)
-        LOG(INFO) << ">>> [IPC] Connector::ReadSingleMessage. Successfully get message.";
 
     receiver_result =
         incoming_receiver_ && incoming_receiver_->Accept(&message);

@@ -109,8 +109,6 @@ void HTMLFrameElementBase::OpenURL(bool replace_current_item) {
     url = BlankURL();
   }
 
-  LOG(INFO) << ">>> [renderer][iframe] HTMLFrameElementBase::OpenURL";
-
   if (!LoadOrRedirectSubframe(url, frame_name_, replace_current_item))
     return;
   if (!ContentFrame() || script_url.IsEmpty() ||
@@ -184,7 +182,6 @@ HTMLFrameElementBase::GetOriginForFeaturePolicy() const {
 }
 
 void HTMLFrameElementBase::SetNameAndOpenURL() {
-    LOG(INFO) << ">>> [renderer][iframe] HTMLFrameElementBase::SetNameAndOpenURL";
   frame_name_ = GetNameAttribute();
   OpenURL();
 }
@@ -204,8 +201,6 @@ void HTMLFrameElementBase::DidNotifySubtreeInsertionsToDocument() {
 
   if (!SubframeLoadingDisabler::CanLoadFrame(*this))
     return;
-
-  LOG(INFO) << ">>> [renderer][iframe] HTMLFrameElementBase::DidNotifySubtreeInsertionsToDocument";
 
   // It's possible that we already have ContentFrame(). Arbitrary user code can
   // run between InsertedInto() and DidNotifySubtreeInsertionsToDocument().

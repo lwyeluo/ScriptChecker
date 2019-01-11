@@ -12,8 +12,6 @@
 #include "content/renderer/loader/url_response_body_consumer.h"
 #include "net/url_request/redirect_info.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace content {
 
 class URLLoaderClientImpl::DeferredMessage {
@@ -237,7 +235,6 @@ void URLLoaderClientImpl::Bind(
 void URLLoaderClientImpl::OnReceiveResponse(
     const network::ResourceResponseHead& response_head,
     network::mojom::DownloadedTempFilePtr downloaded_file) {
-    //LOG(INFO) << ">>> [renderer] URLLoaderClientImpl::OnReceiveResponse";
   has_received_response_ = true;
   downloaded_file_ = std::move(downloaded_file);
   if (NeedsStoringMessage()) {
@@ -309,10 +306,6 @@ void URLLoaderClientImpl::OnStartLoadingResponseBody(
     mojo::ScopedDataPipeConsumerHandle body) {
   DCHECK(!body_consumer_);
   DCHECK(has_received_response_);
-
-  LOG(INFO) << ">>> [IPC] URLLoaderClientImpl::OnStartLoadingResponseBody. " <<
-               pass_response_pipe_to_dispatcher_ << ", " << is_deferred_;
-
   if (pass_response_pipe_to_dispatcher_) {
     resource_dispatcher_->OnStartLoadingResponseBody(request_id_,
                                                      std::move(body));
@@ -326,8 +319,6 @@ void URLLoaderClientImpl::OnStartLoadingResponseBody(
     body_consumer_->SetDefersLoading();
     return;
   }
-
-  LOG(INFO) << "\tbody_consumer_->OnReadable";
 
   body_consumer_->OnReadable(MOJO_RESULT_OK);
 }

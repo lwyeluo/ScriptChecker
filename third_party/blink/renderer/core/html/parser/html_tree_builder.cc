@@ -373,7 +373,6 @@ void HTMLTreeBuilder::ProcessToken(AtomicHTMLToken* token) {
 void HTMLTreeBuilder::ProcessDoctypeToken(AtomicHTMLToken* token) {
   DCHECK_EQ(token->GetType(), HTMLToken::DOCTYPE);
   if (insertion_mode_ == kInitialMode) {
-    LOG(INFO) << ">>> [renderer] ProcessDoctypeToken. Here we begin to build DOM tree when we receive <!DOCTYPE html>. IsMainthread = " << IsMainThread();
     tree_.InsertDoctype(token);
     SetInsertionMode(kBeforeHTMLMode);
     return;
@@ -557,7 +556,6 @@ void HTMLTreeBuilder::ProcessStartTagForInBody(AtomicHTMLToken* token) {
       token->GetName() == linkTag || token->GetName() == metaTag ||
       token->GetName() == noframesTag || token->GetName() == scriptTag ||
       token->GetName() == styleTag || token->GetName() == titleTag) {
-    LOG(INFO) << ">>> [renderer][DOM] receive <" << token->GetName() << ">";
     bool did_process = ProcessStartTagForInHead(token);
     DCHECK(did_process);
     return;
@@ -610,7 +608,6 @@ void HTMLTreeBuilder::ProcessStartTagForInBody(AtomicHTMLToken* token) {
       token->GetName() == olTag || token->GetName() == pTag ||
       token->GetName() == sectionTag || token->GetName() == summaryTag ||
       token->GetName() == ulTag) {
-    LOG(INFO) << ">>> [renderer][DOM] receive <" << token->GetName() << ">";
     ProcessFakePEndTagIfPInButtonScope();
     tree_.InsertHTMLElement(token);
     return;
@@ -721,7 +718,6 @@ void HTMLTreeBuilder::ProcessStartTagForInBody(AtomicHTMLToken* token) {
     return;
   }
   if (token->GetName() == imageTag) {
-    LOG(INFO) << ">>> [renderer][DOM] receive <" << token->GetName() << ">";
     ParseError(token);
     // Apparently we're not supposed to ask.
     token->SetName(imgTag.LocalName());
@@ -781,7 +777,6 @@ void HTMLTreeBuilder::ProcessStartTagForInBody(AtomicHTMLToken* token) {
   }
   if (token->GetName() == iframeTag) {
     frameset_ok_ = false;
-    LOG(INFO) << ">>> [renderer][DOM] receive <iframe>";
     ProcessGenericRawTextStartTag(token);
     return;
   }
@@ -1011,15 +1006,12 @@ void HTMLTreeBuilder::ProcessStartTag(AtomicHTMLToken* token) {
   DCHECK_EQ(token->GetType(), HTMLToken::kStartTag);
   switch (GetInsertionMode()) {
     case kInitialMode:
-      LOG(INFO) << ">>> [renderer][DOM] here is the DefaultForInitial()";
       DCHECK_EQ(GetInsertionMode(), kInitialMode);
       DefaultForInitial();
       FALLTHROUGH;
     case kBeforeHTMLMode:
       DCHECK_EQ(GetInsertionMode(), kBeforeHTMLMode);
       if (token->GetName() == htmlTag) {
-        LOG(INFO) << ">>> [renderer][DOM] receive <HTML>, thread_id is " << std::this_thread::get_id();
-        //base::debug::StackTrace().Print();
         tree_.InsertHTMLHtmlStartTagBeforeHTML(token);
         SetInsertionMode(kBeforeHeadMode);
         return;
@@ -1382,7 +1374,6 @@ void HTMLTreeBuilder::ProcessStartTag(AtomicHTMLToken* token) {
 }
 
 void HTMLTreeBuilder::ProcessHtmlStartTagForInBody(AtomicHTMLToken* token) {
-    LOG(INFO) << ">>> [renderer] ProcessHtmlStartTagForInBody. We receive <html>";
   ParseError(token);
   if (tree_.OpenElements()->HasTemplateInHTMLScope()) {
     DCHECK(IsParsingTemplateContents());

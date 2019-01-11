@@ -29,8 +29,6 @@
 #include "services/network/public/cpp/url_loader_completion_status.h"
 #include "services/network/resource_scheduler.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace content {
 namespace {
 
@@ -254,8 +252,6 @@ void MojoAsyncResourceHandler::OnWillRead(
     return;
   }
 
-  LOG(INFO) << ">>> [IPC] MojoAsyncResourceHandler::OnWillRead";
-
   bool first_call = false;
   if (!shared_writer_) {
     first_call = true;
@@ -266,8 +262,6 @@ void MojoAsyncResourceHandler::OnWillRead(
     options.capacity_num_bytes = g_allocation_size;
     mojo::ScopedDataPipeProducerHandle producer;
     mojo::ScopedDataPipeConsumerHandle consumer;
-
-    LOG(INFO) << ">>> [IPC] try to create data pipe";
 
     MojoResult result = mojo::CreateDataPipe(&options, &producer, &consumer);
     if (result != MOJO_RESULT_OK) {
@@ -341,8 +335,6 @@ void MojoAsyncResourceHandler::OnReadCompleted(
       url_loader_client_->OnTransferSizeUpdated(transfer_size_diff);
   }
 
-  LOG(INFO) << ">>> [IPC] MojoAsyncResourceHandler::OnReadCompleted";
-
   if (response_body_consumer_handle_.is_valid()) {
     if (url_loader_options_ &
         network::mojom::kURLLoadOptionPauseOnResponseStarted) {
@@ -351,7 +343,6 @@ void MojoAsyncResourceHandler::OnReadCompleted(
                                              time_proceed_with_response_,
                                              time_first_read_completed);
     }
-    LOG(INFO) << "\t send OnStartLoadingResponseBody.. is_using_io_buffer_not_from_writer_=" << is_using_io_buffer_not_from_writer_;
     // Send the data pipe on the first OnReadCompleted call.
     url_loader_client_->OnStartLoadingResponseBody(
         std::move(response_body_consumer_handle_));
@@ -363,7 +354,6 @@ void MojoAsyncResourceHandler::OnReadCompleted(
     DCHECK_EQ(0u, buffer_bytes_read_);
     buffer_bytes_read_ = bytes_read;
     bool defer = false;
-    LOG(INFO) << "\t send data: " << buffer_->data();
     if (!CopyReadDataToDataPipe(&defer)) {
       controller->CancelWithError(net::ERR_INSUFFICIENT_RESOURCES);
       return;
@@ -377,8 +367,6 @@ void MojoAsyncResourceHandler::OnReadCompleted(
     controller->Resume();
     return;
   }
-
-  LOG(INFO) << "\t EndWrite: " << buffer_->data();
 
   if (EndWrite(bytes_read) != MOJO_RESULT_OK) {
     controller->Cancel();

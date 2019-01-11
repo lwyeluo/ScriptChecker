@@ -900,8 +900,6 @@ class NavigationURLLoaderNetworkService::URLLoaderRequestController
       }
     }
 
-    LOG(INFO) << " post a task: NavigationURLLoaderNetworkService::OnReceiveResponse";
-
     // Make a copy of the ResourceResponse before it is passed to another
     // thread.
     //
@@ -1289,8 +1287,6 @@ void NavigationURLLoaderNetworkService::OnReceiveResponse(
   TRACE_EVENT_ASYNC_END2("navigation", "Navigation timeToResponseStarted", this,
                          "&NavigationURLLoaderNetworkService", this, "success",
                          true);
-
-  LOG(INFO) << "\t enter NavigationURLLoaderNetworkService::OnReceiveResponse";
 
   // TODO(scottmg): This needs to do more of what
   // NavigationResourceHandler::OnResponseStarted() does.

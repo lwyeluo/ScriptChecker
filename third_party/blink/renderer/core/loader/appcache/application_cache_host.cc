@@ -122,8 +122,6 @@ void ApplicationCacheHost::WillStartLoadingMainResource(const KURL& url,
             : nullptr;
   }
 
-  LOG(INFO) << "\tenter ApplicationCacheHost::WillStartLoadingMainResource??";
-
   host_->WillStartMainResourceRequest(url, method, spawning_host);
 
   // NOTE: The semantics of this method, and others in this interface, are

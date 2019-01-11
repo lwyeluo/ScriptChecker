@@ -738,8 +738,6 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
   DCHECK_EQ(pending_script->IsExternal(), is_external_script_);
   DCHECK(already_started_);
 
-  LOG(INFO) << ">>> [renderer][EXT] how to attack the world id????";
-
   Document* element_document = &(element_->GetDocument());
   Document* context_document = element_document->ContextDocument();
   if (!context_document) {

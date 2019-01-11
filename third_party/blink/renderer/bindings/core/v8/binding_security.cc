@@ -46,8 +46,6 @@
 #include "third_party/blink/renderer/platform/bindings/wrapper_creation_security_check.h"
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace blink {
 
 namespace {
@@ -56,14 +54,6 @@ bool CanAccessWindowInternal(const LocalDOMWindow* accessing_window,
                              const DOMWindow* target_window) {
   SECURITY_CHECK(!(target_window && target_window->GetFrame()) ||
                  target_window == target_window->GetFrame()->DomWindow());
-
-  // accessing_window->document()->Url().GetString().Contains("localhost:3001") &&
-  if(ToLocalDOMWindow(target_window)->document()->Url().GetString().Contains("victim.com:3001")) {
-      LOG(INFO) << ">>> [render] CanAccessWindowInternal? [accessing_window, target_window] = "
-                << accessing_window->document()->Url().GetString() << " -> "
-                << ToLocalDOMWindow(target_window)->document()->Url().GetString();
-      base::debug::StackTrace().Print();
-  }
 
   // It's important to check that target_window is a LocalDOMWindow: it's
   // possible for a remote frame and local frame to have the same security

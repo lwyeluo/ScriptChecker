@@ -7,7 +7,6 @@
 #include "base/macros.h"
 #include "base/memory/ptr_util.h"
 #include "base/stl_util.h"
-#include "base/debug/stack_trace.h"
 
 namespace blink {
 namespace {
@@ -108,9 +107,6 @@ std::unique_ptr<FeaturePolicy> FeaturePolicy::CreateFromParentPolicy(
 std::unique_ptr<FeaturePolicy> FeaturePolicy::CreateFromPolicyWithOrigin(
     const FeaturePolicy& policy,
     const url::Origin& origin) {
-    LOG(INFO) << ">>> [renderer] create a security policy in CreateFromPolicyWithOrigin";
-    //base::debug::StackTrace().Print();
-
   std::unique_ptr<FeaturePolicy> new_policy =
       base::WrapUnique(new FeaturePolicy(origin, policy.feature_list_));
   new_policy->inherited_policies_ = policy.inherited_policies_;

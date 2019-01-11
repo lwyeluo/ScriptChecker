@@ -66,8 +66,6 @@
 #include "third_party/blink/renderer/platform/bindings/v8_per_isolate_data.h"
 #include "third_party/blink/renderer/platform/text/text_break_iterator.h"
 
-#include "thread"
-
 namespace blink {
 
 using namespace HTMLNames;
@@ -414,9 +412,6 @@ HTMLFormElement* HTMLConstructionSite::TakeForm() {
 void HTMLConstructionSite::InsertHTMLHtmlStartTagBeforeHTML(
     AtomicHTMLToken* token) {
   DCHECK(document_);
-  LOG(INFO) << ">>> [renderer][DOM] HTMLConstructionSite::InsertHTMLHtmlStartTagBeforeHTML";
-  LOG(INFO) << "\tThe current ThreadID is [" << base::PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "]";
-
   HTMLHtmlElement* element;
   if (const auto* is_attribute = token->GetAttributeItem(HTMLNames::isAttr)) {
     element = ToHTMLHtmlElement(document_->CreateElement(
@@ -894,11 +889,6 @@ Element* HTMLConstructionSite::CreateElement(
   // for the HTML fragment parsing algorithm, then let will execute script
   // be true."
   bool will_execute_script = definition && !is_parsing_fragment_;
-
-  if(token->GetName() == iframeTag) {
-      LOG(INFO) << ">>> [renderer][iframe] create a iframe tag. [will_execute_script, !definition, isMainThread] = "
-                << will_execute_script << ", " << (!definition) << ", " << IsMainThread();
-  }
 
   Element* element;
 

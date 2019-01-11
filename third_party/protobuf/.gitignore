@@ -52,7 +52,7 @@ src/google/protobuf/util/**/*.pb.h
 
 *.pyc
 *.egg-info
-*_pb2.py
+#*_pb2.py
 python/*.egg
 python/.eggs/
 python/.tox

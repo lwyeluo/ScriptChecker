@@ -46,8 +46,6 @@
 #include "services/network/public/cpp/resource_response.h"
 #include "url/url_constants.h"
 
-#include "base/debug/stack_trace.h"
-
 using base::TimeDelta;
 using base::TimeTicks;
 
@@ -482,8 +480,6 @@ void ResourceLoader::OnResponseStarted(net::URLRequest* unused, int net_error) {
 
   DVLOG(1) << "OnResponseStarted: " << request_->url().spec();
 
-  LOG(INFO) << ">>> [browser][url] ResourceLoader::OnResponseStarted: " << request_->url().spec();
-
   if (net_error != net::OK) {
     ResponseCompleted();
     return;
@@ -588,8 +584,6 @@ void ResourceLoader::Resume(bool called_from_resource_controller) {
         // the only case which calls different methods, depending on the path.
         // ResumeReading does check for cancellation. Should other paths do that
         // as well?
-        LOG(INFO) << ">>> [browser][net] ResourceLoader::Resume";
-        LOG(INFO) << "\tpost a task for ResourceLoader::ResumeReading";
         base::ThreadTaskRunnerHandle::Get()->PostTask(
             FROM_HERE, base::BindOnce(&ResourceLoader::ResumeReading,
                                       weak_ptr_factory_.GetWeakPtr()));

@@ -501,8 +501,6 @@ int ResourceDispatcher::StartAsync(
     base::OnceClosure* continue_navigation_function) {
   CheckSchemeForReferrerPolicy(*request);
 
-  LOG(INFO) << ">>> [renderer][frame] ResourceDispatcher::StartAsync";
-
   bool override_url_loader =
       !!response_override_params &&
       !!response_override_params->url_loader_client_endpoints;

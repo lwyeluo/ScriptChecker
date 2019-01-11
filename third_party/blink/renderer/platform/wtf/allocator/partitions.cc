@@ -71,7 +71,6 @@ void Partitions::Initialize(
   base::subtle::SpinLock::Guard guard(initialization_lock_.Get());
 
   if (!initialized_) {
-    LOG(INFO) << ">>> [Partition] Partitions::Initialize";
     fast_malloc_allocator_ = lazy_fast_malloc.Pointer();
     array_buffer_allocator_ = lazy_array_buffer.Pointer();
     buffer_allocator_ = lazy_buffer.Pointer();

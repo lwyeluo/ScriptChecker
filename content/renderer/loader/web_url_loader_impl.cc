@@ -606,8 +606,6 @@ void WebURLLoaderImpl::Context::Start(const WebURLRequest& request,
                                       SyncLoadResponse* sync_load_response) {
   DCHECK(request_id_ == -1);
 
-  LOG(INFO) << ">>> [renderer][frame] WebURLLoaderImpl::Context::Start";
-
   url_ = request.Url();
   use_stream_on_response_ = request.UseStreamOnResponse();
   report_raw_headers_ = request.ReportRawHeaders();
@@ -745,8 +743,6 @@ void WebURLLoaderImpl::Context::Start(const WebURLRequest& request,
   else
     extra_data = &empty_extra_data;
   extra_data->CopyToResourceRequest(resource_request.get());
-
-  LOG(INFO) << "\tsync_load_response = " << sync_load_response;
 
   if (sync_load_response) {
     DCHECK(defers_loading_ == NOT_DEFERRING);
@@ -911,8 +907,6 @@ void WebURLLoaderImpl::Context::OnReceivedData(
   int data_length = data->length();
   if (!client_)
     return;
-
-  LOG(INFO) << ">>> [IPC] I found this data: " << payload;
 
   TRACE_EVENT_WITH_FLOW0(
       "loading", "WebURLLoaderImpl::Context::OnReceivedData",

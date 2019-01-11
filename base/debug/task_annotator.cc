@@ -13,8 +13,6 @@
 #include "base/threading/thread_local.h"
 #include "base/trace_event/trace_event.h"
 
-#include "mojo/public/cpp/bindings/message.h"
-
 namespace base {
 namespace debug {
 
@@ -62,37 +60,6 @@ void TaskAnnotator::DidQueueTask(const char* queue_function,
   }
 }
 
-/*
- * Added by Luo Wu
- */
-void siteSwitcher(PendingTask* pending_task) {
-    // only handle the main thread of renderer process
-    PlatformThreadId tid = base::PlatformThread::CurrentId();
-    if(getpid() != 1 || (tid != 1))
-        return;
-
-    std::string taskFrom = pending_task->posted_from.ToString();
-    LOG(INFO) << ">>> [Switcher] Run Task in Main Thread posted from " << taskFrom;
-    if(taskFrom == "Accept@../../ipc/ipc_mojo_bootstrap.cc:810") {
-        // handle IPC, invoke ChannelAssociatedGroupController::AcceptOnProxyThread or AcceptSyncMessage
-        LOG(INFO) << "\t invoke accept.. handle IPC msg..";
-        // get args
-//        boost::any args = pending_task->task.Export();
-//        try {
-//            std::tuple<mojo::Message*> ret = boost::any_cast<std::tuple<mojo::Message*>>(args);
-//            mojo::Message *message = std::get<0>(ret);
-//            LOG(INFO) << "\t message [interfaceID, name, flags, number_bytes]: "
-//                      << message->header()->interface_id << ", "
-//                      << message->header()->name << ", "
-//                      << message->header()->flags << ", "
-//                      << message->header()->num_bytes;
-//        } catch (boost::bad_any_cast& e) {
-//            LOG(ERROR) << "\tbad arguments";
-//        }
-    }
-}
-// end
-
 void TaskAnnotator::RunTask(const char* queue_function,
                             PendingTask* pending_task) {
   ScopedTaskRunActivity task_activity(*pending_task);
@@ -131,13 +98,6 @@ void TaskAnnotator::RunTask(const char* queue_function,
 
   if (g_task_annotator_observer)
     g_task_annotator_observer->BeforeRunTask(pending_task);
-
-  /*
-   * Modified by Luo Wu
-   * collect all site switcher events
-   */
-  siteSwitcher(pending_task);
-  // end
 
   std::move(pending_task->task).Run();
 

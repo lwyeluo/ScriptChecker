@@ -26,7 +26,6 @@ RuntimeCustomBindings::RuntimeCustomBindings(ScriptContext* context)
 RuntimeCustomBindings::~RuntimeCustomBindings() {}
 
 void RuntimeCustomBindings::AddRoutes() {
-    LOG(INFO) << "\t  register runtime.GetManifest & runtime.GetExtensionViews";
   RouteHandlerFunction(
       "GetManifest",
       base::Bind(&RuntimeCustomBindings::GetManifest, base::Unretained(this)));

@@ -237,9 +237,6 @@
 #include "content/renderer/media/webrtc/rtc_peer_connection_handler.h"
 #endif
 
-#include "base/debug/stack_trace.h"
-#include "thread"
-
 #if defined(OS_ANDROID)
 #include <cpu-features.h>
 
@@ -1687,8 +1684,6 @@ void RenderFrameImpl::ScriptedPrint(bool user_initiated) {
 }
 
 bool RenderFrameImpl::Send(IPC::Message* message) {
-    //LOG(INFO) << ">>> [renderer] RenderFrameImpl::Send " << message->type() << "," <<
-    //         message->routing_id() << "," << message->flags();
   return RenderThread::Get()->Send(message);
 }
 
@@ -3699,8 +3694,6 @@ blink::WebLocalFrame* RenderFrameImpl::CreateChildFrame(
     const blink::WebFrameOwnerProperties& frame_owner_properties) {
   DCHECK_EQ(frame_, parent);
 
-  LOG(INFO) << ">>> [renderer][iframe] RenderFrameImpl::CreateChildFrame.";
-
   // Synchronously notify the browser of a child frame creation to get the
   // routing_id for the RenderFrame.
   int child_routing_id = MSG_ROUTING_NONE;
@@ -3733,9 +3726,6 @@ blink::WebLocalFrame* RenderFrameImpl::CreateChildFrame(
   params.frame_owner_properties =
       ConvertWebFrameOwnerPropertiesToFrameOwnerProperties(
           frame_owner_properties);
-
-  LOG(INFO) << "\t !!!!!!!!! Send IPC: FrameHostMsg_CreateChildFrame for frame [name, uniqueName] = "
-            << params.frame_name << ", " << params.frame_unique_name;
 
   Send(new FrameHostMsg_CreateChildFrame(params, &child_routing_id,
                                          &child_interface_provider_handle,
@@ -3993,8 +3983,6 @@ void RenderFrameImpl::DownloadURL(const blink::WebURLRequest& request) {
   params.initiator_origin = request.RequestorOrigin();
   if (request.GetSuggestedFilename().has_value())
     params.suggested_name = request.GetSuggestedFilename()->Utf16();
-
-  LOG(INFO) << " enter RenderFrameImpl::DownloadURL";
 
   Send(new FrameHostMsg_DownloadUrl(params));
 }
@@ -4418,8 +4406,6 @@ void RenderFrameImpl::DidCreateDocumentElement() {
           frame_->GetDocument().IsPluginDocument()));
     }
   }
-
-  LOG(INFO) << ">>> [renderer][EXT] RenderFrameImpl::DidCreateDocumentElement";
 
   for (auto& observer : observers_)
     observer.DidCreateDocumentElement();
@@ -5173,8 +5159,6 @@ void RenderFrameImpl::DidCreateScriptContext(v8::Local<v8::Context> context,
     // world context of the main frame.
     blink::WebContextFeatures::EnableMojoJS(context, true);
   }
-
-  LOG(INFO) << "\tenter RenderFrameImpl::DidCreateScriptContext, [WorldID, PID] = " << world_id << ", " << getpid();
 
   for (auto& observer : observers_)
     observer.DidCreateScriptContext(context, world_id);
@@ -6946,10 +6930,6 @@ void RenderFrameImpl::BeginNavigation(const NavigationPolicyInfo& info) {
     extra_data->set_transition_type(ui::PageTransitionFromInt(
         extra_data->transition_type() | ui::PAGE_TRANSITION_CLIENT_REDIRECT));
   }
-
-  LOG(INFO) << ">>> [renderer][DOM] RenderFrameImpl::BeginNavigation";
-  LOG(INFO) << "\t [url, site_for_cookie] = " << request.Url().GetString().Utf8() << ", "
-            << request.SiteForCookies().GetString().Utf8();
 
   // TODO(clamy): Same-document navigations should not be sent back to the
   // browser.

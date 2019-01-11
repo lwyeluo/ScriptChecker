@@ -149,8 +149,6 @@ bool SandboxBPF::StartSandbox(SeccompLevel seccomp_level) {
     SetProcFd(ProcUtil::OpenProc());
   }
 
-  LOG(INFO) << ">>> [sandbox] prepare to start sandbox [pid]=" << getpid();
-
   const bool supports_tsync = KernelSupportsSeccompTsync();
 
   if (seccomp_level == SeccompLevel::SINGLE_THREADED) {
@@ -213,29 +211,6 @@ CodeGen::Program SandboxBPF::AssembleFilter() {
   return compiler.Compile();
 }
 
-// Add by Luo Wu for test BPF
-ssize_t my_mprotect(void* addr, size_t len, int prot)
-{
-    ssize_t ret = 0;
-    LOG(INFO) << "invoke my_mprotect";
-#if defined(__x86_64__)
-    asm volatile
-    (
-        "mov $0xabcd, %%r9\n\t"
-        "syscall"
-        : "=a" (ret)
-        : "0"(10), "D"(addr), "S"(len), "d"(prot)
-        : "cc", "rcx", "r11", "memory"
-    );
-    asm volatile
-    (
-        //"movq %r9, %xmm15\n\t"
-        "mov $0x0c, %r9\n\t"
-    );
-#endif
-    return ret;
-}
-
 void SandboxBPF::InstallFilter(bool must_sync_threads) {
   // We want to be very careful in not imposing any requirements on the
   // policies that are set with SetSandboxPolicy(). This means, as soon as
@@ -280,30 +255,6 @@ void SandboxBPF::InstallFilter(bool must_sync_threads) {
       SANDBOX_DIE("Kernel refuses to turn on BPF filters");
     }
   }
-
-  // ........start
-  // Just test mmap, mprotect, munmap
-  //char data;
-  int page_size = getpagesize();
-  int fd = open("/dev/zero", O_RDONLY);
-  char* memory = (char*)mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-  LOG(INFO) << ">>> [Seccomp-Test] mmap";
-  close(fd);
-  LOG(INFO) << ">>> [Seccomp-Test] close";
-
-  LOG(INFO) << ">>> [Seccomp-Test] mprotect with secret??";
-  my_mprotect(memory, page_size, PROT_READ);
-  LOG(INFO) << ">>> [Seccomp-Test] mprotect";
-
-//  LOG(INFO) << ">>> [Seccomp-Test] mprotect??";
-//  mprotect(memory, page_size, PROT_NONE);
-//  LOG(INFO) << ">>> [Seccomp-Test] mprotect";
-
-  munmap(memory, page_size);
-  LOG(INFO) << ">>> [Seccomp-Test] munmap";
-  /*
-   * Modify End
-   */
 
   sandbox_has_started_ = true;
 }

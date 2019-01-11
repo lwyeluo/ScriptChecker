@@ -35,8 +35,6 @@
 #include "third_party/blink/renderer/platform/bindings/v8_per_context_data.h"
 #include "third_party/blink/renderer/platform/bindings/v8_per_isolate_data.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace blink {
 
 v8::Local<v8::Object> V8DOMWrapper::CreateWrapper(
@@ -50,8 +48,6 @@ v8::Local<v8::Object> V8DOMWrapper::CreateWrapper(
   // check fails and throws an exception.
   V8WrapperInstantiationScope scope(creation_context, isolate, type);
   CHECK(!scope.AccessCheckFailed());
-
-  LOG(INFO) << ">>> [DOM] create a wrapper";
 
   V8PerContextData* per_context_data =
       V8PerContextData::From(scope.GetContext());

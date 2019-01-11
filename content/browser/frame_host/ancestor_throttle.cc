@@ -20,8 +20,6 @@
 #include "net/http/http_response_headers.h"
 #include "url/origin.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace content {
 
 namespace {
@@ -103,9 +101,6 @@ AncestorThrottle::~AncestorThrottle() {}
 NavigationThrottle::ThrottleCheckResult
 AncestorThrottle::WillProcessResponse() {
   DCHECK(!navigation_handle()->IsInMainFrame());
-
-  LOG(INFO) << "\t AncestorThrottle::WillProcessResponse";
-
   NavigationHandleImpl* handle =
       static_cast<NavigationHandleImpl*>(navigation_handle());
 
@@ -117,9 +112,6 @@ AncestorThrottle::WillProcessResponse() {
   std::string header_value;
   HeaderDisposition disposition =
       ParseHeader(handle->GetResponseHeaders(), &header_value);
-
-  LOG(INFO) << ">>> [browser][TEST] disposition=" << (int)disposition;
-
   switch (disposition) {
     case HeaderDisposition::CONFLICT:
       ParseError(header_value, disposition);
@@ -135,7 +127,6 @@ AncestorThrottle::WillProcessResponse() {
     case HeaderDisposition::DENY:
       ConsoleError(disposition);
       RecordXFrameOptionsUsage(DENY);
-      //LOG(INFO) << ">>> [browser][TEST] we remove the X-Frame-Options(DENY) check for test";
       return NavigationThrottle::BLOCK_RESPONSE;
       //return NavigationThrottle::PROCEED;
 
@@ -144,12 +135,8 @@ AncestorThrottle::WillProcessResponse() {
       FrameTreeNode* parent = handle->frame_tree_node()->parent();
       url::Origin current_origin =
           url::Origin::Create(navigation_handle()->GetURL());
-      LOG(INFO) << "\t\t requires HeaderDisposition::SAMEORIGIN";
       while (parent) {
         if (!parent->current_origin().IsSameOriginWith(current_origin)) {
-            LOG(INFO) << "\t\t IsSameOriginWith -> [parent, current] = "
-                      << parent->current_origin().GetURL().GetContent() << ", "
-                      << current_origin.GetURL().GetContent();
           RecordXFrameOptionsUsage(SAMEORIGIN_BLOCKED);
           ConsoleError(disposition);
 
@@ -161,7 +148,6 @@ AncestorThrottle::WillProcessResponse() {
                   current_origin)) {
             RecordXFrameOptionsUsage(SAMEORIGIN_WITH_BAD_ANCESTOR_CHAIN);
           }
-          //LOG(INFO) << ">>> [browser][TEST] we remove the X-Frame-Options(SAMEORIGIN) check for test";
           return NavigationThrottle::BLOCK_RESPONSE;
         }
         parent = parent->parent();
@@ -229,9 +215,6 @@ void AncestorThrottle::ConsoleError(HeaderDisposition disposition) {
       "to '%s'.",
       navigation_handle()->GetURL().spec().c_str(),
       disposition == HeaderDisposition::DENY ? "deny" : "sameorigin");
-
-  LOG(INFO) << "\t AncestorThrottle::ConsoleError: " << message;
-  //base::debug::StackTrace().Print();
 
   // Log a console error in the parent of the current RenderFrameHost (as
   // the current RenderFrameHost itself doesn't yet have a document).

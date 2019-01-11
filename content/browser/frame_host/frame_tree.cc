@@ -215,8 +215,6 @@ bool FrameTree::AddFrame(
   FrameTreeNode* added_node =
       parent->AddChild(std::move(new_node), process_id, new_routing_id);
 
-  LOG(INFO) << "\t enter FrameTree::AddFrame: " << frame_name;
-
   DCHECK(interface_provider_request.is_pending());
   added_node->current_frame_host()->BindInterfaceProviderRequest(
       std::move(interface_provider_request));

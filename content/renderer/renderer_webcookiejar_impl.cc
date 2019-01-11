@@ -12,9 +12,6 @@
 #include "content/renderer/render_frame_impl.h"
 #include "content/renderer/render_thread_impl.h"
 
-#include "base/debug/stack_trace.h"
-#include "thread"
-
 using blink::WebString;
 using blink::WebURL;
 
@@ -33,14 +30,8 @@ void RendererWebCookieJarImpl::SetCookie(const WebURL& url,
 WebString RendererWebCookieJarImpl::Cookies(const WebURL& url,
                                             const WebURL& site_for_cookies) {
   std::string value_utf8;
-  LOG(INFO) << ">>> [renderer] enter RendererWebCookieJarImpl::Cookies. [url, site_for_cookies] = "
-            << url.GetString().Utf8(WebString::UTF8ConversionMode::kStrictReplacingErrorsWithFFFD) << ", "
-            << site_for_cookies.GetString().Utf8(WebString::UTF8ConversionMode::kStrictReplacingErrorsWithFFFD);
-  LOG(INFO) << "\tThe current ThreadID is [" << base::PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "]";
-
   RenderThreadImpl::current()->render_frame_message_filter()->GetCookies(
       sender_->GetRoutingID(), url, site_for_cookies, &value_utf8);
-  LOG(INFO) << ">>> [renderer] RendererWebCookieJarImpl::Cookies -> " << value_utf8;
   return WebString::FromUTF8(value_utf8);
 }
 

@@ -32,8 +32,6 @@
 #include "third_party/blink/renderer/platform/runtime_enabled_features.h"
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace blink {
 
 // static
@@ -66,15 +64,11 @@ void SecurityContext::SetSecurityOrigin(
     scoped_refptr<SecurityOrigin> security_origin) {
   security_origin_ = std::move(security_origin);
   UpdateFeaturePolicyOrigin();
-  if(security_origin_->ToString() != "null")
-    LOG(INFO) << ">>> [renderer] !!! here we set security origin:" << security_origin_->ToString();
 }
 
 void SecurityContext::SetContentSecurityPolicy(
     ContentSecurityPolicy* content_security_policy) {
   content_security_policy_ = content_security_policy;
-  if(content_security_policy->GetSelfProtocol())
-    LOG(INFO) << ">>> [renderer] !!! here we set CSP:" << content_security_policy_->GetSelfProtocol();
 }
 
 void SecurityContext::EnforceSandboxFlags(SandboxFlags mask) {

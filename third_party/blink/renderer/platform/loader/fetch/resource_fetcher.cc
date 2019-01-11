@@ -718,8 +718,6 @@ Resource* ResourceFetcher::RequestResourceInternal(
     }
   }
 
-  LOG(INFO) << ">>> [renderer][frame] ResourceFetcher::RequestResourceInternal.";
-
   ResourceRequestBlockedReason blocked_reason =
       PrepareRequest(params, factory, substitute_data, identifier);
   if (blocked_reason != ResourceRequestBlockedReason::kNone)

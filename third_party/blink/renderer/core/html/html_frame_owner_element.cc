@@ -294,9 +294,6 @@ bool HTMLFrameOwnerElement::LoadOrRedirectSubframe(
     const AtomicString& frame_name,
     bool replace_current_item) {
   UpdateContainerPolicy();
-
-  LOG(INFO) << ">>> [renderer][iframe] HTMLFrameOwnerElement::LoadOrRedirectSubframe";
-
   if (ContentFrame()) {
     ContentFrame()->Navigate(GetDocument(), url, replace_current_item,
                              UserGestureStatus::kNone);

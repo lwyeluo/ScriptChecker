@@ -103,12 +103,6 @@ class SimpleWatcher::Context : public base::RefCountedThreadSafe<Context> {
       // default task runner for the IO thread.
       weak_watcher_->OnHandleReady(watch_id_, result, state);
     } else {
-      // For Debug, Added by Luo Wu
-//      pid_t tid = base::PlatformThread::CurrentId();
-//      if(getpid() == 1 && (tid == 7)) {
-//        LOG(INFO) << ">>> [task] post a task in Notify@../../mojo/public/cpp/system/simple_watcher.cc " << watch_id_;
-//      }
-
       task_runner_->PostTask(
           FROM_HERE, base::Bind(&SimpleWatcher::OnHandleReady, weak_watcher_,
                                 watch_id_, result, state));

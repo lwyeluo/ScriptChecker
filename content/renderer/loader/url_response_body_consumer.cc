@@ -12,8 +12,6 @@
 #include "content/renderer/loader/resource_dispatcher.h"
 #include "services/network/public/cpp/url_loader_completion_status.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace content {
 
 constexpr uint32_t URLResponseBodyConsumer::kMaxNumConsumedBytesInTask;
@@ -113,7 +111,6 @@ void URLResponseBodyConsumer::OnReadable(MojoResult unused) {
   while (!has_been_cancelled_ && !is_deferred_) {
     const void* buffer = nullptr;
     uint32_t available = 0;
-    LOG(INFO) << ">>> [IPC] OnReadable->BeginReadData";
     MojoResult result =
         handle_->BeginReadData(&buffer, &available, MOJO_READ_DATA_FLAG_NONE);
     if (result == MOJO_RESULT_SHOULD_WAIT) {

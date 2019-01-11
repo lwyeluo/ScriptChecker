@@ -265,25 +265,6 @@ bool InterfaceEndpointClient::AcceptWithResponder(
 
   message->set_request_id(request_id);
 
-//  LOG(INFO) << ">>> [renderer] here I will send message. ";
-//  LOG(INFO) << "\t message [interfaceID, name, flags, number_bytes, request_id]: "
-//            << message->header_v1()->interface_id << ", "
-//            << message->header_v1()->name << ", "
-//            << message->header_v1()->flags << ", "
-//            << message->header_v1()->num_bytes << ", "
-//            << message->header_v1()->request_id;
-  bool flag = false;
-  if(message->header_v1()->name == 338284713) {
-      //kBlobRegistry_Register_Name:
-      LOG(INFO) << ">>> [MSG] kBlobRegistry_Register_Name";
-  } else if(message->header_v1()->name ==  482691073) { //kBlob_GetInternalUUID_Name:
-      LOG(INFO) << ">>> [MSG] kBlob_GetInternalUUID_Name";
-  } else if(message->header_v1()->name ==  1013481838) { //kURLLoaderClient_OnDataDownloaded_Name:
-      LOG(INFO) << ">>> [MSG] kURLLoaderClient_OnDataDownloaded_Name";
-  } else {
-      flag = true;
-  }
-
   bool is_sync = message->has_flag(Message::kFlagIsSync);
   if (!controller_->SendMessage(message))
     return false;
@@ -299,7 +280,6 @@ bool InterfaceEndpointClient::AcceptWithResponder(
   sync_responses_.insert(std::make_pair(
       request_id, std::make_unique<SyncResponseInfo>(&response_received)));
 
-  LOG(INFO) << ">>> [renderer] here I wait the sync response. request_id is " << request_id;
   base::WeakPtr<InterfaceEndpointClient> weak_self =
       weak_ptr_factory_.GetWeakPtr();
   controller_->SyncWatch(&response_received);
@@ -309,7 +289,6 @@ bool InterfaceEndpointClient::AcceptWithResponder(
     auto iter = sync_responses_.find(request_id);
     DCHECK_EQ(&response_received, iter->second->response_received);
     if (response_received) {
-        LOG(INFO) << ">>> [renderer] call the callback(Accept) function ";
       ignore_result(responder->Accept(&iter->second->response));
     } else {
       DVLOG(1) << "Mojo sync call returns without receiving a response. "

@@ -614,16 +614,12 @@ void NavigationHandleImpl::WillStartRequest(
     const ThrottleChecksFinishedCallback& callback) {
   TRACE_EVENT_ASYNC_STEP_INTO0("navigation", "NavigationHandle", this,
                                "WillStartRequest");
-  LOG(INFO) << ">>> [browser][navigation] NavigationHandleImpl::WillStartRequest";
-
   // WillStartRequest should only be called once.
   if (state_ != INITIAL) {
     state_ = CANCELING;
     RunCompleteCallback(NavigationThrottle::CANCEL);
     return;
   }
-
-  LOG(INFO) << "\t 1";
 
   state_ = WILL_SEND_REQUEST;
   complete_callback_ = callback;
@@ -633,8 +629,6 @@ void NavigationHandleImpl::WillStartRequest(
     RunCompleteCallback(NavigationThrottle::CANCEL);
     return;
   }
-
-  LOG(INFO) << "\t 2";
 
   RegisterNavigationThrottles();
 
@@ -651,13 +645,9 @@ void NavigationHandleImpl::WillStartRequest(
     return;
   }
 
-  LOG(INFO) << "\t 3 " << result.action();
-
   TRACE_EVENT_ASYNC_STEP_INTO1("navigation", "NavigationHandle", this,
                                "StartRequest", "result", result.action());
   RunCompleteCallback(result);
-
-  LOG(INFO) << "\t 4 " << result.action();
 }
 
 void NavigationHandleImpl::UpdateStateFollowingRedirect(
@@ -742,8 +732,6 @@ void NavigationHandleImpl::WillFailRequest(
   if (ssl_info.has_value())
     ssl_info_ = ssl_info.value();
 
-  LOG(INFO) << ">>> [browser][navigation] NavigationHandleImpl::WillFailRequest";
-
   complete_callback_ = callback;
   state_ = WILL_FAIL_REQUEST;
 
@@ -773,9 +761,6 @@ void NavigationHandleImpl::WillProcessResponse(
     const ThrottleChecksFinishedCallback& callback) {
   TRACE_EVENT_ASYNC_STEP_INTO0("navigation", "NavigationHandle", this,
                                "WillProcessResponse");
-
-  LOG(INFO) << "\t enter NavigationHandleImpl::WillProcessResponse";
-
   DCHECK(!render_frame_host_ || render_frame_host_ == render_frame_host);
   render_frame_host_ = render_frame_host;
   response_headers_ = response_headers;
@@ -1132,9 +1117,6 @@ NavigationHandleImpl::CheckWillProcessResponse() {
   DCHECK(state_ == WILL_PROCESS_RESPONSE || state_ == DEFERRING_RESPONSE);
   DCHECK(state_ != WILL_PROCESS_RESPONSE || next_index_ == 0);
   DCHECK(state_ != DEFERRING_RESPONSE || next_index_ != 0);
-
-  LOG(INFO) << "\t enter NavigationHandleImpl::CheckWillProcessResponse";
-
   base::WeakPtr<NavigationHandleImpl> weak_ref = weak_factory_.GetWeakPtr();
   for (size_t i = next_index_; i < throttles_.size(); ++i) {
     NavigationThrottle::ThrottleCheckResult result =

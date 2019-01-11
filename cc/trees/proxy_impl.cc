@@ -29,8 +29,6 @@
 #include "gpu/command_buffer/client/gles2_interface.h"
 #include "services/metrics/public/cpp/ukm_recorder.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace cc {
 
 namespace {
@@ -607,7 +605,6 @@ void ProxyImpl::ScheduledActionBeginLayerTreeFrameSinkCreation() {
   TRACE_EVENT0("cc",
                "ProxyImpl::ScheduledActionBeginLayerTreeFrameSinkCreation");
   DCHECK(IsImplThread());
-  LOG(INFO) << ">>> [SHM] ScheduledActionBeginLayerTreeFrameSinkCreation";
   MainThreadTaskRunner()->PostTask(
       FROM_HERE, base::BindOnce(&ProxyMain::RequestNewLayerTreeFrameSink,
                                 proxy_main_weak_ptr_));

@@ -41,8 +41,6 @@
 #include <sys/fcntl.h>
 #include <sys/mman.h>
 
-#include "base/debug/stack_trace.h"
-
 namespace blink {
 
 static WebCookieJar* ToCookieJar(const Document* document) {
@@ -51,65 +49,13 @@ static WebCookieJar* ToCookieJar(const Document* document) {
   return document->GetFrame()->Client()->CookieJar();
 }
 
-// Add by Luo Wu for test BPF
-ssize_t my_mprotect(void* addr, size_t len, int prot)
-{
-    ssize_t ret = 0;
-    LOG(INFO) << "invoke my_mprotect";
-#if defined(__x86_64__)
-    asm volatile
-    (
-        "mov $0xabcd, %%r9\n\t"
-        "syscall"
-        : "=a" (ret)
-        : "0"(10), "D"(addr), "S"(len), "d"(prot)
-        : "cc", "rcx", "r11", "memory"
-    );
-    asm volatile
-    (
-        "mov $0x0c, %r9\n\t"
-    );
-#endif
-    return ret;
-}
-
 String Cookies(const Document* document, const KURL& url) {
   WebCookieJar* cookie_jar = ToCookieJar(document);
   if (!cookie_jar)
     return String();
 
-  LOG(INFO) << ">>> Cookies: " << url.GetString();
-
-  // ........start
-  // Just test mmap, mprotect, munmap
-  //char data;
-  int page_size = getpagesize();
-  int fd = open("/dev/zero", O_RDONLY);
-  char* memory = (char*)mmap(NULL, page_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
-  LOG(INFO) << ">>> [Seccomp-Test] mmap";
-  close(fd);
-  LOG(INFO) << ">>> [Seccomp-Test] close";
-
-  LOG(INFO) << ">>> [Seccomp-Test] mprotect with secret??";
-  my_mprotect(memory, page_size, PROT_READ);
-  LOG(INFO) << ">>> [Seccomp-Test] mprotect";
-
-  LOG(INFO) << ">>> [Seccomp-Test] mprotect??";
-  mprotect(memory, page_size, PROT_NONE);
-  LOG(INFO) << ">>> [Seccomp-Test] mprotect";
-
-  munmap(memory, page_size);
-  LOG(INFO) << ">>> [Seccomp-Test] munmap";
-  //...........end
-
   SCOPED_BLINK_UMA_HISTOGRAM_TIMER("Blink.CookieJar.SyncCookiesTime");
-  const KURL site_for_cookie = document->SiteForCookies();
-  LOG(INFO) << "\t document->SiteForCookies is " << site_for_cookie.GetString();
-  return cookie_jar->Cookies(url, site_for_cookie);
-  //return cookie_jar->Cookies(url, document->SiteForCookies());
-
-//  const KURL* urlTemp = new KURL("http://localhost/123456");
-//  return cookie_jar->Cookies(*urlTemp, document->SiteForCookies());
+  return cookie_jar->Cookies(url, document->SiteForCookies());
 }
 
 void SetCookies(Document* document,

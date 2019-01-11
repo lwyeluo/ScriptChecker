@@ -189,7 +189,7 @@
 /syzygy/binaries
 /tsan/
 /ub-uiautomator/lib
-/usb_ids
+#/usb_ids
 /usrsctp/usrsctplib
 /v8-i18n
 /valgrind

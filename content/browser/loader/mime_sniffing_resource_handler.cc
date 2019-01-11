@@ -43,8 +43,6 @@
 #include "third_party/blink/public/common/mime_util/mime_util.h"
 #include "url/origin.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace content {
 
 namespace {
@@ -284,9 +282,6 @@ void MimeSniffingResourceHandler::ResumeInternal() {
     advance_state_ = true;
     return;
   }
-
-  LOG(INFO) << ">>> [browser][url] MimeSniffingResourceHandler::ResumeInternal";
-  LOG(INFO) << "\tpost a task for MimeSniffingResourceHandler::AdvanceState";
 
   // Otherwise proceed with the replay of the response. If it is successful,
   // it will resume the request. Posted as a task to avoid re-entrancy into

@@ -123,15 +123,11 @@ void RunLoop::Run() {
   // multiple sequences is still disallowed).
   DETACH_FROM_SEQUENCE(sequence_checker_);
 
-  LOG(INFO) << ">>> [BEGIN] begin to run??";
-
   DCHECK_EQ(this, delegate_->active_run_loops_.top());
   const bool application_tasks_allowed =
       delegate_->active_run_loops_.size() == 1U ||
       type_ == Type::kNestableTasksAllowed;
   delegate_->Run(application_tasks_allowed);
-
-  LOG(INFO) << ">>> [BEGIN] After run??";
 
   // Rebind this RunLoop to the current thread after Run().
   DETACH_FROM_SEQUENCE(sequence_checker_);

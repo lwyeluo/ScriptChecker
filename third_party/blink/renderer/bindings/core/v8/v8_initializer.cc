@@ -581,8 +581,6 @@ static void AdjustAmountOfExternalAllocatedMemory(int64_t diff) {
 void V8Initializer::InitializeMainThread(const intptr_t* reference_table) {
   DCHECK(IsMainThread());
 
-  LOG(INFO) << ">>> [V8] V8Initializer::InitializeMainThread";
-
   WTF::ArrayBufferContents::Initialize(AdjustAmountOfExternalAllocatedMemory);
 
   DEFINE_STATIC_LOCAL(ArrayBufferAllocator, array_buffer_allocator, ());

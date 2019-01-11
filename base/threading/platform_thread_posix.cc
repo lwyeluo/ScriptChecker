@@ -33,8 +33,6 @@
 #include <sys/resource.h>
 #endif
 
-#include "thread"
-
 namespace base {
 
 void InitThreading();
@@ -119,7 +117,6 @@ bool CreateThread(size_t stack_size,
   if (success) {
     // ThreadParams should be deleted on the created thread after used.
     ignore_result(params.release());
-    LOG(INFO) << ">>> [THREAD] thread [" << PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "] creates a new thread [" << handle << "] !!! ";
   } else {
     // Value of |handle| is undefined if pthread_create fails.
     handle = 0;

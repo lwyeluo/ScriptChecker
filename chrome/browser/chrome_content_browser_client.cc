@@ -2167,9 +2167,6 @@ bool ChromeContentBrowserClient::AllowGetCookie(
   ProfileIOData* io_data = ProfileIOData::FromResourceContext(context);
   bool allow =
       io_data->GetCookieSettings()->IsCookieAccessAllowed(url, first_party);
-
-  LOG(INFO) << ">>> [browser] ChromeContentBrowserClient::AllowGetCookie. IsCookieAccessAllowed() returns " << allow;
-
   base::Callback<content::WebContents*(void)> wc_getter =
       base::Bind(&GetWebContents, render_process_id, render_frame_id);
   BrowserThread::PostTask(

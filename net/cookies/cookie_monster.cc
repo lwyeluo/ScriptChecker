@@ -467,7 +467,6 @@ void CookieMonster::GetCookieListWithOptionsAsync(
     const GURL& url,
     const CookieOptions& options,
     GetCookieListCallback callback) {
-    LOG(INFO) << ">>> [browser] GetCookieListWithOptionsAsync";
   DoCookieCallbackForURL(
       InstrumentGetCookieListClosure(base::BindOnce(
           // base::Unretained is safe as DoCookieCallbackForURL stores
@@ -922,8 +921,6 @@ void CookieMonster::StoreLoadedCookies(
     std::vector<std::unique_ptr<CanonicalCookie>> cookies) {
   DCHECK(thread_checker_.CalledOnValidThread());
 
-  LOG(INFO) << ">>> StoreLoadedCookies ";
-
   // Even if a key is expired, insert it so it can be garbage collected,
   // removed, and sync'd.
   CookieItVector cookies_with_control_chars;
@@ -952,11 +949,6 @@ void CookieMonster::StoreLoadedCookies(
           cookie->Name().c_str(), cookie->Domain().c_str(),
           cookie->Path().c_str());
     }
-    if(cookie)
-        LOG(INFO) << base::StringPrintf(
-            "\t>>> {name='%s', domain='%s', path='%s'}",
-            cookie->Name().c_str(), cookie->Domain().c_str(),
-            cookie->Path().c_str());
   }
 
   // Any cookies that contain control characters that we have loaded from the

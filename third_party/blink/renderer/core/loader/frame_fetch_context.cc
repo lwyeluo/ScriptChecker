@@ -464,8 +464,6 @@ void FrameFetchContext::DispatchDidChangeResourcePriority(
 
 void FrameFetchContext::PrepareRequest(ResourceRequest& request,
                                        RedirectType redirect_type) {
-  LOG(INFO) << "\t enter FrameFetchContext::PrepareRequest";
-
   SetFirstPartyCookieAndRequestorOrigin(request);
 
   String user_agent = GetUserAgent();
@@ -477,7 +475,6 @@ void FrameFetchContext::PrepareRequest(ResourceRequest& request,
 
   // ServiceWorker hook ups.
   if (MasterDocumentLoader()->GetServiceWorkerNetworkProvider()) {
-      LOG(INFO) << "\t\tenter here?";
     WrappedResourceRequest webreq(request);
     MasterDocumentLoader()->GetServiceWorkerNetworkProvider()->WillSendRequest(
         webreq);

@@ -1183,31 +1183,6 @@ bool RenderThreadImpl::Send(IPC::Message* msg) {
       pumping_events = true;
     }
   }
-
-//    uint32_t type_class = ((msg->type())>>16);
-//    uint32_t type_line = ((msg->type())&0xffff);
-//    LOG(INFO) << ">>> [renderer] here I will send message. ";
-//    LOG(INFO) << "\t message [route_id, type, flag, type_line, type_class]: "
-//              << msg->routing_id() << ", "
-//              << msg->type() << ", "
-//              << msg->flags() << ", "
-//              << type_line << ", "
-//              << type_class;
-
-//    switch (type_class) {
-//    case 16: // BlobMsgStart
-//        LOG(INFO) << "\t here is BlobMsgStart";
-//        //base::debug::StackTrace().Print();
-//        break;
-//    case 3: //ViewMsgStart
-//        LOG(INFO) << "\t here is ViewMsgStart";
-//        break;
-//    case 1: //FrameMsgStart
-//        //LOG(INFO) << "\t here is FrameMsgStart";
-//        //base::debug::StackTrace().Print();
-//        break;
-//    }
-
   std::unique_ptr<blink::scheduler::WebMainThreadScheduler::RendererPauseHandle>
       renderer_paused_handle;
 
@@ -2305,7 +2280,6 @@ RenderThreadImpl::GetPeerConnectionDependencyFactory() {
 
 mojom::RenderFrameMessageFilter*
 RenderThreadImpl::render_frame_message_filter() {
-    LOG(INFO) << ">>> [renderer] get render_frame_message_filter";
   if (!render_frame_message_filter_)
     GetChannel()->GetRemoteAssociatedInterface(&render_frame_message_filter_);
   return render_frame_message_filter_.get();
@@ -2334,7 +2308,6 @@ void RenderThreadImpl::CreateView(mojom::CreateViewParamsPtr params) {
   RenderViewImpl::Create(compositor_deps, std::move(params),
                          RenderWidget::ShowCallback(),
                          GetWebMainThreadScheduler()->DefaultTaskRunner());
-  LOG(INFO) << ">>> [BPF] exit from CreateView";
 }
 
 void RenderThreadImpl::CreateFrame(mojom::CreateFrameParamsPtr params) {

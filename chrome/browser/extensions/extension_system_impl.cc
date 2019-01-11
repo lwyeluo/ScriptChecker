@@ -76,8 +76,6 @@
 #include "components/user_manager/user_manager.h"
 #endif
 
-#include "base/debug/stack_trace.h"
-
 using content::BrowserThread;
 
 namespace extensions {
@@ -375,9 +373,6 @@ void ExtensionSystemImpl::InitForRegularProfile(bool extensions_enabled) {
 
   if (shared_user_script_master() || extension_service())
     return;  // Already initialized.
-
-  LOG(INFO) << ">>> [browser][EXT] ExtensionSystemImpl::InitForRegularProfile";
-  //base::debug::StackTrace().Print();
 
   // The InfoMap needs to be created before the ProcessManager.
   shared_->info_map();

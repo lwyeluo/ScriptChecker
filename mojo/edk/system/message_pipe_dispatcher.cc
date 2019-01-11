@@ -187,13 +187,6 @@ MojoResult MessagePipeDispatcher::ReadMessage(
     return MOJO_RESULT_FAILED_PRECONDITION;
   }
 
-  pid_t tid = base::PlatformThread::CurrentId();
-  if(getpid() == 1 && (tid == 1 || tid == 7)) {
-    LOG(INFO) << ">>> [IPC] MessagePipeDispatcher::ReadMessage";
-    LOG(INFO) << "\tMessage pipe consumer " << pipe_id_ << " is aware that some bytes were written. [control_port="
-              << port_.name() << "]";
-  }
-
   // We may need to update anyone watching our signals in case we just read the
   // last available message.
   base::AutoLock lock(signal_lock_);

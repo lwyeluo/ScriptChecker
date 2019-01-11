@@ -202,13 +202,6 @@ bool SetSystemPagesAccess(void* address,
                           size_t length,
                           PageAccessibilityConfiguration accessibility) {
   DCHECK(!(length & kSystemPageOffsetMask));
-  // debug
-  int permission = GetAccessFlags(accessibility);
-  if(permission)
-      LOG(INFO) << ">>> [mprotect] [r, w, x] = [" << (permission & PROT_READ)
-                << ", " << (permission & PROT_WRITE)
-                << ", " << (permission & PROT_EXEC) << "]";
-  // debug end
   return SetSystemPagesAccessInternal(address, length, accessibility);
 }
 

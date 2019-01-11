@@ -42,9 +42,6 @@
 #include "third_party/blink/renderer/platform/wtf/text/text_position.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
-#include "thread"
-#include "base/debug/stack_trace.h"
-
 namespace blink {
 
 // On a network with high latency and high bandwidth, using a device with a fast
@@ -233,9 +230,6 @@ void BackgroundHTMLParser::PumpTokenizer() {
   // No need to start speculating until the main thread has almost caught up.
   if (input_.TotalCheckpointTokenCount() > outstanding_token_limit_)
     return;
-
-  LOG(INFO) << ">>> [renderer] BackgroundHTMLParser::PumpTokenizer. [thread] = " << std::this_thread::get_id();
-
   bool should_notify_main_thread = false;
   while (true) {
     if (xss_auditor_->IsEnabled())

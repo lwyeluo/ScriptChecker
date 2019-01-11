@@ -239,7 +239,6 @@ void LocalFrameClientImpl::RunScriptsAtDocumentIdle() {
 void LocalFrameClientImpl::DidCreateScriptContext(
     v8::Local<v8::Context> context,
     int world_id) {
-    LOG(INFO) << "\tenter LocalFrameClientImpl::DidCreateScriptContext. World id is " << world_id;
   if (web_frame_->Client())
     web_frame_->Client()->DidCreateScriptContext(context, world_id);
 }
@@ -793,7 +792,6 @@ void LocalFrameClientImpl::TransitionToCommittedForNewPage() {
 LocalFrame* LocalFrameClientImpl::CreateFrame(
     const AtomicString& name,
     HTMLFrameOwnerElement* owner_element) {
-    LOG(INFO) << ">>> [renderer][iframe] LocalFrameClientImpl::CreateFrame";
   return web_frame_->CreateChildFrame(name, owner_element);
 }
 

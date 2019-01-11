@@ -95,9 +95,6 @@
 #include "third_party/blink/renderer/platform/wtf/auto_reset.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
-#include "base/debug/stack_trace.h"
-#include "thread"
-
 namespace blink {
 
 // The MHTML mime type should be same as the one we check in the browser
@@ -723,8 +720,6 @@ void DocumentLoader::CommitNavigation(const AtomicString& mime_type,
 }
 
 void DocumentLoader::CommitData(const char* bytes, size_t length) {
-  LOG(INFO) << ">>> [renderer] DocumentLoader::CommitData.";
-
   CommitNavigation(response_.MimeType());
   DCHECK_GE(state_, kCommitted);
 
@@ -735,14 +730,6 @@ void DocumentLoader::CommitData(const char* bytes, size_t length) {
 
   if (length)
     data_received_ = true;
-
-  if (frame_->GetDocument()->Url().GetString().Contains("http://localhost:3001/") ||
-          frame_->GetDocument()->Url().GetString().Contains("http://victim.com:3001/")
-          ) {
-    LOG(INFO) << ">>> [renderer] DocumentLoader::CommitData. data is: " << String(bytes, length);
-    LOG(INFO) << "\t[thread_id, parser_blocked_count_, !committed_data_buffer_] = " << std::this_thread::get_id()
-              << ", " << parser_blocked_count_ << ", " << (!committed_data_buffer_);
-  }
 
   if (parser_blocked_count_) {
     if (!committed_data_buffer_)
@@ -889,14 +876,10 @@ void DocumentLoader::StartLoading() {
   DCHECK_EQ(state_, kNotStarted);
   state_ = kProvisional;
 
-  LOG(INFO) << ">>> [renderer] DocumentLoader::StartLoading(). Url is " << request_.Url().GetString();
-
   if (MaybeLoadEmpty())
     return;
 
   DCHECK(!GetTiming().NavigationStart().is_null());
-
-  LOG(INFO) << ">>> [renderer] DocumentLoader::StartLoading(), passing check for MaybeLoadEmpty";
 
   // PlzNavigate:
   // The fetch has already started in the browser. Don't mark it again.
@@ -916,10 +899,6 @@ void DocumentLoader::StartLoading() {
   // make some modification to the request, e.g. adding the referer header.
   request_ = GetResource()->IsLoading() ? GetResource()->GetResourceRequest()
                                         : fetch_params.GetResourceRequest();
-
-  LOG(INFO) << "\t [request url, thread_id] = " << request_.Url().GetString() << ", " << std::this_thread::get_id();
-//  if(request_.Url().GetString() == "http://localhost:3001/")
-//    base::debug::StackTrace().Print();
 }
 
 void DocumentLoader::DidInstallNewDocument(Document* document) {

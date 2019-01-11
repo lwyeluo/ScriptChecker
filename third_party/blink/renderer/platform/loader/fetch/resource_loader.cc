@@ -53,8 +53,6 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace blink {
 
 ResourceLoader* ResourceLoader::Create(ResourceFetcher* fetcher,
@@ -121,11 +119,6 @@ void ResourceLoader::Run() {
 void ResourceLoader::StartWith(const ResourceRequest& request) {
   DCHECK_NE(ResourceLoadScheduler::kInvalidClientId, scheduler_client_id_);
   DCHECK(loader_);
-
-  LOG(INFO) << ">>> [renderer][frame] ResourceLoader::StartWith. [IsMainThread, is_cache_aware_loading_activated_, flag2] = "
-            << IsMainThread() << ", " << is_cache_aware_loading_activated_ << ", "
-            << (resource_->Options().synchronous_policy == kRequestSynchronously);
-
   if (resource_->Options().synchronous_policy == kRequestSynchronously &&
       Context().DefersLoading()) {
     Cancel();

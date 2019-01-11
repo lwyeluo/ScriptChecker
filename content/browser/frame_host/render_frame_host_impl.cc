@@ -1397,8 +1397,6 @@ void RenderFrameHostImpl::OnCreateChildFrame(
   if (!is_active() || !IsCurrent() || !render_frame_created_)
     return;
 
-  LOG(INFO) << "\t enter RenderFrameHostImpl::OnCreateChildFrame";
-
   // |new_routing_id|, |new_interface_provider_provider_request|, and
   // |devtools_frame_token| were generated on the browser's IO thread and not
   // taken from the renderer process.
@@ -3089,8 +3087,6 @@ void RenderFrameHostImpl::BeginNavigation(
     return;
   }
 
-  LOG(INFO) << ">>> [broswer][navigation] RenderFrameHostImpl::BeginNavigation";
-
   frame_tree_node()->navigator()->OnBeginNavigation(
       frame_tree_node(), validated_params, std::move(begin_params),
       std::move(blob_url_loader_factory));
@@ -3668,8 +3664,6 @@ void RenderFrameHostImpl::CommitNavigation(
   DCHECK(!base::FeatureList::IsEnabled(network::features::kNetworkService) ||
          is_same_document || !is_first_navigation ||
          subresource_loader_factories);
-
-  LOG(INFO) << ">>> [browser][navigation] RenderFrameHostImpl::CommitNavigation. [is_same_document] = " << is_same_document;
 
   if (is_same_document) {
     DCHECK(same_document_navigation_request_);

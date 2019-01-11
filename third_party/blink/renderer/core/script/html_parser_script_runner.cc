@@ -286,9 +286,6 @@ void HTMLParserScriptRunner::ProcessScriptElement(
   DCHECK(script_element);
 
   // FIXME: If scripting is disabled, always just return.
-
-  LOG(INFO) << ">>> [renderer][EXT] how can I attack??????????";
-
   bool had_preload_scanner = host_->HasPreloadScanner();
 
   // Initial steps of 'An end tag whose tag name is "script"'.

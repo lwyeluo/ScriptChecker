@@ -255,10 +255,6 @@ class ChildProcessSecurityPolicyImpl::SecurityState {
   }
 
   bool CanAccessDataForOrigin(const GURL& site_url) {
-      LOG(INFO) << ">>> [browser] ChildProcessSecurityPolicyImpl::SecurityState::CanAccessDataForOrigin";
-      LOG(INFO) << "\t [site_url, origin_lock_, res] = " << site_url.GetContent() << ", "
-                << origin_lock_.GetContent() << ", "
-                << (origin_lock_.is_empty() || (origin_lock_ == site_url));
     if (origin_lock_.is_empty())
       return true;
     return origin_lock_ == site_url;
@@ -1019,7 +1015,6 @@ bool ChildProcessSecurityPolicyImpl::ChildProcessHasPermissionsForFile(
 
 bool ChildProcessSecurityPolicyImpl::CanAccessDataForOrigin(int child_id,
                                                             const GURL& url) {
-    LOG(INFO) << ">>> [browser] ChildProcessSecurityPolicyImpl::CanAccessDataForOrigin";
   // It's important to call GetSiteForURL before acquiring |lock_|, since
   // GetSiteForURL consults IsIsolatedOrigin, which needs to grab the same
   // lock.
@@ -1029,8 +1024,6 @@ bool ChildProcessSecurityPolicyImpl::CanAccessDataForOrigin(int child_id,
   // http://crbug.com/160576.
   GURL site_url = SiteInstanceImpl::GetSiteForURL(nullptr, url);
 
-  LOG(INFO) << "\t site_url is " << site_url.GetContent();
-
   base::AutoLock lock(lock_);
   SecurityStateMap::iterator state = security_state_.find(child_id);
   if (state == security_state_.end()) {
@@ -1039,7 +1032,6 @@ bool ChildProcessSecurityPolicyImpl::CanAccessDataForOrigin(int child_id,
     return true;
   }
   bool can_access = state->second->CanAccessDataForOrigin(site_url);
-  LOG(INFO) << "\t SecurityState::CanAccessDataForOrigin returns: " << can_access;
   if (!can_access) {
     // Returning false here will result in a renderer kill.  Set some crash
     // keys that will help understand the circumstances of that kill.

@@ -517,8 +517,6 @@ void NavigationRequest::BeginNavigation() {
   }
 #endif
 
-  LOG(INFO) << ">>> [browser][navigation] NavigationRequest::BeginNavigation";
-
   // Check Content Security Policy before the NavigationThrottles run. This
   // gives CSP a chance to modify requests that NavigationThrottles would
   // otherwise block. Similarly, the NavigationHandle is created afterwards, so
@@ -536,8 +534,6 @@ void NavigationRequest::BeginNavigation() {
     return;
   }
 
-  LOG(INFO) << "\t 1";
-
   if (CheckCredentialedSubresource() ==
           CredentialedSubresourceCheckResult::BLOCK_REQUEST ||
       CheckLegacyProtocolInSubresource() ==
@@ -553,8 +549,6 @@ void NavigationRequest::BeginNavigation() {
     return;
   }
 
-  LOG(INFO) << "\t 2";
-
   CreateNavigationHandle();
 
   if (IsURLHandledByNetworkStack(common_params_.url) &&
@@ -568,8 +562,6 @@ void NavigationRequest::BeginNavigation() {
                    base::Unretained(this)));
     return;
   }
-
-  LOG(INFO) << "\t 3";
 
   // There is no need to make a network request for this navigation, so commit
   // it immediately.
@@ -585,8 +577,6 @@ void NavigationRequest::BeginNavigation() {
 
   // Inform the NavigationHandle that the navigation will commit.
   navigation_handle_->ReadyToCommitNavigation(render_frame_host, false);
-
-  LOG(INFO) << "\t 4";
 
   CommitNavigation();
 }
@@ -634,11 +624,6 @@ void NavigationRequest::CreateNavigationHandle() {
   }
 
   navigation_handle_ = std::move(navigation_handle);
-
-  LOG(INFO) << ">>> [browser][navigation] CreateNavigationHandle";
-  if(navigation_handle_->frame_tree_node() && navigation_handle_->frame_tree_node()->parent())
-      LOG(INFO) << "\tparent = " << navigation_handle_->frame_tree_node()->parent()->current_origin().GetURL().GetContent();
-  LOG(INFO) << "\tcurrent = " << navigation_handle_->GetURL().GetContent();
 
   if (!begin_params_->searchable_form_url.is_empty()) {
     navigation_handle_->set_searchable_form_url(
@@ -852,8 +837,6 @@ void NavigationRequest::OnResponseStarted(
   TRACE_EVENT_ASYNC_STEP_INTO0("navigation", "NavigationRequest", this,
                                "OnResponseStarted");
   state_ = RESPONSE_STARTED;
-
-  LOG(INFO) << "\t enter NavigationRequest::OnResponseStarted";
 
   // Check if the response should be sent to a renderer.
   response_should_be_rendered_ =
@@ -1113,9 +1096,6 @@ void NavigationRequest::OnStartChecksComplete(
     NavigationThrottle::ThrottleCheckResult result) {
   DCHECK(result.action() != NavigationThrottle::DEFER);
   DCHECK(result.action() != NavigationThrottle::BLOCK_RESPONSE);
-
-  LOG(INFO) << ">>> [browser][navigation] NavigationRequest::OnStartChecksComplete";
-
   if (on_start_checks_complete_closure_)
     on_start_checks_complete_closure_.Run();
   // Abort the request if needed. This will destroy the NavigationRequest.
@@ -1223,8 +1203,6 @@ void NavigationRequest::OnStartChecksComplete(
   bool is_for_guests_only =
       navigation_handle_->GetStartingSiteInstance()->GetSiteURL().
           SchemeIs(kGuestScheme);
-
-  LOG(INFO) << "\t enter here?";
 
   // Give DevTools a chance to override begin params (headers, skip SW)
   // before actually loading resource.
@@ -1412,9 +1390,6 @@ void NavigationRequest::CommitNavigation() {
   DCHECK(response_ || !IsURLHandledByNetworkStack(common_params_.url) ||
          navigation_handle_->IsSameDocument());
   DCHECK(!common_params_.url.SchemeIs(url::kJavaScriptScheme));
-
-  LOG(INFO) << ">>> [browser][navigation] NavigationRequest::CommitNavigation";
-
   // Retrieve the RenderFrameHost that needs to commit the navigation.
   RenderFrameHostImpl* render_frame_host =
       navigation_handle_->GetRenderFrameHost();

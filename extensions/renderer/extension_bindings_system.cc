@@ -10,8 +10,6 @@
 #include "extensions/renderer/renderer_extension_registry.h"
 #include "extensions/renderer/script_context.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace extensions {
 
 namespace {
@@ -23,8 +21,6 @@ const int kHistogramBucketCount = 50;
 // static
 bool ExtensionBindingsSystem::IsRuntimeAvailableToContext(
     ScriptContext* context) {
-    LOG(INFO) << ">>> [renderer][EXT][Runtime] enter ExtensionBindingsSystem::IsRuntimeAvailableToContext";
-
   for (const auto& extension :
        *RendererExtensionRegistry::Get()->GetMainThreadExtensionSet()) {
     ExternallyConnectableInfo* info = static_cast<ExternallyConnectableInfo*>(
@@ -32,7 +28,6 @@ bool ExtensionBindingsSystem::IsRuntimeAvailableToContext(
     if (info && info->matches.MatchesURL(context->url()))
       return true;
   }
-  LOG(INFO) << "\treturn false";
   return false;
 }
 

@@ -809,8 +809,6 @@ MojoResult Core::CreateDataPipe(const MojoCreateDataPipeOptions* options,
   DCHECK(data_pipe_producer_handle);
   DCHECK(data_pipe_consumer_handle);
 
-  LOG(INFO) << ">>> [IPC] Core::CreateDataPipe. Port Name is: " << port0.name() << ", " << port1.name();
-
   uint64_t pipe_id = base::RandUint64();
   scoped_refptr<Dispatcher> producer = DataPipeProducerDispatcher::Create(
       GetNodeController(), port0, ring_buffer, create_options, pipe_id);

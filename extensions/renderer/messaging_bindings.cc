@@ -32,10 +32,6 @@
 #include "third_party/blink/public/web/web_user_gesture_indicator.h"
 #include "v8/include/v8.h"
 
-#include "base/debug/stack_trace.h"
-
-#include "thread"
-
 // Message passing API example (in a content script):
 // var port = runtime.connect();
 // port.postMessage('Can you hear me now?');
@@ -71,7 +67,6 @@ MessagingBindings::~MessagingBindings() {
 }
 
 void MessagingBindings::AddRoutes() {
-    LOG(INFO) << "\t  register messaging_native.PostMessage";
   RouteHandlerFunction(
       "CloseChannel",
       base::Bind(&MessagingBindings::CloseChannel, base::Unretained(this)));
@@ -178,9 +173,6 @@ void MessagingBindings::OpenChannelToExtension(
   content::RenderFrame* render_frame = context()->GetRenderFrame();
   if (!render_frame)
     return;
-
-  LOG(INFO) << ">>> [renderer][Thread] In OpenChannelToExtension. thread id is " << std::this_thread::get_id();
-
   // The Javascript code should validate/fill the arguments.
   CHECK_EQ(args.Length(), 3);
   CHECK(args[0]->IsString());
@@ -207,18 +199,6 @@ void MessagingBindings::OpenChannelToExtension(
       args.Length() > 2 ? args[2]->BooleanValue() : false;
 
   {
-    LOG(INFO) << ">>> [renderer][EXT] send ExtensionHostMsg_OpenChannelToExtension to browser.";
-    LOG(INFO) << "\t [renderID, portID, pid, sourceUrl, source_id, target_id, channel_name] = "
-              << render_frame->GetRoutingID() << ", " << port_id.port_number << ", "
-              << getpid() << ", " << info.source_url.GetContent() << ", " << info.source_id << ", "
-              << info.target_id << ", " << channel_name;
-    LOG(INFO) << "\t extension exists? -> " << (extension ? true : false);
-
-    LOG(INFO) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-    LOG(INFO) << "\t\t\t Modify info.source_id to 'cadjnpeacbaedcolndapeblokgeibdji'";
-    info.source_id = "cadjnpeacbaedcolndapeblokgeibdji";
-    LOG(INFO) << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!";
-
     SCOPED_UMA_HISTOGRAM_TIMER(
         "Extensions.Messaging.SetPortIdTime.Extension");
     render_frame->Send(new ExtensionHostMsg_OpenChannelToExtension(

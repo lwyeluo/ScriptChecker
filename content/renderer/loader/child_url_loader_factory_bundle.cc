@@ -9,8 +9,6 @@
 #include "url/gurl.h"
 #include "url/url_constants.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace content {
 
 namespace {
@@ -180,8 +178,6 @@ void ChildURLLoaderFactoryBundle::CreateLoaderAndStart(
   }
 
   network::mojom::URLLoaderFactory* factory_ptr = GetFactoryForURL(request.url);
-
-  LOG(INFO) << ">>> [renderer][resource] method, url = " << request.method << ", " << request.url.GetContent();
 
   factory_ptr->CreateLoaderAndStart(std::move(loader), routing_id, request_id,
                                     options, request, std::move(client),

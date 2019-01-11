@@ -75,7 +75,6 @@ bool HTMLParserScheduler::IsScheduledForUnpause() const {
 
 void HTMLParserScheduler::ScheduleForUnpause() {
   DCHECK(!is_paused_with_active_timer_);
-  LOG(INFO) << ">>> [renderer] HTMLParserScheduler::ScheduleForUnpause. IsMainThread = " << IsMainThread();
   cancellable_continue_parse_task_handle_ =
       PostCancellableTask(*loading_task_runner_, FROM_HERE,
                           WTF::Bind(&HTMLParserScheduler::ContinueParsing,

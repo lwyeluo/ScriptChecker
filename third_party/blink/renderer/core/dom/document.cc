@@ -5060,9 +5060,6 @@ bool Document::IsInInvisibleSubframe() const {
 String Document::cookie(ExceptionState& exception_state) const {
   if (GetSettings() && !GetSettings()->GetCookieEnabled())
     return String();
-
-  LOG(INFO) << ">>> Document::cookie. " << GetSecurityOrigin()->ToString() << ", " << GetSecurityOrigin()->CanAccessCookies();
-
   UseCounter::Count(*this, WebFeature::kCookieGet);
 
   // FIXME: The HTML5 DOM spec states that this attribute can raise an
@@ -5261,11 +5258,6 @@ const KURL Document::SiteForCookies() const {
           top_document_url.Protocol()))
     return top_document_url;
 
-//  LOG(INFO) << ">>> [renderer][TEST] wo enforce access_entry.MatchesDomain to return TRUE !!!! [top_url, origin] = "
-//            << top_document_url.GetString() << ","
-//            << top.GetSecurityContext()->GetSecurityOrigin()->ToString();
-//  return top_document_url;
-
   // We're intentionally using the URL of each document rather than the
   // document's SecurityOrigin.  Sandboxing a document into a unique origin
   // shouldn't effect first-/third-party status for cookies and site data.
@@ -5290,10 +5282,6 @@ const KURL Document::SiteForCookies() const {
     if (access_entry.MatchesDomain(
             *current_frame->GetSecurityContext()->GetSecurityOrigin()) ==
             OriginAccessEntry::kDoesNotMatchOrigin) {
-//        LOG(INFO) << "****************************************************";
-//        LOG(INFO) << ">>> [renderer][SOP] access_entry.MatchesDomain";
-//        LOG(INFO) << "\t we enforce it to return the true url, not data:,";
-//        LOG(INFO) << "****************************************************";
         return SecurityOrigin::UrlWithUniqueSecurityOrigin();
     }
 
@@ -6016,12 +6004,7 @@ int64_t Document::UkmSourceID() const {
 
 void Document::InitSecurityContext(const DocumentInit& initializer) {
   DCHECK(!GetSecurityOrigin());
-
-  LOG(INFO) << ">>> [renderer] create a security origin in InitSecurityContext";
-  //base::debug::StackTrace().Print();
-
   if (!initializer.HasSecurityContext()) {
-      //LOG(INFO) << "\t set initializer.HasSecurityContext";
     // No source for a security context.
     // This can occur via document.implementation.createDocument().
     cookie_url_ = KURL(g_empty_string);
@@ -6033,7 +6016,6 @@ void Document::InitSecurityContext(const DocumentInit& initializer) {
 
   SandboxFlags sandbox_flags = initializer.GetSandboxFlags();
   if (fetcher_->Archive()) {
-      //LOG(INFO) << "\t fetcher_->Archive()";
     // The URL of a Document loaded from a MHTML archive is controlled by the
     // Content-Location header. This would allow UXSS, since Content-Location
     // can be arbitrarily controlled to control the Document's URL and origin.
@@ -6048,16 +6030,12 @@ void Document::InitSecurityContext(const DocumentInit& initializer) {
   EnforceSandboxFlags(sandbox_flags);
   SetInsecureRequestPolicy(initializer.GetInsecureRequestPolicy());
   if (initializer.InsecureNavigationsToUpgrade()) {
-      //LOG(INFO) << "\t initializer.InsecureNavigationsToUpgrad";
     for (auto to_upgrade : *initializer.InsecureNavigationsToUpgrade())
       AddInsecureNavigationUpgrade(to_upgrade);
   }
 
   ContentSecurityPolicy* policy_to_inherit = nullptr;
-
-  LOG(INFO) << "\t sandbox_flags=" << sandbox_flags;
   if (IsSandboxed(kSandboxOrigin)) {
-      //LOG(INFO) << "\t IsSandboxed(kSandboxOrigin)";
     cookie_url_ = url_;
     scoped_refptr<SecurityOrigin> security_origin =
         SecurityOrigin::CreateUnique();
@@ -6069,7 +6047,6 @@ void Document::InitSecurityContext(const DocumentInit& initializer) {
     // the file system.
     Document* owner = initializer.OwnerDocument();
     if (owner) {
-        LOG(INFO) << "\t owner";
       if (owner->GetSecurityOrigin()->IsPotentiallyTrustworthy())
         security_origin->SetUniqueOriginIsPotentiallyTrustworthy(true);
       if (owner->GetSecurityOrigin()->CanLoadLocalResources())
@@ -6078,15 +6055,12 @@ void Document::InitSecurityContext(const DocumentInit& initializer) {
     }
     SetSecurityOrigin(std::move(security_origin));
   } else if (Document* owner = initializer.OwnerDocument()) {
-      //LOG(INFO) << "\t owner = initializer.OwnerDocument()";
     cookie_url_ = owner->CookieURL();
     // We alias the SecurityOrigins to match Firefox, see Bug 15313
     // https://bugs.webkit.org/show_bug.cgi?id=15313
     SetSecurityOrigin(owner->GetMutableSecurityOrigin());
     policy_to_inherit = owner->GetContentSecurityPolicy();
   } else {
-//      LOG(INFO) << "\t else";
-      LOG(INFO) << "\t here we set security origin for " << url_.GetString();
     cookie_url_ = url_;
     SetSecurityOrigin(SecurityOrigin::Create(url_));
   }
@@ -6095,7 +6069,6 @@ void Document::InitSecurityContext(const DocumentInit& initializer) {
   // the former via the 'treat-as-public-address' directive (see
   // https://wicg.github.io/cors-rfc1918/#csp).
   if (initializer.IsHostedInReservedIPRange()) {
-      LOG(INFO) << "\t IsHostedInReservedIPRange";
     SetAddressSpace(GetSecurityOrigin()->IsLocalhost()
                         ? mojom::IPAddressSpace::kLocal
                         : mojom::IPAddressSpace::kPrivate);
@@ -6129,7 +6102,6 @@ void Document::InitSecurityContext(const DocumentInit& initializer) {
       GetMutableSecurityOrigin()->GrantUniversalAccess();
     } else if (GetSecurityOrigin()->IsLocal()) {
       if (settings->GetAllowUniversalAccessFromFileURLs()) {
-          LOG(INFO) << "\t GetAllowUniversalAccessFromFileURLs";
         // Some clients want local URLs to have universal access, but that
         // setting is dangerous for other clients.
         GetMutableSecurityOrigin()->GrantUniversalAccess();
@@ -6184,7 +6156,6 @@ void Document::InitSecureContextState() {
 void Document::InitContentSecurityPolicy(
     ContentSecurityPolicy* csp,
     const ContentSecurityPolicy* policy_to_inherit) {
-    LOG(INFO) << ">>> [renderer] InitContentSecurityPolicy";
   SetContentSecurityPolicy(csp ? csp : ContentSecurityPolicy::Create());
 
   GetContentSecurityPolicy()->BindToExecutionContext(this);
@@ -6199,7 +6170,6 @@ void Document::InitContentSecurityPolicy(
   // TODO(dcheng): This is similar enough to work we're doing in
   // 'DocumentLoader::ensureWriter' that it might make sense to combine them.
   if (policy_to_inherit) {
-      LOG(INFO) << "\t policy_to_inherit has value";
     GetContentSecurityPolicy()->CopyStateFrom(policy_to_inherit);
   } else if (frame_) {
     Frame* inherit_from = frame_->Tree().Parent() ? frame_->Tree().Parent()

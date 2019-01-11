@@ -105,9 +105,6 @@
 #include "third_party/blink/renderer/platform/wtf/text/cstring.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
-#include "base/debug/stack_trace.h"
-#include "thread"
-
 using blink::WebURLRequest;
 
 namespace blink {
@@ -275,8 +272,6 @@ void FrameLoader::Trace(blink::Visitor* visitor) {
 }
 
 void FrameLoader::Init() {
-  LOG(INFO) << ">>> [renderer] FrameLoader::init";
-
   ScriptForbiddenScope forbid_scripts;
 
   ResourceRequest initial_request{KURL(g_empty_string)};
@@ -290,11 +285,7 @@ void FrameLoader::Init() {
                                      ClientRedirectPolicy::kNotClientRedirect,
                                      base::UnguessableToken::Create());
 
-  LOG(INFO) << ">>> [renderer][frame] startLoading???";
-
   provisional_document_loader_->StartLoading();
-
-  LOG(INFO) << ">>> [renderer][frame] finished???";
 
   frame_->GetDocument()->CancelParsing();
 
@@ -881,9 +872,6 @@ void FrameLoader::Load(const FrameLoadRequest& passed_request,
                        HistoryItem* history_item,
                        HistoryLoadType history_load_type) {
   DCHECK(frame_->GetDocument());
-
-  LOG(INFO) << ">>> [renderer][iframe] FrameLoader::Load";
-
   if (IsBackForwardLoadType(frame_load_type) && !frame_->IsNavigationAllowed())
     return;
 
@@ -1551,9 +1539,6 @@ void FrameLoader::StartLoad(FrameLoadRequest& frame_load_request,
                             FrameLoadType type,
                             NavigationPolicy navigation_policy,
                             HistoryItem* history_item) {
-  LOG(INFO) << ">>> [renderer] FrameLoader::StartLoad";
-  //base::debug::StackTrace().Print();
-
   DCHECK(Client()->HasWebView());
   ResourceRequest& resource_request = frame_load_request.GetResourceRequest();
   NavigationType navigation_type = DetermineNavigationType(

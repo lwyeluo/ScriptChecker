@@ -63,8 +63,6 @@
 #include "third_party/blink/renderer/platform/wtf/assertions.h"
 #include "v8/include/v8.h"
 
-#include "thread"
-
 namespace blink {
 
 void LocalWindowProxy::DisposeContext(Lifecycle next_status,
@@ -168,10 +166,6 @@ void LocalWindowProxy::Initialize() {
     SetSecurityToken(origin);
   }
 
-  LOG(INFO) << ">>> [renderer][EXT] create script context in LocalWindowProxy::Initialize. [WorldID, PID] = "
-            << world_->GetWorldId() << ", " << getpid();
-  LOG(INFO) << "\tThe current ThreadID is [" << base::PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "]";
-
   {
     TRACE_EVENT1("v8", "ContextCreatedNotification", "IsMainFrame",
                  GetFrame()->IsMainFrame());
@@ -241,8 +235,6 @@ void LocalWindowProxy::CreateContext() {
 #if DCHECK_IS_ON()
   DidAttachGlobalObject();
 #endif
-
-  LOG(INFO) << ">>> [renderer][EXT] create a new scriptState for world " << world_->GetWorldId();
   script_state_ = ScriptState::Create(context, world_);
 
   InitializeV8ExtrasBinding(script_state_.get());

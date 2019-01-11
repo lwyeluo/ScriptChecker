@@ -82,9 +82,6 @@ void CreateChildFrameOnUI(
     const FrameOwnerProperties& frame_owner_properties,
     int new_routing_id,
     mojo::ScopedMessagePipeHandle interface_provider_request_handle) {
-
-    LOG(INFO) << "\t enter CreateChildFrameOnUI";
-
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   RenderFrameHostImpl* render_frame_host =
       RenderFrameHostImpl::FromID(process_id, parent_routing_id);
@@ -109,8 +106,6 @@ void DownloadUrlOnUIThread(
       RenderProcessHost::FromID(parameters->render_process_host_id());
   if (!render_process_host)
     return;
-
-  LOG(INFO) << "\t enter DownloadUrlOnUIThread";
 
   BrowserContext* browser_context = render_process_host->GetBrowserContext();
   DownloadManager* download_manager =
@@ -358,8 +353,6 @@ void RenderFrameMessageFilter::DownloadUrl(int render_view_id,
     // through and allow it to be interrupted so that the embedder can deal.
   }
 
-  LOG(INFO) << "\t enter RenderFrameMessageFilter::DownloadUrl. Post a task to DownloadUrlOnUIThread";
-
   BrowserThread::PostTask(
       BrowserThread::UI, FROM_HERE,
       base::BindOnce(&DownloadUrlOnUIThread, std::move(parameters),
@@ -371,10 +364,6 @@ void RenderFrameMessageFilter::OnCreateChildFrame(
     int* new_routing_id,
     mojo::MessagePipeHandle* new_interface_provider,
     base::UnguessableToken* devtools_frame_token) {
-
-    LOG(INFO) << ">>> [browser][iframe] enter RenderFrameMessageFilter::OnCreateChildFrame";
-    //base::debug::StackTrace().Print();
-
   *new_routing_id = render_widget_helper_->GetNextRoutingID();
 
   service_manager::mojom::InterfaceProviderPtr interface_provider;
@@ -412,7 +401,6 @@ void RenderFrameMessageFilter::CheckPolicyForCookies(
     const GURL& site_for_cookies,
     GetCookiesCallback callback,
     const net::CookieList& cookie_list) {
-    LOG(INFO) << ">>> [browser] RenderFrameMessageFilter::CheckPolicyForCookies";
   net::URLRequestContext* context = GetRequestContextForURL(url);
   // Check the policy for get cookies, and pass cookie_list to the
   // TabSpecificContentSetting for logging purpose.
@@ -427,7 +415,6 @@ void RenderFrameMessageFilter::CheckPolicyForCookies(
 
 void RenderFrameMessageFilter::OnDownloadUrl(
     const FrameHostMsg_DownloadUrl_Params& params) {
-    LOG(INFO) << ">>> [browser][DownloadUrl] RenderFrameMessageFilter::OnDownloadUrl";
   DownloadUrl(params.render_view_id, params.render_frame_id, params.url,
               params.referrer, params.initiator_origin, params.suggested_name,
               false);
@@ -513,11 +500,6 @@ void RenderFrameMessageFilter::GetCookies(int render_frame_id,
                                           const GURL& url,
                                           const GURL& site_for_cookies,
                                           GetCookiesCallback callback) {
-    LOG(INFO) << ">>> [browser] RenderFrameMessageFilter::GetCookies. ";
-    LOG(INFO) << "\t [url, firstpatry, render_frame_id] "
-              << url.GetContent() << ", " << site_for_cookies.GetContent()
-              << ", " << render_frame_id;
-
   ChildProcessSecurityPolicyImpl* policy =
       ChildProcessSecurityPolicyImpl::GetInstance();
   if (!policy->CanAccessDataForOrigin(render_process_id_, url)) {
@@ -536,7 +518,6 @@ void RenderFrameMessageFilter::GetCookies(int render_frame_id,
     options.set_same_site_cookie_mode(
         net::CookieOptions::SameSiteCookieMode::INCLUDE_STRICT_AND_LAX);
   } else {
-      LOG(INFO) << "\t check SameDomainOrHost should be false";
     options.set_same_site_cookie_mode(
         net::CookieOptions::SameSiteCookieMode::DO_NOT_INCLUDE);
   }

@@ -213,8 +213,6 @@ bool SandboxSeccompBPF::StartSandboxWithExternalPolicy(
     SandboxBPF sandbox(std::move(policy));
     sandbox.SetProcFd(std::move(proc_fd));
 
-    LOG(INFO) << ">>> [sandbox] enter StartSandboxWithExternalPolicy. [pid]=" << getpid();
-
     CHECK(sandbox.StartSandbox(SandboxBPF::SeccompLevel::SINGLE_THREADED));
     return true;
   }

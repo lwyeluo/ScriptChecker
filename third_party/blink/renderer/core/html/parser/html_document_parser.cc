@@ -62,9 +62,6 @@
 #include "third_party/blink/renderer/platform/shared_buffer.h"
 #include "third_party/blink/renderer/platform/wtf/auto_reset.h"
 
-#include "base/debug/stack_trace.h"
-#include "thread"
-
 namespace blink {
 
 using namespace HTMLNames;
@@ -319,9 +316,6 @@ bool HTMLDocumentParser::CanTakeNextToken() {
 void HTMLDocumentParser::NotifyPendingTokenizedChunks() {
   TRACE_EVENT0("blink", "HTMLDocumentParser::notifyPendingTokenizedChunks");
   DCHECK(tokenized_chunk_queue_);
-
-  LOG(INFO) << ">>> [renderer] HTMLDocumentParser::NotifyPendingTokenizedChunks. [thread] = " << std::this_thread::get_id();
-
   Vector<std::unique_ptr<TokenizedChunk>> pending_chunks;
   tokenized_chunk_queue_->TakeAll(pending_chunks);
 
@@ -1179,9 +1173,6 @@ void HTMLDocumentParser::UnpauseScheduledTasks() {
 void HTMLDocumentParser::AppendBytes(const char* data, size_t length) {
   if (!length || IsStopped())
     return;
-
-  LOG(INFO) << ">>> [renderer] HTMLDocumentParser::AppendBytes. flag [ShouldUseThreading] = " << ShouldUseThreading();
-
   if (ShouldUseThreading()) {
     if (!have_background_parser_)
       StartBackgroundParser();

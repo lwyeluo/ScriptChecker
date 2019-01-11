@@ -29,8 +29,6 @@
 #include "third_party/blink/public/web/web_document_loader.h"
 #include "third_party/blink/public/web/web_local_frame.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace extensions {
 
 namespace {
@@ -304,7 +302,6 @@ void ExtensionFrameHelper::RunScriptsAtDocumentIdle() {
 
 void ExtensionFrameHelper::ScheduleAtDocumentStart(
     const base::Closure& callback) {
-    LOG(INFO) << ">>> [renderer][EXT] add callback when document is created";
   document_element_created_callbacks_.push_back(callback);
 }
 
@@ -357,7 +354,6 @@ void ExtensionFrameHelper::DidCreateScriptContext(
     // point with PlzNavigate.
     delayed_main_world_script_initialization_ = true;
   } else {
-      LOG(INFO) << "\tenter ExtensionFrameHelper::DidCreateScriptContext. World id is " << world_id;
     extension_dispatcher_->DidCreateScriptContext(render_frame()->GetWebFrame(),
                                                   context, world_id);
   }
