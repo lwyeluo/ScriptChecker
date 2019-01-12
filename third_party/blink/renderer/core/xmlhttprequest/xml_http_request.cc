@@ -91,9 +91,6 @@
 #include "third_party/blink/renderer/platform/wtf/std_lib_extras.h"
 #include "third_party/blink/renderer/platform/wtf/text/cstring.h"
 
-#include "base/debug/stack_trace.h"
-#include "thread"
-
 namespace blink {
 
 namespace {
@@ -265,10 +262,6 @@ XMLHttpRequest* XMLHttpRequest::Create(ScriptState* script_state) {
   ExecutionContext* context = ExecutionContext::From(script_state);
   DOMWrapperWorld& world = script_state->World();
   v8::Isolate* isolate = script_state->GetIsolate();
-
-  LOG(INFO) << ">>> [renderer][XMLRequest] create a XMLHttpRequest in world: " << world.GetWorldId();
-  LOG(INFO) << "\tThe current ThreadID is [" << base::PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "]";
-
   XMLHttpRequest* xml_http_request =
       world.IsIsolatedWorld()
           ? new XMLHttpRequest(context, isolate, true,
@@ -341,7 +334,6 @@ v8::Local<v8::String> XMLHttpRequest::responseText(
   }
   if (error_ || (state_ != kLoading && state_ != kDone))
     return v8::Local<v8::String>();
-  LOG(INFO) << ">>> [XHR][responseText]";
   return response_text_.V8Value(isolate_);
 }
 
@@ -644,9 +636,6 @@ void XMLHttpRequest::open(const AtomicString& method,
   if (!GetExecutionContext())
     return;
 
-  LOG(INFO) << ">>> [renderer][XMLRequest] XMLHttpRequest::Open. [url, username, password] = "
-            << url_string << ", " << username << ", " << password;
-
   KURL url(GetExecutionContext()->CompleteURL(url_string));
   if (!ValidateOpenArguments(method, url, exception_state))
     return;
@@ -781,8 +770,6 @@ void XMLHttpRequest::send(
         body,
     ExceptionState& exception_state) {
   probe::willSendXMLHttpOrFetchNetworkRequest(GetExecutionContext(), Url());
-
-  LOG(INFO) << ">>> [renderer][XMLRequest] send message from XMLHttpRequest";
 
   if (body.IsNull()) {
     send(String(), exception_state);
@@ -1838,9 +1825,6 @@ void XMLHttpRequest::DidReceiveData(const char* data, unsigned len) {
     return;
 
   DCHECK(!downloading_to_blob_ || blob_loader_);
-
-  LOG(INFO) << ">>> [XHR] XMLHttpRequest::DidReceiveData. " << data;
-
   if (state_ < kHeadersReceived)
     ChangeState(kHeadersReceived);
 

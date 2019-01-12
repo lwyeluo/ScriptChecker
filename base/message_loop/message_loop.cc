@@ -348,10 +348,6 @@ void MessageLoop::RunTask(PendingTask* pending_task) {
   task_execution_allowed_ = false;
 
   TRACE_TASK_EXECUTION("MessageLoop::RunTask", *pending_task);
-
-//  if(getpid() == 1 && base::PlatformThread::CurrentId() == 1)
-//      LOG(INFO) << ">>>> [TASK] Run Task in Main Thread: [file_name::func_name] = " << pending_task->posted_from.ToString();
-
   for (auto& observer : task_observers_)
     observer.WillProcessTask(*pending_task);
   incoming_task_queue_->RunTask(pending_task);

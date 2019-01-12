@@ -1032,8 +1032,6 @@ void DownloadManagerImpl::DownloadUrl(
     DCHECK_EQ("POST", params->method());
   }
 
-  LOG(INFO) << "\t DownloadManagerImpl::DownloadUrl";
-
   download::RecordDownloadCountWithSource(
       download::DownloadCountTypes::DOWNLOAD_TRIGGERED_COUNT,
       params->download_source());
@@ -1323,8 +1321,6 @@ void DownloadManagerImpl::BeginDownloadInternal(
       }
     }
 
-    LOG(INFO) << "\t post task to BeginResourceDownload in BeginResourceDownload";
-
     BrowserThread::PostTask(
         BrowserThread::IO, FROM_HERE,
         base::BindOnce(&BeginResourceDownload, std::move(params),
@@ -1334,8 +1330,6 @@ void DownloadManagerImpl::BeginDownloadInternal(
                        tab_referrer_url,
                        base::MessageLoop::current()->task_runner()));
   } else {
-      LOG(INFO) << "\t post task to BeginDownload in BeginResourceDownload";
-
     BrowserThread::PostTask(
         BrowserThread::IO, FROM_HERE,
         base::BindOnce(&BeginDownload, std::move(params),

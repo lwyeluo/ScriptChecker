@@ -31,8 +31,6 @@
 #include "third_party/blink/public/web/web_user_gesture_indicator.h"
 #include "v8/include/v8.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace extensions {
 
 RendererMessagingService::RendererMessagingService(
@@ -89,10 +87,8 @@ void RendererMessagingService::DispatchOnConnect(
 
   IPCMessageSender* ipc_sender = bindings_system_->GetIPCMessageSender();
   if (port_created) {
-    LOG(INFO) << "\t\t send ExtensionHostMsg_OpenMessagePort to browser";
     ipc_sender->SendOpenMessagePort(routing_id, target_port_id);
   } else {
-    LOG(INFO) << "\t\t send ExtensionHostMsg_CloseMessagePort to browser. closeChannel is false";
     ipc_sender->SendCloseMessagePort(routing_id, target_port_id, false);
   }
 }
@@ -102,7 +98,6 @@ void RendererMessagingService::DeliverMessage(
     const PortId& target_port_id,
     const Message& message,
     content::RenderFrame* restrict_to_render_frame) {
-    LOG(INFO) << "\tenter RendererMessagingService::DeliverMessage.";
   context_set.ForEach(
       restrict_to_render_frame,
       base::Bind(&RendererMessagingService::DeliverMessageToScriptContext,
@@ -139,8 +134,6 @@ void RendererMessagingService::DispatchOnConnectToScriptContext(
     const std::string& tls_channel_id,
     bool* port_created,
     ScriptContext* script_context) {
-    LOG(INFO) << "!!!!!!!!!!!!!!! RendererMessagingService::DispatchOnConnectToScriptContext";
-
   // If the channel was opened by this same context, ignore it. This should only
   // happen when messages are sent to an entire process (rather than a single
   // frame) as an optimization; otherwise the browser process filters this out.
@@ -162,9 +155,6 @@ void RendererMessagingService::DispatchOnConnectToScriptContext(
                              : messaging_util::kOnConnectEvent;
   }
 
-  LOG(INFO) << "!!!!!!!!!!!!!!! 1. [source_id, extension, eventName, pid] = " << info.source_id << ", "
-            << target_extension_id << ", " << event_name << ", " << getpid();
-
   // If there are no listeners for the given event, then we know the port won't
   // be used in this context.
   if (!bindings_system_->HasEventListenerInContext(event_name,
@@ -172,8 +162,6 @@ void RendererMessagingService::DispatchOnConnectToScriptContext(
     return;
   }
   *port_created = true;
-
-  LOG(INFO) << "!!!!!!!!!!!!!!! 2";
 
   DispatchOnConnectToListeners(script_context, target_port_id,
                                target_extension_id, channel_name, source, info,
@@ -184,12 +172,8 @@ void RendererMessagingService::DeliverMessageToScriptContext(
     const Message& message,
     const PortId& target_port_id,
     ScriptContext* script_context) {
-  LOG(INFO) << "\tenter RendererMessagingService::DeliverMessageToScriptContext.";
-
   if (!ContextHasMessagePort(script_context, target_port_id))
     return;
-
-  LOG(INFO) << "\t\tpass check in ContextHasMessagePort.";
 
   std::unique_ptr<blink::WebScopedUserGesture> web_user_gesture;
   std::unique_ptr<blink::WebScopedWindowFocusAllowedIndicator>

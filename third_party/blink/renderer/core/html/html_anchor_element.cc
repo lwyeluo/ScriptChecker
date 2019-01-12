@@ -145,7 +145,6 @@ void HTMLAnchorElement::DefaultEventHandler(Event* event) {
     }
 
     if (IsLinkClick(event) && IsLiveLink()) {
-        LOG(INFO) << " enter HTMLAnchorElement::DefaultEventHandler. Is a link click.";
       HandleClick(event);
       return;
     }
@@ -330,8 +329,6 @@ void HTMLAnchorElement::HandleClick(Event* event) {
     UseCounter::Count(GetDocument(),
                       WebFeature::kAnchorClickDispatchForNonConnectedNode);
   }
-
-  LOG(INFO) << "\t enter HTMLAnchorElement::HandleClick";
 
   StringBuilder url;
   url.Append(StripLeadingAndTrailingHTMLSpaces(FastGetAttribute(hrefAttr)));

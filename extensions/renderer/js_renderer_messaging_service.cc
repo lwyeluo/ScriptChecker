@@ -20,8 +20,6 @@
 #include "extensions/renderer/v8_helpers.h"
 #include "v8/include/v8.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace extensions {
 
 using v8_helpers::ToV8String;
@@ -34,7 +32,6 @@ JSRendererMessagingService::~JSRendererMessagingService() {}
 bool JSRendererMessagingService::ContextHasMessagePort(
     ScriptContext* script_context,
     const PortId& port_id) {
-    LOG(INFO) << "\t\tenter JSRendererMessagingService::ContextHasMessagePort";
   MessagingBindings* bindings = MessagingBindings::ForContext(script_context);
   DCHECK(bindings);
   return bindings->GetPortWithId(port_id) != nullptr;
@@ -98,9 +95,6 @@ void JSRendererMessagingService::DispatchOnConnectToListeners(
     return;
   }
 
-  LOG(INFO) << ">>> [extension][EXT] call messaging.dispatchOnConnect: [port_id, pid] = "
-            << port->js_id() << ", " << getpid();
-
   v8::Local<v8::Value> arguments[] = {
       // portId
       v8::Integer::New(isolate, port->js_id()),
@@ -136,9 +130,6 @@ void JSRendererMessagingService::DispatchOnMessageToListeners(
   MessagingBindings* bindings = MessagingBindings::ForContext(script_context);
   ExtensionPort* port = bindings->GetPortWithId(target_port_id);
   DCHECK(port);
-
-  LOG(INFO) << ">>> [extension][EXT] call messaging.dispatchOnMessage: [port_id, msg, pid] = "
-            << port->js_id() << ", " << message.data << ", " << getpid();
 
   v8::Isolate* isolate = script_context->isolate();
   v8::HandleScope handle_scope(isolate);
@@ -178,8 +169,6 @@ void JSRendererMessagingService::DispatchOnDisconnectToListeners(
   } else {
     arguments.push_back(v8::Null(isolate));
   }
-
-  LOG(INFO) << ">>> [renderer][EXT] invoke messaging.dispatchOnDisconnect. pid = " << getpid();
 
   script_context->module_system()->CallModuleMethodSafe(
       "messaging", "dispatchOnDisconnect", &arguments);

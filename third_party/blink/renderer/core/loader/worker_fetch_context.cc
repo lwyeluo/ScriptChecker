@@ -275,7 +275,6 @@ int WorkerFetchContext::ApplicationCacheHostID() const {
 
 void WorkerFetchContext::PrepareRequest(ResourceRequest& request,
                                         RedirectType) {
-    LOG(INFO) << "\t enter WorkerFetchContext::PrepareRequest???";
   String user_agent = global_scope_->UserAgent();
   probe::applyUserAgentOverride(global_scope_, &user_agent);
   DCHECK(!user_agent.IsNull());

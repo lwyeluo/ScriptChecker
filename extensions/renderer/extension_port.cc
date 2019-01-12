@@ -10,8 +10,6 @@
 #include "extensions/common/extension_messages.h"
 #include "extensions/renderer/script_context.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace extensions {
 
 ExtensionPort::ExtensionPort(ScriptContext* script_context,
@@ -28,8 +26,6 @@ void ExtensionPort::PostExtensionMessage(std::unique_ptr<Message> message) {
   // out for service workers.
   if (!render_frame)
     return;
-  LOG(INFO) << ">>> [renderer][EXT] send ExtensionHostMsg_PostMessage: [port_id, context_id, msg, pid] = "
-            << id_.port_number << ", " <<id_.context_id << ", " << message->data << ", " << getpid();
   render_frame->Send(new ExtensionHostMsg_PostMessage(
       render_frame->GetRoutingID(), id_, *message));
 }

@@ -200,9 +200,6 @@ class ResourceFetcherImpl::ClientImpl : public network::mojom::URLLoaderClient {
       mojo::ScopedDataPipeConsumerHandle body) override {
     DCHECK_EQ(Status::kStarted, status_);
     status_ = Status::kFetching;
-
-    LOG(INFO) << ">>> [IPC] OnStartLoadingResponseBody";
-
     data_pipe_ = std::move(body);
     data_pipe_watcher_.Watch(
         data_pipe_.get(),

@@ -390,10 +390,6 @@ void ExtensionMessageFilter::OnOpenChannelToExtension(
     const PortId& port_id) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   if (browser_context_) {
-      LOG(INFO) << ">>> [browser][EXT] receive ExtensionHostMsg_OpenChannelToExtension and prepare to open OpenChannelToExtension."
-                << " [renderID, portID, pid, sourceUrl, source_id, target_id, channelName] = " << render_process_id_ << ", "
-                << port_id.port_number << ", " << getpid() << ", " << info.source_url.GetContent() << ", "
-                << info.source_id << ", " << info.target_id << ", " << channel_name;
     MessageService::Get(browser_context_)
         ->OpenChannelToExtension(render_process_id_, routing_id, port_id,
                                  info.source_id, info.target_id,
@@ -436,8 +432,6 @@ void ExtensionMessageFilter::OnOpenMessagePort(
   if (!browser_context_)
     return;
 
-  LOG(INFO) << ">>> [browser][EXT] receive ExtensionHostMsg_OpenMessagePort. [portID, pid] = " << port_id.port_number << ", " << getpid();
-
   MessageService::Get(browser_context_)
       ->OpenPort(port_id, render_process_id_, routing_id);
 }
@@ -458,8 +452,6 @@ void ExtensionMessageFilter::OnPostMessage(const PortId& port_id,
   if (!browser_context_)
     return;
 
-  LOG(INFO) << ">>> [browser][EXT] receive ExtensionHostMsg_PostMessage. [portID, contextID, msg, pid] = "
-            << port_id.port_number << ", " << port_id.context_id <<", " << message.data << ", " << getpid();
   MessageService::Get(browser_context_)->PostMessage(port_id, message);
 }
 

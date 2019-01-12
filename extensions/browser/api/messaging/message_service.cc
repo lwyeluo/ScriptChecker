@@ -469,8 +469,6 @@ void MessageService::OpenChannelImpl(BrowserContext* browser_context,
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
   DCHECK_EQ(target_extension != nullptr, !params->target_extension_id.empty());
 
-  LOG(INFO) << "\tenter MessageService::OpenChannelImpl";
-
   content::RenderFrameHost* source =
       content::RenderFrameHost::FromID(params->source_process_id,
                                        params->source_routing_id);
@@ -656,9 +654,6 @@ void MessageService::CloseChannelImpl(MessageChannelMap::iterator channel_iter,
 void MessageService::PostMessage(const PortId& source_port_id,
                                  const Message& message) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
-
-  LOG(INFO) << "\tenter MessageService::PostMessage";
-
   ChannelId channel_id = source_port_id.GetChannelId();
   MessageChannelMap::iterator iter = channels_.find(channel_id);
   if (iter == channels_.end()) {
@@ -725,8 +720,6 @@ void MessageService::DispatchMessage(const PortId& source_port_id,
                                      const Message& message) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
 
-  LOG(INFO) << "\tenter MessageService::DispatchMessage";
-
   // Figure out which port the ID corresponds to.
   MessagePort* dest_port = source_port_id.is_opener ? channel->receiver.get()
                                                     : channel->opener.get();
@@ -774,9 +767,6 @@ void MessageService::OnOpenChannelAllowed(
     std::unique_ptr<OpenChannelParams> params,
     bool allowed) {
   DCHECK_CURRENTLY_ON(BrowserThread::UI);
-
-  LOG(INFO) << "\tenter MessageService::OnOpenChannelAllowed";
-
   ChannelId channel_id = params->receiver_port_id.GetChannelId();
 
   PendingChannelMap::iterator pending_for_incognito =

@@ -427,8 +427,6 @@ void UserScriptLoader::SendUpdate(content::RenderProcessHost* process,
   if (!handle_for_process.IsValid())
     return;
 
-  LOG(INFO) << ">>> [browser][EXT] prepare to send IPC: ExtensionMsg_UpdateUserScripts";
-
   process->Send(new ExtensionMsg_UpdateUserScripts(
       handle_for_process, host_id(), changed_hosts, whitelisted_only));
 }

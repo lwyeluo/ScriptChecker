@@ -246,8 +246,6 @@
 #include "third_party/blink/renderer/platform/wtf/hash_map.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
-#include "thread"
-
 namespace blink {
 
 static int g_frame_count = 0;
@@ -856,10 +854,6 @@ void WebLocalFrameImpl::RequestExecuteScriptInIsolatedWorld(
   DCHECK(GetFrame());
   CHECK_GT(world_id, 0);
   CHECK_LT(world_id, DOMWrapperWorld::kEmbedderWorldIdLimit);
-
-  LOG(INFO) << ">>> [renderer][Thread] In RequestExecuteScriptInIsolatedWorld.";
-  LOG(INFO) << "\tThe current ThreadID is [" << base::PlatformThread::CurrentId() << ", " << std::this_thread::get_id() << "]";
-  LOG(INFO) << "\t option is " << (int)option;
 
   scoped_refptr<DOMWrapperWorld> isolated_world =
       DOMWrapperWorld::EnsureIsolatedWorld(ToIsolate(GetFrame()), world_id);

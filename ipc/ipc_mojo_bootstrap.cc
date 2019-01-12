@@ -650,7 +650,6 @@ class ChannelAssociatedGroupController
     } else {
       // We always post tasks to the master endpoint thread when called from
       // other threads in order to simulate IPC::ChannelProxy::Send behavior.
-        //LOG(INFO) << ">>> [renderer] invoke task_runner to PostTask, the msg's name is " << message->header()->name;
       task_runner_->PostTask(
           FROM_HERE,
           base::Bind(

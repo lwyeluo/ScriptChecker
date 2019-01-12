@@ -1080,9 +1080,6 @@ void DocumentThreadableLoader::DataReceived(Resource* resource,
                                             size_t data_length) {
   DCHECK_EQ(resource, GetResource());
   DCHECK(async_);
-
-  LOG(INFO) << ">>> [IPC] DocumentThreadableLoader::DataReceived. " << data;
-
   checker_.DataReceived();
 
   if (is_using_data_consumer_handle_)

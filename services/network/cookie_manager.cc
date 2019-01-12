@@ -164,14 +164,12 @@ void CookieManager::AddRequest(network::mojom::CookieManagerRequest request) {
 }
 
 void CookieManager::GetAllCookies(GetAllCookiesCallback callback) {
-    LOG(INFO) << ">>> GetAllCookies";
   cookie_store_->GetAllCookiesAsync(std::move(callback));
 }
 
 void CookieManager::GetCookieList(const GURL& url,
                                   const net::CookieOptions& cookie_options,
                                   GetCookieListCallback callback) {
-    LOG(INFO) << ">>> GetCookieList";
   cookie_store_->GetCookieListWithOptionsAsync(url, cookie_options,
                                                std::move(callback));
 }

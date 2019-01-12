@@ -23,9 +23,6 @@ void CookieStore::SetForceKeepSessionState() {
 
 void CookieStore::GetAllCookiesForURLAsync(const GURL& url,
                                            GetCookieListCallback callback) {
-
-    LOG(INFO) << ">>> GetAllCookiesForURLAsync: " << url.path();
-
   CookieOptions options;
   options.set_include_httponly();
   options.set_same_site_cookie_mode(

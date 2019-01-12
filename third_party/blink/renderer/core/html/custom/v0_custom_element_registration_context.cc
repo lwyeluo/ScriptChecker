@@ -78,7 +78,6 @@ Element* V0CustomElementRegistrationContext::CreateCustomTagElement(
   Element* element;
 
   if (HTMLNames::xhtmlNamespaceURI == tag_name.NamespaceURI()) {
-    LOG(INFO) << ">>> [renderer][iframe] V0CustomElementRegistrationContext::CreateCustomTagElement";
     element = HTMLElement::Create(tag_name, document);
   } else if (SVGNames::svgNamespaceURI == tag_name.NamespaceURI()) {
     element = SVGUnknownElement::Create(tag_name, document);

@@ -1349,7 +1349,6 @@ void SimpleURLLoaderImpl::OnReceiveRedirect(
     const net::RedirectInfo& redirect_info,
     const ResourceResponseHead& response_head) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
-  LOG(INFO) << ">>> [] SimpleURLLoaderImpl::OnReceiveRedirect. " << getpid();
   if (request_state_->response_info) {
     // If the headers have already been received, the URLLoader is violating the
     // API contract.

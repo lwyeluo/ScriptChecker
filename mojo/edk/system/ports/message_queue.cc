@@ -51,20 +51,12 @@ void MessageQueue::GetNextMessage(std::unique_ptr<UserMessageEvent>* message,
   std::pop_heap(heap_.begin(), heap_.end());
   *message = std::move(heap_.back());
   heap_.pop_back();
-
-//  if(getpid() == 1)
-//    LOG(INFO) << ">>> [IPC] MessageQueue::GetNextMessage #" << message->get()->sequence_num();
-
   next_sequence_num_++;
 }
 
 void MessageQueue::AcceptMessage(std::unique_ptr<UserMessageEvent> message,
                                  bool* has_next_message) {
   // TODO: Handle sequence number roll-over.
-
-//  if(getpid() == 1)
-//    LOG(INFO) << ">>> [IPC] MessageQueue::AcceptMessage #" << message->sequence_num();
-
   heap_.emplace_back(std::move(message));
   std::push_heap(heap_.begin(), heap_.end());
 

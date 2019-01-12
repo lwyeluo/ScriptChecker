@@ -20,9 +20,6 @@
 #include "extensions/common/extension_messages.h"
 #include "extensions/common/manifest_handlers/background_info.h"
 
-#include "base/debug/stack_trace.h"
-#include "thread"
-
 namespace extensions {
 
 const char kReceivingEndDoesntExistError[] =
@@ -217,26 +214,17 @@ void ExtensionMessagePort::DispatchOnConnect(
   info.guest_process_id = guest_process_id;
   info.guest_render_frame_routing_id = guest_render_frame_routing_id;
 
-  LOG(INFO) << "\tenter ExtensionMessagePort::DispatchOnConnect, and invoke SendToPort for ExtensionMsg_DispatchOnConnect";
-  LOG(INFO) << "\t\t[source_id, source_url, channel_name] = "
-            << info.source_id << ", " << info.source_url.GetContent() << ", " << channel_name;
-
   SendToPort(std::make_unique<ExtensionMsg_DispatchOnConnect>(
       MSG_ROUTING_NONE, port_id_, channel_name, source, info, tls_channel_id));
 }
 
 void ExtensionMessagePort::DispatchOnDisconnect(
     const std::string& error_message) {
-    LOG(INFO) << ">>> [browser][EXT] send ExtensionMsg_DispatchOnDisconnect: [port_id, msg, pid] = "
-              << port_id_.port_number << ", " << error_message << ", " << getpid();
   SendToPort(std::make_unique<ExtensionMsg_DispatchOnDisconnect>(
       MSG_ROUTING_NONE, port_id_, error_message));
 }
 
 void ExtensionMessagePort::DispatchOnMessage(const Message& message) {
-    LOG(INFO) << ">>> [browser][EXT] send ExtensionMsg_DeliverMessage: [port_id, msg, pid] = "
-              << port_id_.port_number << ", " << message.data << ", " << getpid();
-    LOG(INFO) << ">>> [renderer][Thread] In DispatchOnMessage. thread id is " << std::this_thread::get_id();
   SendToPort(std::make_unique<ExtensionMsg_DeliverMessage>(MSG_ROUTING_NONE,
                                                            port_id_, message));
 }

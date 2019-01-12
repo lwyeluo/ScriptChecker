@@ -91,7 +91,6 @@ bool EventBookkeeper::RemoveFilter(const std::string& event_name,
 
 bool EventBookkeeper::HasListener(ScriptContext* script_context,
                                   const std::string& event_name) {
-    LOG(INFO) << "\tEventBookkeeper::HasListener. [event_name] = " << event_name;
   // Unmanaged event listeners.
   auto unmanaged_iter = unmanaged_listeners_.find(script_context);
   if (unmanaged_iter != unmanaged_listeners_.end() &&

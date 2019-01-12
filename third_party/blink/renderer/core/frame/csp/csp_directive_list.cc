@@ -22,8 +22,6 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_utf8_adaptor.h"
 #include "third_party/blink/renderer/platform/wtf/text/wtf_string.h"
 
-#include "base/debug/stack_trace.h"
-
 namespace blink {
 
 namespace {
@@ -589,11 +587,6 @@ bool CSPDirectiveList::CheckAncestorsAndReportViolation(
     const KURL& url) const {
   if (CheckAncestors(directive, frame))
     return true;
-
-  LOG(INFO) << ">>> [renderer][CSP] CSPDirectiveList::CheckAncestorsAndReportViolation";
-  LOG(INFO) << ">>> [renderer][TEST] We enforce it to return true!!!!!!!!!";
-  base::debug::StackTrace().Print();
-  return true;
 
   ReportViolationWithFrame(
       directive->GetText(),
