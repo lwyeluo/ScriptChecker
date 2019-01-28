@@ -854,8 +854,12 @@ bool CSSParserFastPaths::IsValidKeywordPropertyAndValue(
       return value_id == CSSValueDisc || value_id == CSSValueCircle ||
              value_id == CSSValueSquare || value_id == CSSValueNone;
     case CSSPropertyTransformBox:
-      return value_id == CSSValueBorderBox || value_id == CSSValueFillBox ||
-             value_id == CSSValueViewBox;
+      // Updated by Luo Wu
+      //   here is a bug in https://bugs.chromium.org/p/chromium/issues/detail?id=816534
+      //  I modify the source code according to the commit for this bug
+      return value_id == CSSValueFillBox || value_id == CSSValueViewBox;
+//      return value_id == CSSValueBorderBox || value_id == CSSValueFillBox ||
+//             value_id == CSSValueViewBox;
     case CSSPropertyTransformStyle:
       return value_id == CSSValueFlat || value_id == CSSValuePreserve3d;
     case CSSPropertyWebkitUserDrag:
