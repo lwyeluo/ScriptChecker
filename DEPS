@@ -375,8 +375,8 @@ deps = {
       'condition': 'checkout_win',
   },
 
-  'src/third_party/boringssl/src':
-    Var('boringssl_git') + '/boringssl.git' + '@' +  Var('boringssl_revision'),
+  #'src/third_party/boringssl/src':
+  #  Var('boringssl_git') + '/boringssl.git' + '@' +  Var('boringssl_revision'),
 
   'src/third_party/bouncycastle': {
       'packages': [

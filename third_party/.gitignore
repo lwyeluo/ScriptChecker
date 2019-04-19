@@ -27,7 +27,7 @@
 /bazel/desugar/Desugar.jar
 /bidichecker
 /bison
-/boringssl/src
+#/boringssl/src
 /bouncycastle/lib/
 /breakpad/breakpad
 /byte_buddy/lib/
