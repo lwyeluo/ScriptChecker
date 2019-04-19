@@ -623,10 +623,10 @@ deps = {
   'src/third_party/libaddressinput/src':
     Var('chromium_git') + '/external/libaddressinput.git' + '@' + 'd955c63ec7048d59dffd20af25eeec23da878d27',
 
-  'src/third_party/libaom/source/libaom': {
-    'url': Var('aomedia_git') + '/aom.git' + '@' +  'cc92258a08d98f469dff1be288acbc322632377b',
-    'condition': 'checkout_libaom',
-  },
+  #'src/third_party/libaom/source/libaom': {
+  #  'url': Var('aomedia_git') + '/aom.git' + '@' +  'cc92258a08d98f469dff1be288acbc322632377b',
+  #  'condition': 'checkout_libaom',
+  #},
 
   # Userspace interface to kernel DRM services.
   'src/third_party/libdrm/src': {
@@ -744,8 +744,8 @@ deps = {
   'src/third_party/openh264/src':
     Var('chromium_git') + '/external/github.com/cisco/openh264' + '@' + '2e96d62426547ac4fb5cbcd122e5f6eb68d66ee6',
 
-  'src/third_party/openmax_dl':
-    Var('webrtc_git') + '/deps/third_party/openmax.git' + '@' +  Var('openmax_dl_revision'),
+  #'src/third_party/openmax_dl':
+  #  Var('webrtc_git') + '/deps/third_party/openmax.git' + '@' +  Var('openmax_dl_revision'),
 
   'src/third_party/ow2_asm': {
       'packages': [
@@ -758,8 +758,8 @@ deps = {
       'dep_type': 'cipd',
   },
 
-  'src/third_party/pdfium':
-    Var('pdfium_git') + '/pdfium.git' + '@' +  Var('pdfium_revision'),
+  #'src/third_party/pdfium':
+  #  Var('pdfium_git') + '/pdfium.git' + '@' +  Var('pdfium_revision'),
 
   # Parses Windows PE/COFF executable format.
   'src/third_party/pefile': {
@@ -817,8 +817,8 @@ deps = {
   'src/third_party/shaderc/src':
     Var('chromium_git') + '/external/github.com/google/shaderc.git' + '@' + 'cd8793c34907073025af2622c28bcee64e9879a4',
 
-  'src/third_party/skia':
-    Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
+  #'src/third_party/skia':
+  #  Var('skia_git') + '/skia.git' + '@' +  Var('skia_revision'),
 
   'src/third_party/smhasher/src':
     Var('chromium_git') + '/external/smhasher.git' + '@' + 'e87738e57558e0ec472b2fc3a643b838e5b6e88f',
@@ -837,8 +837,8 @@ deps = {
       'dep_type': 'cipd',
   },
 
-  'src/third_party/swiftshader':
-    Var('swiftshader_git') + '/SwiftShader.git' + '@' +  Var('swiftshader_revision'),
+  #'src/third_party/swiftshader':
+  #  Var('swiftshader_git') + '/SwiftShader.git' + '@' +  Var('swiftshader_revision'),
 
   'src/third_party/ub-uiautomator/lib': {
       'url': Var('chromium_git') + '/chromium/third_party/ub-uiautomator.git' + '@' + '00270549ce3161ae72ceb24712618ea28b4f9434',
@@ -875,8 +875,8 @@ deps = {
   'src/third_party/webgl/src':
     Var('chromium_git') + '/external/khronosgroup/webgl.git' + '@' + 'da5abe6e9bae583e4ae73aa553547fcaa637d099',
 
-  'src/third_party/webrtc':
-    Var('webrtc_git') + '/src.git' + '@' + '4da18e89bdee78df4478b66cdd0e6f6a38d61b4d', # commit position 21742
+  #'src/third_party/webrtc':
+  #  Var('webrtc_git') + '/src.git' + '@' + '4da18e89bdee78df4478b66cdd0e6f6a38d61b4d', # commit position 21742
 
   'src/third_party/xdg-utils': {
       'url': Var('chromium_git') + '/chromium/deps/xdg-utils.git' + '@' + 'd80274d5869b17b8c9067a1022e4416ee7ed5e0d',
