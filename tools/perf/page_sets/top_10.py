@@ -98,7 +98,7 @@ class Top10PageSet(story.StorySet):
     #self.AddStory(Gmail(self))
 
     # productivity, top google properties
-    self.AddStory(GoogleCalendar(self))
+    #self.AddStory(GoogleCalendar(self))
 
     # #3 (Alexa global)
     self.AddStory(Youtube(self))

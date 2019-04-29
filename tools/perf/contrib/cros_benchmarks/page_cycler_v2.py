@@ -42,6 +42,24 @@ class PageCyclerV2Typical25(_PageCyclerV2):
         cache_temperatures=[
           cache_temperature.COLD, cache_temperature.WARM])
 
+"""
+Added by Luo Wu. 
+To test the top_10 using page_sets/top_10.py
+"""
+@benchmark.Owner(emails=['kouhei@chromium.org', 'ksakamoto@chromium.org'])
+class PageCyclerV2Top10(_PageCyclerV2):
+  """Page load time benchmark for a top 10 web pages.
+
+  Designed to represent typical, not highly optimized or highly popular web
+  sites. Runs against pages recorded in June, 2014.
+  """
+
+  @classmethod
+  def Name(cls):
+    return 'page_cycler_v2.top_10'
+
+  def CreateStorySet(self, options):
+    return page_sets.Top10PageSet()
 
 @benchmark.Owner(emails=['kouhei@chromium.org', 'ksakamoto@chromium.org'])
 class PageCyclerV2IntlArFaHe(_PageCyclerV2):
