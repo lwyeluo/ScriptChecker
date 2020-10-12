@@ -17,7 +17,7 @@ from telemetry.page import cache_temperature
 from telemetry.web_perf import timeline_based_measurement
 
 class _PageCyclerV2(perf_benchmark.PerfBenchmark):
-  options = {'pageset_repeat': 2}
+  options = {'pageset_repeat': 1}
 
   def CreateCoreTimelineBasedMeasurementOptions(self):
     tbm_options = timeline_based_measurement.Options()
@@ -60,6 +60,58 @@ class PageCyclerV2Top10(_PageCyclerV2):
 
   def CreateStorySet(self, options):
     return page_sets.Top10PageSet()
+
+
+@benchmark.Owner(emails=['kouhei@chromium.org', 'ksakamoto@chromium.org'])
+class PageCyclerV2Top10_0(_PageCyclerV2):
+  """Page load time benchmark for a top 10 web pages.
+
+  Designed to represent typical, not highly optimized or highly popular web
+  sites. Runs against pages recorded in June, 2014.
+  """
+
+  @classmethod
+  def Name(cls):
+    return 'page_cycler_v2.top_10_0'
+
+  def CreateStorySet(self, options):
+    return page_sets.Top10PageSet0()
+
+@benchmark.Owner(emails=['kouhei@chromium.org', 'ksakamoto@chromium.org'])
+class PageCyclerV2Top10_1(_PageCyclerV2):
+  """Page load time benchmark for a top 10 web pages.
+
+  Designed to represent typical, not highly optimized or highly popular web
+  sites. Runs against pages recorded in June, 2014.
+  """
+
+  @classmethod
+  def Name(cls):
+    return 'page_cycler_v2.top_10_1'
+
+  def CreateStorySet(self, options):
+    return page_sets.Top10PageSet1()
+
+
+"""
+Added by Luo Wu. 
+To test the static_top_25 using page_sets/static_top25_pages.py
+"""
+@benchmark.Owner(emails=['kouhei@chromium.org', 'ksakamoto@chromium.org'])
+class PageCyclerV2Top25(_PageCyclerV2):
+  """Page load time benchmark for a top 25 web pages.
+
+  Designed to represent typical, not highly optimized or highly popular web
+  sites. Runs against pages recorded in June, 2014.
+  """
+
+  @classmethod
+  def Name(cls):
+    return 'page_cycler_v2.top_25'
+
+  def CreateStorySet(self, options):
+    return page_sets.Top25PageSet()
+
 
 @benchmark.Owner(emails=['kouhei@chromium.org', 'ksakamoto@chromium.org'])
 class PageCyclerV2IntlArFaHe(_PageCyclerV2):

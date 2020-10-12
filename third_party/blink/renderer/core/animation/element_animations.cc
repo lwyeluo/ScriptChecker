@@ -125,6 +125,9 @@ void ElementAnimations::UpdateBaseComputedStyle(
     base_computed_style_ = nullptr;
     return;
   }
+  if (base_computed_style_ && computed_style)
+    if(*base_computed_style_ != *computed_style)
+      return;
 #if DCHECK_IS_ON()
   if (base_computed_style_ && computed_style)
     DCHECK(*base_computed_style_ == *computed_style);
