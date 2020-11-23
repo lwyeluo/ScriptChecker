@@ -47,6 +47,8 @@
 #include "services/service_manager/sandbox/sandbox.h"
 #include "third_party/icu/source/i18n/unicode/timezone.h"
 
+#include "base/scriptchecker/global.h"
+
 // See https://chromium.googlesource.com/chromium/src/+/master/docs/linux_zygote.md
 
 namespace content {
@@ -450,6 +452,10 @@ int Zygote::ForkWithRealPid(const std::string& process_type,
             sig, sandbox::NamespaceSandbox::SignalExitCode(sig));
       }
     }
+
+    // Added by Luo Wu
+    //      init the ScriptChecker
+    base::scriptchecker::initScriptChecker();
 
     // In the child process.
     write_pipe.reset();

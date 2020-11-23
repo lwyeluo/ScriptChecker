@@ -40,6 +40,8 @@
 #include "mojo/public/cpp/bindings/pipe_control_message_proxy.h"
 #include "mojo/public/cpp/bindings/sequence_local_sync_event_watcher.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace IPC {
 
 namespace {
@@ -840,6 +842,15 @@ class ChannelAssociatedGroupController
 
     // Sync messages should never make their way to this method.
     DCHECK(!message.has_flag(mojo::Message::kFlagIsSync));
+
+    /* Added by Luo Wu */
+    if(base::scriptchecker::g_script_checker &&
+            base::PlatformThread::CurrentId() == 1) {
+      // obtain the capability attached in IPC
+      std::string capability = "";
+      base::scriptchecker::g_script_checker->RecordIPCTask(capability);
+    }
+    /* Added End */
 
     bool result = false;
     {

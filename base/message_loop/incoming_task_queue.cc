@@ -13,6 +13,8 @@
 #include "base/time/time.h"
 #include "build/build_config.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace base {
 namespace internal {
 
@@ -328,6 +330,15 @@ bool IncomingTaskQueue::PostPendingTaskLockRequired(PendingTask* pending_task) {
   // tasks (to facilitate FIFO sorting when two tasks have the same
   // delayed_run_time value) and for identifying the task in about:tracing.
   pending_task->sequence_num = next_sequence_num_++;
+
+  /* Added by Luo Wu */
+  //  here we should not check base::PlatformThread::CurrentId, since it just
+  //   means which thread operates task queue
+  if(base::scriptchecker::g_script_checker && message_loop_->thread_id_ == 1) {
+    // enter SCRIPT_CHECK's task recorder
+    base::scriptchecker::g_script_checker->RecordNewTask(pending_task);
+  }
+  /* Added End */
 
   task_annotator_.DidQueueTask("MessageLoop::PostTask", *pending_task);
 

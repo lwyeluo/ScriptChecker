@@ -12,6 +12,8 @@
 #include "base/trace_event/trace_event.h"
 #include "third_party/blink/renderer/platform/scheduler/base/lazy_now.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 namespace scheduler {
 namespace internal {
@@ -135,6 +137,16 @@ void ThreadControllerImpl::RestoreDefaultTaskRunner() {
 }
 
 void ThreadControllerImpl::DidQueueTask(const base::PendingTask& pending_task) {
+  /* Added by Luo Wu */
+  //    try to update the capability with its parent task, i.e., the current task
+  if(base::scriptchecker::g_script_checker &&
+          message_loop_->GetThreadName() == "CrRendererMain") {
+    // we have to remove const
+    base::PendingTask* task = const_cast<base::PendingTask*>(&pending_task);
+    // enter SCRIPT_CHECK's task recorder
+    base::scriptchecker::g_script_checker->RecordNewTask(task);
+  }
+  /* Added End */
   task_annotator_.DidQueueTask("TaskQueueManager::PostTask", pending_task);
 }
 

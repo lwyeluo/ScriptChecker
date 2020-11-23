@@ -22,6 +22,8 @@
 #include "mojo/public/cpp/bindings/sync_handle_watcher.h"
 #include "mojo/public/cpp/system/wait.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace mojo {
 
 namespace {
@@ -438,6 +440,15 @@ bool Connector::ReadSingleMessage(MojoResult* read_result) {
     // This emits just full class name, and is inferior to mojo tracing.
     TRACE_EVENT0("mojom", heap_profiler_tag_);
 #endif
+
+    /* Added by Luo Wu */
+    if(base::scriptchecker::g_script_checker &&
+            base::PlatformThread::CurrentId() == 1) {
+      // obtain the capability attached in IPC
+      std::string capability = "";
+      base::scriptchecker::g_script_checker->RecordIPCTask(capability);
+    }
+    /* Added End */
 
     receiver_result =
         incoming_receiver_ && incoming_receiver_->Accept(&message);

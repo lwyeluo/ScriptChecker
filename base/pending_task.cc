@@ -6,6 +6,9 @@
 
 #include "base/message_loop/message_loop.h"
 
+#include "base/scriptchecker/global.h"
+#include "base/scriptchecker/task_type.h"
+
 namespace base {
 
 PendingTask::PendingTask(const Location& posted_from,
@@ -37,6 +40,28 @@ bool PendingTask::operator<(const PendingTask& other) const {
   // If the times happen to match, then we use the sequence number to decide.
   // Compare the difference to support integer roll-over.
   return (sequence_num - other.sequence_num) > 0;
+}
+
+void PendingTask::SetCapability(base::scriptchecker::Capability* in_capability) {
+  capability.SetFrom(in_capability);
+  has_set_capability = true;
+}
+
+void PendingTask::SetCapabilityFromIPCMessage(std::string in_capabilty_attached_in_ipc) {
+  capability.SetFromIPCMessage(in_capabilty_attached_in_ipc);
+  has_set_capability = true;
+  task_type = base::scriptchecker::TaskType::IPC_TASK;
+}
+
+void PendingTask::SetCapabilityFromJSString(std::string in_capabilty_specified_in_js_str) {
+  capability.SetFromJSString(in_capabilty_specified_in_js_str);
+  has_set_capability = true;
+}
+
+bool PendingTask::IsTaskRestricted() {
+  if(!has_set_capability)
+    return false;
+  return capability.IsRestricted();
 }
 
 }  // namespace base

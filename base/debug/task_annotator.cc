@@ -13,6 +13,8 @@
 #include "base/threading/thread_local.h"
 #include "base/trace_event/trace_event.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace base {
 namespace debug {
 
@@ -98,6 +100,14 @@ void TaskAnnotator::RunTask(const char* queue_function,
 
   if (g_task_annotator_observer)
     g_task_annotator_observer->BeforeRunTask(pending_task);
+
+  /* Added by Luo Wu */
+  // here is the task scheduler
+  if(base::scriptchecker::g_script_checker &&
+          base::PlatformThread::CurrentId() == 1) {
+    base::scriptchecker::g_script_checker->UpdateCurrentTask(pending_task);
+  }
+  /* Added End */
 
   std::move(pending_task->task).Run();
 

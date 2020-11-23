@@ -149,6 +149,8 @@ if package_exists realpath; then
 fi
 
 # Packages needed for development
+# Modified by Luo Wu
+# 	Remove libgbm-dev libgtk-3-dev... Because I cannot run graphics in ubuntu 16.04 (atop vmware) after installing them...
 dev_list="\
   bison
   cdbs
@@ -177,12 +179,10 @@ dev_list="\
   libdrm-dev
   libelf-dev
   libffi-dev
-  libgbm-dev
   libglib2.0-dev
   libglu1-mesa-dev
   libgnome-keyring-dev
   libgtk2.0-dev
-  libgtk-3-dev
   libkrb5-dev
   libnspr4-dev
   libnss3-dev
@@ -425,6 +425,8 @@ case $distro_codename in
 esac
 
 # Packages to build NaCl, its toolchains, and its ports.
+# Modified by Luo Wu
+# 	Remove libgbm-dev libgtk-3-0:i386... Because I cannot run graphics in ubuntu 16.04 (atop vmware) after installing them...
 naclports_list="ant autoconf bison cmake gawk intltool xutils-dev xsltproc"
 nacl_list="\
   g++-mingw-w64-i686
@@ -436,7 +438,6 @@ nacl_list="\
   libglib2.0-0:i386
   libgpm2:i386
   libgtk2.0-0:i386
-  libgtk-3-0:i386
   libncurses5:i386
   lib32ncurses5-dev
   libnss3:i386
@@ -641,6 +642,7 @@ echo "Finding missing packages..."
 # Intentionally leaving $packages unquoted so it's more readable.
 echo "Packages required: " $packages
 echo
+
 new_list_cmd="sudo apt-get install --reinstall $(echo $packages)"
 if new_list="$(yes n | LANGUAGE=en LANG=C $new_list_cmd)"; then
   # We probably never hit this following line.

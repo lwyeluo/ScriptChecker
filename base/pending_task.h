@@ -13,6 +13,8 @@
 #include "base/location.h"
 #include "base/time/time.h"
 
+#include "base/scriptchecker/capability.h"
+
 namespace base {
 
 enum class Nestable {
@@ -56,6 +58,18 @@ struct BASE_EXPORT PendingTask {
 
   // Needs high resolution timers.
   bool is_high_res = false;
+
+  /* Added by Luo Wu */
+  base::scriptchecker::Capability capability;
+  bool has_set_capability = false;
+  // maintain the task's type, referring to task_type.h in ScriptChecker
+  //   by default, the task is a NORMAL_TASK
+  uint64_t task_type = 0;
+  void SetCapability(base::scriptchecker::Capability* in_capability);
+  void SetCapabilityFromIPCMessage(std::string in_capabilty_attached_in_ipc);
+  void SetCapabilityFromJSString(std::string in_capabilty_specified_in_js_str);
+  bool IsTaskRestricted();
+  /* Added End */
 };
 
 using TaskQueue = base::queue<PendingTask>;
