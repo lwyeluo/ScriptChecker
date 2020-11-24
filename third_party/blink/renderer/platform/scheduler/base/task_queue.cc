@@ -35,19 +35,31 @@ TaskQueue::Task::Task(TaskQueue::PostedTask task,
     : PendingTask(task.posted_from,
                   std::move(task.callback),
                   desired_run_time,
-                  task.nestable),
+                  task.nestable
+                  /*Added by Luo Wu*/ ,
+                  task.capability,
+                  task.task_type_in_scriptchecker
+                  /* Added End */),
       task_type_(task.task_type) {}
 
 TaskQueue::PostedTask::PostedTask(base::OnceClosure callback,
                                   base::Location posted_from,
                                   base::TimeDelta delay,
                                   base::Nestable nestable,
-                                  int task_type)
+                                  int task_type
+                                  /*Added by Luo Wu*/ ,
+                                  base::scriptchecker::Capability* capability,
+                                  int task_type_in_scriptchecker  /* see base::scriptchecker::TaskType */
+                                  /* Added End */)
     : callback(std::move(callback)),
       posted_from(posted_from),
       delay(delay),
       nestable(nestable),
-      task_type(task_type) {}
+      task_type(task_type)
+      /*Added by Luo Wu*/ ,
+      capability(capability),
+      task_type_in_scriptchecker(task_type_in_scriptchecker)
+      /* Added End */ {}
 
 void TaskQueue::ShutdownTaskQueue() {
   DCHECK_CALLED_ON_VALID_THREAD(main_thread_checker_);
@@ -72,7 +84,11 @@ bool TaskQueue::RunsTasksInCurrentSequence() const {
 
 bool TaskQueue::PostDelayedTask(const base::Location& from_here,
                                 base::OnceClosure task,
-                                base::TimeDelta delay) {
+                                base::TimeDelta delay
+                                /*Added by Luo Wu*/ ,
+                                base::scriptchecker::Capability* capability,
+                                int task_type_in_scriptchecker
+                                /* Added End */) {
   internal::TaskQueueImpl::PostTaskResult result;
   {
     auto lock = AcquireImplReadLockIfNeeded();

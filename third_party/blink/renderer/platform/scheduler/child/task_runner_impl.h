@@ -33,7 +33,12 @@ class PLATFORM_EXPORT TaskRunnerImpl : public base::SingleThreadTaskRunner {
  protected:
   bool PostDelayedTask(const base::Location&,
                        base::OnceClosure,
-                       base::TimeDelta) override;
+                       base::TimeDelta
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */
+          ) override;
   bool PostNonNestableDelayedTask(const base::Location&,
                                   base::OnceClosure,
                                   base::TimeDelta) override;

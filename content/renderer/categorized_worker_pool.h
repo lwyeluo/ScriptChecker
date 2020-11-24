@@ -37,7 +37,11 @@ class CONTENT_EXPORT CategorizedWorkerPool : public base::TaskRunner,
   // Overridden from base::TaskRunner:
   bool PostDelayedTask(const base::Location& from_here,
                        base::OnceClosure task,
-                       base::TimeDelta delay) override;
+                       base::TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override;
   bool RunsTasksInCurrentSequence() const override;
 
   // Overridden from cc::TaskGraphRunner:

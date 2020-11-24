@@ -56,7 +56,11 @@ class SchedulerParallelTaskRunner : public TaskRunner {
   // TaskRunner:
   bool PostDelayedTask(const Location& from_here,
                        OnceClosure closure,
-                       TimeDelta delay) override {
+                       TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override {
     if (!g_active_pools_count)
       return false;
 
@@ -94,7 +98,11 @@ class SchedulerSequencedTaskRunner : public SequencedTaskRunner {
   // SequencedTaskRunner:
   bool PostDelayedTask(const Location& from_here,
                        OnceClosure closure,
-                       TimeDelta delay) override {
+                       TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override {
     if (!g_active_pools_count)
       return false;
 

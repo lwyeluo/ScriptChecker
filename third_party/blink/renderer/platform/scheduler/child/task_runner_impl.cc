@@ -33,10 +33,17 @@ TaskRunnerImpl::~TaskRunnerImpl() = default;
 
 bool TaskRunnerImpl::PostDelayedTask(const base::Location& location,
                                      base::OnceClosure task,
-                                     base::TimeDelta delay) {
+                                     base::TimeDelta delay
+                                     /*Added by Luo Wu*/ ,
+                                     base::scriptchecker::Capability* capability,
+                                     int task_type_in_scriptchecker  /* see base::scriptchecker::TaskType */
+                                     /* Added End */) {
   return task_queue_->PostTaskWithMetadata(TaskQueue::PostedTask(
       std::move(task), location, delay, base::Nestable::kNestable,
-      static_cast<int>(task_type_)));
+      static_cast<int>(task_type_)
+      /* Added by Luo Wu */ ,
+      capability, task_type_in_scriptchecker
+      /* Added End */));
 }
 
 bool TaskRunnerImpl::PostNonNestableDelayedTask(const base::Location& location,

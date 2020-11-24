@@ -36,7 +36,11 @@ DeferredSequencedTaskRunner::DeferredSequencedTaskRunner()
 
 bool DeferredSequencedTaskRunner::PostDelayedTask(const Location& from_here,
                                                   OnceClosure task,
-                                                  TimeDelta delay) {
+                                                  TimeDelta delay
+                                                  /*Added by Luo Wu*/ ,
+                                                  base::scriptchecker::Capability* capability,
+                                                  int task_type_in_scriptchecker
+                                                  /* Added End */) {
   AutoLock lock(lock_);
   if (started_) {
     DCHECK(deferred_tasks_queue_.empty());

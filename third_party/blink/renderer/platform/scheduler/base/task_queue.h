@@ -61,13 +61,21 @@ class PLATFORM_EXPORT TaskQueue : public base::SingleThreadTaskRunner {
                base::Location posted_from,
                base::TimeDelta delay = base::TimeDelta(),
                base::Nestable nestable = base::Nestable::kNestable,
-               int task_type = 0);
+               int task_type = 0
+               /*Added by Luo Wu*/ ,
+               base::scriptchecker::Capability* capability = nullptr,
+               int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+               /* Added End */);
 
     base::OnceClosure callback;
     base::Location posted_from;
     base::TimeDelta delay;
     base::Nestable nestable;
     int task_type;
+    /* Added by Luo Wu */
+    base::scriptchecker::Capability* capability;
+    int task_type_in_scriptchecker;
+    /* Added End */
   };
 
   // Unregisters the task queue after which no tasks posted to it will run and
@@ -254,7 +262,11 @@ class PLATFORM_EXPORT TaskQueue : public base::SingleThreadTaskRunner {
   bool RunsTasksInCurrentSequence() const override;
   bool PostDelayedTask(const base::Location& from_here,
                        base::OnceClosure task,
-                       base::TimeDelta delay) override;
+                       base::TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override;
   bool PostNonNestableDelayedTask(const base::Location& from_here,
                                   base::OnceClosure task,
                                   base::TimeDelta delay) override;

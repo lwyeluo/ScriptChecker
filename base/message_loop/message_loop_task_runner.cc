@@ -26,7 +26,11 @@ void MessageLoopTaskRunner::BindToCurrentThread() {
 
 bool MessageLoopTaskRunner::PostDelayedTask(const Location& from_here,
                                             OnceClosure task,
-                                            base::TimeDelta delay) {
+                                            base::TimeDelta delay
+                                            /*Added by Luo Wu*/ ,
+                                            base::scriptchecker::Capability* capability,
+                                            int task_type_in_scriptchecker
+                                            /* Added End */) {
   DCHECK(!task.is_null()) << from_here.ToString();
   return incoming_queue_->AddToIncomingQueue(from_here, std::move(task), delay,
                                              Nestable::kNestable);

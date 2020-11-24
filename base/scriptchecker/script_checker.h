@@ -22,9 +22,17 @@ class BASE_EXPORT ScriptChecker {
     // Task Recorder
     void RecordNewTask(PendingTask* task);
     void RecordIPCTask(std::string capability_attached_in_ipc_message);
+    void RecordTIMERTask(std::string capability_from_js_string, bool is_restricted);
 
     bool IsCurrentTaskWithRestricted();
     Capability* GetCurrentTaskCapability();
+
+    // update capability information with predefined rules
+    bool MatchWithCapabilityJSRules(std::string in_capability_js_str,
+                                    uint64_t& out_capability_bit_map,
+                                    std::map<std::string, bool>& out_capability_js_wl);
+    std::string ToStringFromCapabilityBitmap(uint64_t capability_bitmap);
+    CapabilityDefinition* GetCapabilityJSStringRules();
 
   private:
     // maintain the current task

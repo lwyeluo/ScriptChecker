@@ -28,7 +28,11 @@ struct BASE_EXPORT PendingTask {
   PendingTask(const Location& posted_from,
               OnceClosure task,
               TimeTicks delayed_run_time = TimeTicks(),
-              Nestable nestable = Nestable::kNestable);
+              Nestable nestable = Nestable::kNestable
+              /*Added by Luo Wu*/ ,
+              base::scriptchecker::Capability* capability = nullptr,
+              int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+              /* Added End */);
   PendingTask(PendingTask&& other);
   ~PendingTask();
 
@@ -60,12 +64,14 @@ struct BASE_EXPORT PendingTask {
   bool is_high_res = false;
 
   /* Added by Luo Wu */
-  base::scriptchecker::Capability capability;
+  base::scriptchecker::Capability capability_;
   bool has_set_capability = false;
   // maintain the task's type, referring to task_type.h in ScriptChecker
   //   by default, the task is a NORMAL_TASK
-  uint64_t task_type = 0;
+  uint64_t task_type_in_scriptchecker_ = 0;
   void SetCapability(base::scriptchecker::Capability* in_capability);
+  // the capability should be an intersection between the assigned and the current task's
+  void NarrowDownCapability(base::scriptchecker::Capability* current_task_capability);
   void SetCapabilityFromIPCMessage(std::string in_capabilty_attached_in_ipc);
   void SetCapabilityFromJSString(std::string in_capabilty_specified_in_js_str);
   bool IsTaskRestricted();

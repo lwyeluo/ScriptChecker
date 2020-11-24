@@ -33,6 +33,8 @@
 #include "third_party/blink/renderer/platform/instrumentation/tracing/trace_event.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 static const TimeDelta kMaxIntervalForUserGestureForwarding =
@@ -58,9 +60,13 @@ static inline bool ShouldForwardUserGesture(TimeDelta interval,
 int DOMTimer::Install(ExecutionContext* context,
                       ScheduledAction* action,
                       TimeDelta timeout,
-                      bool single_shot) {
+                      bool single_shot,
+                      /* Added by Luo Wu */
+                      const String& capability) {
   int timeout_id = context->Timers()->InstallNewTimeout(context, action,
-                                                        timeout, single_shot);
+                                                        timeout, single_shot,
+                                                        /*Added by Luo Wu*/
+                                                        capability.Ascii().data());
   return timeout_id;
 }
 
@@ -78,7 +84,9 @@ DOMTimer::DOMTimer(ExecutionContext* context,
                    ScheduledAction* action,
                    TimeDelta interval,
                    bool single_shot,
-                   int timeout_id)
+                   int timeout_id,
+                   /* Added by Luo Wu */
+                   std::string capability)
     : PausableTimer(context, TaskType::kJavascriptTimer),
       timeout_id_(timeout_id),
       nesting_level_(context->Timers()->TimerNestingLevel() + 1),
@@ -90,15 +98,29 @@ DOMTimer::DOMTimer(ExecutionContext* context,
     user_gesture_token_ = UserGestureIndicator::CurrentToken();
   }
 
+  /* Added by Luo Wu */
+  capability_ = nullptr;
+  if(base::scriptchecker::g_script_checker &&
+          capability != "" &&
+          base::PlatformThread::CurrentId() == 1) {
+    // record a new timer
+    LOG(INFO) << base::scriptchecker::g_name << "DOMTimer::DOMTimer. [cap] = "
+              << capability;
+    capability_ = new base::scriptchecker::Capability(capability);
+  }
+  /* Added End */
+
   TimeDelta interval_milliseconds =
       std::max(TimeDelta::FromMilliseconds(1), interval);
   if (interval_milliseconds < kMinimumInterval &&
       nesting_level_ >= kMaxTimerNestingLevel)
     interval_milliseconds = kMinimumInterval;
   if (single_shot)
-    StartOneShot(interval_milliseconds, FROM_HERE);
+    StartOneShot(interval_milliseconds, FROM_HERE
+                 /* Added by Luo Wu */, capability_ /* Added End */);
   else
-    StartRepeating(interval_milliseconds, FROM_HERE);
+    StartRepeating(interval_milliseconds, FROM_HERE
+                   /* Added by Luo Wu */, capability_ /* Added End */);
 
   PauseIfNeeded();
   TRACE_EVENT_INSTANT1("devtools.timeline", "TimerInstall",

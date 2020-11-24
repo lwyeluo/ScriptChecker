@@ -34,6 +34,8 @@
 #include "third_party/blink/renderer/core/frame/pausable_timer.h"
 #include "third_party/blink/renderer/platform/heap/handle.h"
 
+#include "base/scriptchecker/capability.h"
+
 namespace blink {
 
 class ExecutionContext;
@@ -48,7 +50,9 @@ class CORE_EXPORT DOMTimer final : public GarbageCollectedFinalized<DOMTimer>,
   static int Install(ExecutionContext*,
                      ScheduledAction*,
                      TimeDelta timeout,
-                     bool single_shot);
+                     bool single_shot,
+                     /* Added by Luo Wu */
+                     const String& capability = "");
   static void RemoveByID(ExecutionContext*, int timeout_id);
 
   ~DOMTimer() override;
@@ -72,15 +76,20 @@ class CORE_EXPORT DOMTimer final : public GarbageCollectedFinalized<DOMTimer>,
                           ScheduledAction* action,
                           TimeDelta timeout,
                           bool single_shot,
-                          int timeout_id) {
-    return new DOMTimer(context, action, timeout, single_shot, timeout_id);
+                          int timeout_id,
+                          /* Added by Luo Wu */
+                          std::string capability = "") {
+    return new DOMTimer(context, action, timeout, single_shot, timeout_id,
+                        capability /* Added by Luo Wu*/);
   }
 
   DOMTimer(ExecutionContext*,
            ScheduledAction*,
            TimeDelta interval,
            bool single_shot,
-           int timeout_id);
+           int timeout_id,
+           /* Added by Luo Wu */
+           std::string capability = "");
   void Fired() override;
 
   scoped_refptr<base::SingleThreadTaskRunner> TimerTaskRunner() const override;
@@ -89,6 +98,9 @@ class CORE_EXPORT DOMTimer final : public GarbageCollectedFinalized<DOMTimer>,
   int nesting_level_;
   Member<ScheduledAction> action_;
   scoped_refptr<UserGestureToken> user_gesture_token_;
+  /* Added by Luo Wu */
+  base::scriptchecker::Capability* capability_;
+  /* Added End */
 };
 
 }  // namespace blink

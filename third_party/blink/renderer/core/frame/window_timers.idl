@@ -38,6 +38,8 @@
     // Needs spec update and better union support: http://crbug.com/240176
     [CallWith=ScriptState, RuntimeCallStatsCounter=WindowSetTimeout] long setTimeout(Function handler, optional long timeout = 0, any... arguments);
     [CallWith=ScriptState] long setTimeout(DOMString handler, optional long timeout = 0, any... arguments);
+    [CallWith=ScriptState, RuntimeCallStatsCounter=WindowSetTimeout] long setTimeoutWR(Function handler, DOMString capability, optional long timeout = 0, any... arguments);
+    [CallWith=ScriptState] long setTimeoutWR(DOMString handler, DOMString capability, optional long timeout = 0, any... arguments);
     void clearTimeout(optional long handle = 0);
     [CallWith=ScriptState] long setInterval(Function handler, optional long timeout = 0, any... arguments);
     [CallWith=ScriptState] long setInterval(DOMString handler, optional long timeout = 0, any... arguments);

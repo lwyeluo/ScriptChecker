@@ -14,8 +14,7 @@ Capability::Capability() {
   is_restricted_ = false;
 }
 
-Capability::Capability(std::string js_str_capability) :
-    capability_(js_str_capability) {
+Capability::Capability(std::string js_str_capability) {
   LoadJSStringToCapability(js_str_capability);
 }
 
@@ -42,12 +41,19 @@ Capability& Capability::operator=(Capability&& other) {
 }
 
 void Capability::LoadJSStringToCapability(std::string js_str_capability) {
-  capability_ = js_str_capability;
   if(js_str_capability != "") {
-    // TODO
-    is_restricted_ = true;
-    return;
+    bool is_success = g_script_checker->MatchWithCapabilityJSRules(
+                js_str_capability, capability_bit_map_, capability_js_wl);
+
+    if(is_success) {
+      LOG(INFO) << g_name << "after Capability::LoadJSStringToCapability. "
+                << "Capability is " << ToJSString();
+      capability_ = js_str_capability;
+      is_restricted_ = true;
+      return;
+    }
   }
+  capability_ = "";
   is_restricted_ = false;
 }
 
@@ -68,6 +74,19 @@ void Capability::SetFrom(Capability *capability) {
     capability_js_wl.clear();
     capability_js_wl.insert(capability->capability_js_wl.begin(),
                             capability->capability_js_wl.end());
+  }
+}
+
+void Capability::NarrowDownFrom(Capability* capability) {
+  if(!capability)
+    return;
+  if(!is_restricted_)
+    SetFrom(capability);
+
+  capability_bit_map_ |= capability->capability_bit_map_;
+  for(auto iter = capability_js_wl.begin(); iter != capability_js_wl.end(); iter ++) {
+    if(!capability->capability_js_wl.count(iter->first))
+      capability_js_wl.erase(iter);
   }
 }
 
@@ -108,8 +127,20 @@ std::string Capability::ToJSString() {
     return "";
   if(capability_ != "")
     return capability_;
-  // TODO
-  return "TODO-JS";
+
+  std::string output = g_script_checker->
+          ToStringFromCapabilityBitmap(capability_bit_map_);
+  if(capability_js_wl.size() > 0)
+    output = output + CapabilityDefinition::cap_str_js_wl
+            + CapabilityDefinition::cap_str_js_wl_key_value_sep_sysmbol;
+  for(auto iter = capability_js_wl.begin();
+      iter != capability_js_wl.end(); iter ++) {
+    output += iter->first;
+    output += CapabilityDefinition::cap_str_js_wl_value_sep_sysmbol;
+  }
+  capability_ = output;
+
+  return output;
 }
 
 std::string Capability::ToString() {

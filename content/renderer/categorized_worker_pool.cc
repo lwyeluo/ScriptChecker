@@ -54,7 +54,11 @@ class CategorizedWorkerPool::CategorizedWorkerPoolSequencedTaskRunner
   // Overridden from base::TaskRunner:
   bool PostDelayedTask(const base::Location& from_here,
                        base::OnceClosure task,
-                       base::TimeDelta delay) override {
+                       base::TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override {
     return PostNonNestableDelayedTask(from_here, std::move(task), delay);
   }
   bool RunsTasksInCurrentSequence() const override { return true; }
@@ -189,7 +193,11 @@ void CategorizedWorkerPool::Shutdown() {
 // Overridden from base::TaskRunner:
 bool CategorizedWorkerPool::PostDelayedTask(const base::Location& from_here,
                                             base::OnceClosure task,
-                                            base::TimeDelta delay) {
+                                            base::TimeDelta delay
+                                            /*Added by Luo Wu*/ ,
+                                            base::scriptchecker::Capability* capability,
+                                            int task_type_in_scriptchecker
+                                            /* Added End */) {
   base::AutoLock lock(lock_);
 
   // Remove completed tasks.

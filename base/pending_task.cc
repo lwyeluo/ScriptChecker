@@ -14,11 +14,22 @@ namespace base {
 PendingTask::PendingTask(const Location& posted_from,
                          OnceClosure task,
                          TimeTicks delayed_run_time,
-                         Nestable nestable)
+                         Nestable nestable
+                         /*Added by Luo Wu*/ ,
+                         base::scriptchecker::Capability* capability,
+                         int task_type_in_scriptchecker
+                         /* Added End */)
     : task(std::move(task)),
       posted_from(posted_from),
       delayed_run_time(delayed_run_time),
-      nestable(nestable) {}
+      nestable(nestable) {
+    /* Added by Luo Wu */
+    if(capability) {
+      SetCapability(capability);
+      task_type_in_scriptchecker_ = task_type_in_scriptchecker;
+    }
+    /* End */
+}
 
 PendingTask::PendingTask(PendingTask&& other) = default;
 
@@ -43,25 +54,30 @@ bool PendingTask::operator<(const PendingTask& other) const {
 }
 
 void PendingTask::SetCapability(base::scriptchecker::Capability* in_capability) {
-  capability.SetFrom(in_capability);
+  capability_.SetFrom(in_capability);
+  has_set_capability = true;
+}
+
+void PendingTask::NarrowDownCapability(base::scriptchecker::Capability* current_task_capability) {
+  capability_.NarrowDownFrom(current_task_capability);
   has_set_capability = true;
 }
 
 void PendingTask::SetCapabilityFromIPCMessage(std::string in_capabilty_attached_in_ipc) {
-  capability.SetFromIPCMessage(in_capabilty_attached_in_ipc);
+  capability_.SetFromIPCMessage(in_capabilty_attached_in_ipc);
   has_set_capability = true;
-  task_type = base::scriptchecker::TaskType::IPC_TASK;
+  task_type_in_scriptchecker_ = base::scriptchecker::TaskType::IPC_TASK;
 }
 
 void PendingTask::SetCapabilityFromJSString(std::string in_capabilty_specified_in_js_str) {
-  capability.SetFromJSString(in_capabilty_specified_in_js_str);
+  capability_.SetFromJSString(in_capabilty_specified_in_js_str);
   has_set_capability = true;
 }
 
 bool PendingTask::IsTaskRestricted() {
   if(!has_set_capability)
     return false;
-  return capability.IsRestricted();
+  return capability_.IsRestricted();
 }
 
 }  // namespace base

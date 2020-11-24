@@ -33,7 +33,9 @@ class DOMTimerCoordinator {
   int InstallNewTimeout(ExecutionContext*,
                         ScheduledAction*,
                         TimeDelta timeout,
-                        bool single_shot);
+                        bool single_shot,
+                        /* Added by Luo Wu */
+                        std::string capability = "");
 
   // Removes and disposes the timer with the specified ID, if any. This may
   // destroy the timer.

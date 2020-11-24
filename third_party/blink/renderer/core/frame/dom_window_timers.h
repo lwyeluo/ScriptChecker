@@ -53,6 +53,21 @@ int setTimeout(ScriptState*,
                const String& handler,
                int timeout,
                const Vector<ScriptValue>&);
+/* Added by Luo Wu */
+int setTimeoutWR(ScriptState*,
+                 EventTarget&,
+                 const ScriptValue& handler,
+                 const String& capability,
+                 int timeout,
+                 const Vector<ScriptValue>& arguments);
+int setTimeoutWR(ScriptState*,
+                 EventTarget&,
+                 const String& handler,
+                 const String& capability,
+                 int timeout,
+                 const Vector<ScriptValue>&);
+String getCurrentTaskPermission(ScriptState*, EventTarget&);
+/* End */
 int setInterval(ScriptState*,
                 EventTarget&,
                 const ScriptValue& handler,

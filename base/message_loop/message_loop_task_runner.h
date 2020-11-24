@@ -33,7 +33,11 @@ class BASE_EXPORT MessageLoopTaskRunner : public SingleThreadTaskRunner {
   // SingleThreadTaskRunner implementation
   bool PostDelayedTask(const Location& from_here,
                        OnceClosure task,
-                       TimeDelta delay) override;
+                       TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override;
   bool PostNonNestableDelayedTask(const Location& from_here,
                                   OnceClosure task,
                                   TimeDelta delay) override;

@@ -35,7 +35,11 @@ class CONTENT_EXPORT DOMStorageTaskRunner
   // post shutdown-blocking tasks on the primary sequence.
   bool PostDelayedTask(const base::Location& from_here,
                        base::OnceClosure task,
-                       base::TimeDelta delay) override = 0;
+                       base::TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override = 0;
 
   // Posts a shutdown blocking task to |sequence_id|.
   virtual bool PostShutdownBlockingTask(const base::Location& from_here,
@@ -66,7 +70,11 @@ class CONTENT_EXPORT DOMStorageWorkerPoolTaskRunner :
 
   bool PostDelayedTask(const base::Location& from_here,
                        base::OnceClosure task,
-                       base::TimeDelta delay) override;
+                       base::TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override;
 
   bool PostShutdownBlockingTask(const base::Location& from_here,
                                 SequenceID sequence_id,
@@ -103,7 +111,11 @@ class CONTENT_EXPORT MockDOMStorageTaskRunner :
 
   bool PostDelayedTask(const base::Location& from_here,
                        base::OnceClosure task,
-                       base::TimeDelta delay) override;
+                       base::TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override;
 
   bool PostShutdownBlockingTask(const base::Location& from_here,
                                 SequenceID sequence_id,

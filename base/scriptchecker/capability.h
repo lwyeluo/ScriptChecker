@@ -23,6 +23,10 @@ class BASE_EXPORT Capability {
     void SetFrom(Capability* capability);
     void SetFromIPCMessage(std::string capability_atttached_in_ipc);
     void SetFromJSString(std::string capability_atttached_in_js_str);
+
+    // to be intersected with the given capability
+    void NarrowDownFrom(Capability* capability);
+
     // load JS's specified capalitity
     void LoadJSStringToCapability(std::string js_str_capability);
     // load IPC message's specified capalitity

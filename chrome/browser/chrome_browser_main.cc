@@ -772,7 +772,11 @@ class ChromeBrowserMainParts::DeferringTaskRunner
   // base::SequencedTaskRunner:
   bool PostDelayedTask(const base::Location& from_here,
                        base::OnceClosure task,
-                       base::TimeDelta delay) override {
+                       base::TimeDelta delay
+                       /*Added by Luo Wu*/ ,
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                       /* Added End */) override {
     base::AutoLock lock(lock_);
     switch (state_) {
       case State::kInstalled:

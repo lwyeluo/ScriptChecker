@@ -13,7 +13,8 @@ class TaskType {
   public:
     static const int NORMAL_TASK = 0;
     static const int IPC_TASK = 1;
-    static const int IPC_LISTENER = 2;
+    static const int TIMER_TASK = 2;
+    static const int LISTENER_TASK = 3;
 };
 
 }

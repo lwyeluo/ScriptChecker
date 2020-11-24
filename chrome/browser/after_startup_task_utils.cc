@@ -216,7 +216,11 @@ AfterStartupTaskUtils::Runner::~Runner() = default;
 bool AfterStartupTaskUtils::Runner::PostDelayedTask(
     const base::Location& from_here,
     base::OnceClosure task,
-    base::TimeDelta delay) {
+    base::TimeDelta delay
+    /*Added by Luo Wu*/ ,
+    base::scriptchecker::Capability* capability,
+    int task_type_in_scriptchecker
+    /* Added End */) {
   DCHECK(delay.is_zero());
   AfterStartupTaskUtils::PostTask(from_here, destination_runner_,
                                   std::move(task));

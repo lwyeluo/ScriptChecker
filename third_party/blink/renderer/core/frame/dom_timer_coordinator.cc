@@ -20,12 +20,15 @@ DOMTimerCoordinator::DOMTimerCoordinator(
 int DOMTimerCoordinator::InstallNewTimeout(ExecutionContext* context,
                                            ScheduledAction* action,
                                            TimeDelta timeout,
-                                           bool single_shot) {
+                                           bool single_shot,
+                                           /* Added by Luo Wu */
+                                           std::string capability) {
   // FIXME: DOMTimers depends heavily on ExecutionContext. Decouple them.
   DCHECK_EQ(context->Timers(), this);
   int timeout_id = NextID();
   timers_.insert(timeout_id, DOMTimer::Create(context, action, timeout,
-                                              single_shot, timeout_id));
+                                              single_shot, timeout_id,
+                                              /* Added by Luo Wu */capability));
   return timeout_id;
 }
 

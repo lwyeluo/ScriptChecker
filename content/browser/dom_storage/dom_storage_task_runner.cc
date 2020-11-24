@@ -31,7 +31,11 @@ bool DOMStorageWorkerPoolTaskRunner::RunsTasksInCurrentSequence() const {
 bool DOMStorageWorkerPoolTaskRunner::PostDelayedTask(
     const base::Location& from_here,
     base::OnceClosure task,
-    base::TimeDelta delay) {
+    base::TimeDelta delay
+    /*Added by Luo Wu*/ ,
+    base::scriptchecker::Capability* capability,
+    int task_type_in_scriptchecker
+    /* Added End */) {
   return primary_sequence_->PostDelayedTask(from_here, std::move(task), delay);
 }
 
@@ -73,7 +77,11 @@ bool MockDOMStorageTaskRunner::RunsTasksInCurrentSequence() const {
 
 bool MockDOMStorageTaskRunner::PostDelayedTask(const base::Location& from_here,
                                                base::OnceClosure task,
-                                               base::TimeDelta delay) {
+                                               base::TimeDelta delay
+                                               /*Added by Luo Wu*/ ,
+                                               base::scriptchecker::Capability* capability,
+                                               int task_type_in_scriptchecker
+                                               /* Added End */) {
   return task_runner_->PostTask(from_here, std::move(task));
 }
 

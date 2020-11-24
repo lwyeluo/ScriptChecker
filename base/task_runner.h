@@ -13,6 +13,8 @@
 #include "base/memory/ref_counted.h"
 #include "base/time/time.h"
 
+#include "base/scriptchecker/capability.h"
+
 namespace base {
 
 struct TaskRunnerTraits;
@@ -68,7 +70,12 @@ class BASE_EXPORT TaskRunner
   // clock time, to implement |delay|.
   virtual bool PostDelayedTask(const Location& from_here,
                                OnceClosure task,
-                               base::TimeDelta delay) = 0;
+                               base::TimeDelta delay
+                               /*Added by Luo Wu*/ ,
+                               base::scriptchecker::Capability* capability = nullptr,
+                               int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                               /* Added End */
+          ) = 0;
 
   // Returns true iff tasks posted to this TaskRunner are sequenced
   // with this call.
