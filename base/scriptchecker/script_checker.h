@@ -27,12 +27,20 @@ class BASE_EXPORT ScriptChecker {
     bool IsCurrentTaskWithRestricted();
     Capability* GetCurrentTaskCapability();
 
+    // Security Monitor
+    bool DisallowedToAccessCookie();
+    bool DisallowedToAccessNetwork();
+    bool DisallowedToAccessDOM(bool is_ele_has_task_cap_attr);
+
     // update capability information with predefined rules
     bool MatchWithCapabilityJSRules(std::string in_capability_js_str,
                                     uint64_t& out_capability_bit_map,
                                     std::map<std::string, bool>& out_capability_js_wl);
-    std::string ToStringFromCapabilityBitmap(uint64_t capability_bitmap);
+
+    std::string ToJSStringFromCapabilityBitmap(uint64_t capability_bitmap);
     CapabilityDefinition* GetCapabilityJSStringRules();
+
+    std::string GetCurrentTaskCapabilityAsJSString();
 
   private:
     // maintain the current task

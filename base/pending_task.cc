@@ -24,10 +24,10 @@ PendingTask::PendingTask(const Location& posted_from,
       delayed_run_time(delayed_run_time),
       nestable(nestable) {
     /* Added by Luo Wu */
-    if(capability) {
+    capability_ = nullptr;
+    task_type_in_scriptchecker_ = task_type_in_scriptchecker;
+    if(capability && capability->IsRestricted())
       SetCapability(capability);
-      task_type_in_scriptchecker_ = task_type_in_scriptchecker;
-    }
     /* End */
 }
 
@@ -54,30 +54,44 @@ bool PendingTask::operator<(const PendingTask& other) const {
 }
 
 void PendingTask::SetCapability(base::scriptchecker::Capability* in_capability) {
-  capability_.SetFrom(in_capability);
+  capability_ = new base::scriptchecker::Capability(in_capability);
   has_set_capability = true;
 }
 
 void PendingTask::NarrowDownCapability(base::scriptchecker::Capability* current_task_capability) {
-  capability_.NarrowDownFrom(current_task_capability);
+  if(!capability_)
+    capability_ = new base::scriptchecker::Capability();
+  capability_->NarrowDownFrom(current_task_capability);
   has_set_capability = true;
 }
 
 void PendingTask::SetCapabilityFromIPCMessage(std::string in_capabilty_attached_in_ipc) {
-  capability_.SetFromIPCMessage(in_capabilty_attached_in_ipc);
+  if(!capability_)
+    capability_ = new base::scriptchecker::Capability();
+  capability_->SetFromIPCMessage(in_capabilty_attached_in_ipc);
   has_set_capability = true;
   task_type_in_scriptchecker_ = base::scriptchecker::TaskType::IPC_TASK;
 }
 
 void PendingTask::SetCapabilityFromJSString(std::string in_capabilty_specified_in_js_str) {
-  capability_.SetFromJSString(in_capabilty_specified_in_js_str);
+  if(!capability_)
+    capability_ = new base::scriptchecker::Capability();
+  capability_->SetFromJSString(in_capabilty_specified_in_js_str);
   has_set_capability = true;
+}
+
+std::string PendingTask::GetCapbilityAsJSString() {
+  return capability_ ? capability_->ToJSString() : "";
+}
+
+std::string PendingTask::GetCapbilityAsIPCMessage() {
+  return capability_ ? capability_->ToIPCString() : "";
 }
 
 bool PendingTask::IsTaskRestricted() {
   if(!has_set_capability)
     return false;
-  return capability_.IsRestricted();
+  return capability_->IsRestricted();
 }
 
 }  // namespace base

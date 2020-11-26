@@ -59,8 +59,6 @@ bool CapabilityDefinition::Rules::Match(std::string in_capability_js_str,
   out_capability_bit_map = 0;
   out_capability_js_wl.clear();
 
-  LOG(INFO) << g_name << "CapabilityDefinition::Rules::Match for cap: " << in_capability_js_str;
-
   std::map<std::string, uint64_t>::iterator iter;
   size_t idx = in_capability_js_str.find(cap_str_sep_symbol);
   std::string permission = "", remain = in_capability_js_str;
@@ -108,7 +106,7 @@ bool CapabilityDefinition::Rules::Match(std::string in_capability_js_str,
   return true;
 }
 
-std::string CapabilityDefinition::Rules::ToStringFromBitMap(
+std::string CapabilityDefinition::Rules::ToJSStringFromBitMap(
         uint64_t capability_bit_map) {
   std::string output = "";
   for(auto iter = bitmap_shadows_.begin();
@@ -120,6 +118,43 @@ std::string CapabilityDefinition::Rules::ToStringFromBitMap(
     output += cap_str_sep_symbol;
   }
   return output;
+}
+
+bool CapabilityDefinition::Rules::DisallowedToAccessCookie(uint64_t capability_bit_map) {
+  uint64_t bit = capability_bit_map & (cap_no_cookie << cap_cookie_bit_offset);
+  switch (bit >> cap_cookie_bit_offset) {
+    case cap_no_cookie:
+      return true;
+    case cap_with_cookie:
+      return false;
+    default:
+      return true;
+  }
+}
+bool CapabilityDefinition::Rules::DisallowedToAccessNetwork(uint64_t capability_bit_map) {
+  uint64_t bit = capability_bit_map & (cap_no_network << cap_network_bit_offset);
+  switch (bit >> cap_network_bit_offset) {
+    case cap_no_network:
+      return true;
+    case cap_with_network:
+      return false;
+    default:
+      return true;
+  }
+}
+bool CapabilityDefinition::Rules::DisallowedToAccessDOM(uint64_t capability_bit_map,
+                                                        bool is_ele_has_task_cap_attr) {
+  uint64_t bit = capability_bit_map & (cap_no_dom << cap_dom_bit_offset);
+  switch (bit >> cap_dom_bit_offset) {
+    case cap_no_dom:
+      return true;
+    case cap_with_dom:
+      return false;
+    case cap_protective_dom:
+      return is_ele_has_task_cap_attr;
+    default:
+      return true;
+  }
 }
 
 }

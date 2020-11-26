@@ -39,6 +39,8 @@
 #include "third_party/blink/renderer/core/html_names.h"
 #include "third_party/blink/renderer/platform/wtf/hash_set.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 using namespace HTMLNames;
@@ -207,7 +209,17 @@ unsigned HTMLCollection::length() const {
 }
 
 Element* HTMLCollection::item(unsigned offset) const {
-  return collection_items_cache_.NodeAt(*this, offset);
+  //return collection_items_cache_.NodeAt(*this, offset);
+  /* Added by Luo Wu */
+  Element* ele = collection_items_cache_.NodeAt(*this, offset);
+  if(ele && !ele->canAccessByScriptChecker()) {
+    LOG(INFO) << base::scriptchecker::g_name << "[ERROR] the task cannot access DOM "
+              << "[name, id, is_sensitive] = " << ele->nodeName() << ", "
+              << ele->IdForStyleResolution() << ", " << ele->hasTaskSensitiveAttribute();
+    return nullptr;
+  }
+  return ele;
+  /* Added End */
 }
 
 static inline bool IsMatchingHTMLElement(const HTMLCollection& html_collection,

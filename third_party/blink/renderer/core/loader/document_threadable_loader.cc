@@ -69,6 +69,8 @@
 #include "third_party/blink/renderer/platform/weborigin/security_policy.h"
 #include "third_party/blink/renderer/platform/wtf/assertions.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 namespace {
@@ -355,6 +357,26 @@ void DocumentThreadableLoader::StartBlinkCORS(const ResourceRequest& request) {
   } else {
     cors_flag_ = !GetSecurityOrigin()->CanRequest(request.Url());
   }
+
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_script_checker &&
+          base::scriptchecker::g_script_checker->DisallowedToAccessNetwork()) {
+    LOG(INFO) << base::scriptchecker::g_name << ">>> [ERROR] disallowed to issue XHR to "
+              << request.Url().GetString();
+    probe::documentThreadableLoaderFailedToStartLoadingForClient(
+        GetExecutionContext(), client_);
+    ThreadableLoaderClient* client = client_;
+    Clear();
+    ResourceError error = ResourceError::CancelledDueToAccessCheckError(
+        request.Url(), ResourceRequestBlockedReason::kOther,
+        "The task does not have the permission to issue XHR");
+    GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
+        kJSMessageSource, kErrorMessageLevel, error.LocalizedDescription()));
+    client->DidFail(error);
+    return;
+  }
+  /* End */
+
 
   // The CORS flag variable is not yet used at the step in the spec that
   // corresponds to this line, but divert |cors_flag_| here for convenience.

@@ -160,6 +160,8 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "third_party/blink/renderer/platform/wtf/text/text_position.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 namespace {
@@ -192,7 +194,9 @@ Element* Element::Create(const QualifiedName& tag_name, Document* document) {
 Element::Element(const QualifiedName& tag_name,
                  Document* document,
                  ConstructionType type)
-    : ContainerNode(document, type), tag_name_(tag_name) {}
+    : ContainerNode(document, type), tag_name_(tag_name) {
+  has_task_sensitve_attr_ = false; /* Added by Luo Wu */
+}
 
 Element::~Element() {
   DCHECK(NeedsAttach());
@@ -388,6 +392,16 @@ Node::NodeType Element::getNodeType() const {
 
 bool Element::hasAttribute(const QualifiedName& name) const {
   return hasAttributeNS(name.NamespaceURI(), name.LocalName());
+}
+
+bool Element::hasTaskSensitiveAttribute() {
+  return has_task_sensitve_attr_;
+}
+
+bool Element::canAccessByScriptChecker() {
+  return !(base::scriptchecker::g_script_checker &&
+           base::scriptchecker::g_script_checker->DisallowedToAccessDOM(
+              has_task_sensitve_attr_));
 }
 
 void Element::SynchronizeAllAttributes() const {
@@ -1543,7 +1557,18 @@ void Element::AttributeChanged(const AttributeModificationParams& params) {
   } else if (name == HTMLNames::partAttr) {
     if (RuntimeEnabledFeatures::CSSPartPseudoElementEnabled())
       EnsureElementRareData().SetPart(params.new_value);
-  } else if (IsStyledElement()) {
+  }
+  /* Added by Luo Wu */
+  else if (name == HTMLNames::task_sensitiveAttr) {
+    LOG(INFO) << ">>> Element::AttributeChanged " << name;
+    if(params.old_value == g_null_atom &&
+       params.reason == AttributeModificationReason::kDirectly)
+      has_task_sensitve_attr_ = false;
+    else
+      has_task_sensitve_attr_ = true;
+  }
+  /* Added End */
+  else if (IsStyledElement()) {
     if (name == styleAttr) {
       StyleAttributeChanged(params.new_value, params.reason);
     } else if (IsPresentationAttribute(name)) {

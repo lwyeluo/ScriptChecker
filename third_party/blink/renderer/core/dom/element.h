@@ -156,6 +156,15 @@ class CORE_EXPORT Element : public ContainerNode {
   DEFINE_ATTRIBUTE_EVENT_LISTENER(search);
   DEFINE_ATTRIBUTE_EVENT_LISTENER(selectstart);
 
+  /* Added by Luo Wu */
+ public:
+  bool hasTaskSensitiveAttribute();
+  bool canAccessByScriptChecker();
+ private:
+  bool has_task_sensitve_attr_;
+ public:
+  /* Added End */
+
   bool hasAttribute(const QualifiedName&) const;
   const AtomicString& getAttribute(const QualifiedName&) const;
 

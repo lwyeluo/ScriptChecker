@@ -64,7 +64,7 @@ struct BASE_EXPORT PendingTask {
   bool is_high_res = false;
 
   /* Added by Luo Wu */
-  base::scriptchecker::Capability capability_;
+  base::scriptchecker::Capability* capability_;
   bool has_set_capability = false;
   // maintain the task's type, referring to task_type.h in ScriptChecker
   //   by default, the task is a NORMAL_TASK
@@ -74,6 +74,8 @@ struct BASE_EXPORT PendingTask {
   void NarrowDownCapability(base::scriptchecker::Capability* current_task_capability);
   void SetCapabilityFromIPCMessage(std::string in_capabilty_attached_in_ipc);
   void SetCapabilityFromJSString(std::string in_capabilty_specified_in_js_str);
+  std::string GetCapbilityAsJSString();
+  std::string GetCapbilityAsIPCMessage();
   bool IsTaskRestricted();
   /* Added End */
 };

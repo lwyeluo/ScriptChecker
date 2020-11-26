@@ -32,10 +32,8 @@ class BASE_EXPORT Capability {
     // load IPC message's specified capalitity
     void LoadIPCStringToCapability(std::string ipc_str_capability);
 
-    // return the bits in the bit map towards a target capability
-    //   @target_capability: refers to capability_definition.h,
-    //      e.g., CapabilityDefinition::cap_cookie_
-    int GetBitsForCapability(int target_capability);
+    // return the bitmap
+    uint64_t GetBitmap();
 
     // whether the JS_WL contains the target object
     bool ContainsInJSWL(std::string target_object);

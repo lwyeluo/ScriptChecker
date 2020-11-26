@@ -38,6 +38,8 @@
 #include "third_party/blink/renderer/core/html/html_slot_element.h"
 #include "third_party/blink/renderer/core/html_names.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 using namespace HTMLNames;
@@ -126,8 +128,18 @@ inline Element* TreeOrderedMap::Get(const AtomicString& key,
     return nullptr;
 
   DCHECK(entry->count);
-  if (entry->element)
-    return entry->element;
+  if (entry->element) {
+    //return entry->element;
+    /* Added by Luo Wu */
+    if(entry->element->canAccessByScriptChecker())
+      return entry->element;
+    LOG(INFO) << base::scriptchecker::g_name << "[ERROR] the task cannot access DOM "
+              << "[name, id, is_sensitive] = " << entry->element->nodeName() << ", "
+              << entry->element->IdForStyleResolution() << ", "
+              << entry->element->hasTaskSensitiveAttribute();
+    return nullptr;
+    /* Added End */
+  }
 
   // Iterate to find the node that matches. Nothing will match iff an element
   // with children having duplicate IDs is being removed -- the tree traversal
@@ -137,7 +149,16 @@ inline Element* TreeOrderedMap::Get(const AtomicString& key,
     if (!keyMatches(key, element))
       continue;
     entry->element = &element;
-    return &element;
+    //return &element;
+    /* Added by Luo Wu */
+    if(entry->element->canAccessByScriptChecker())
+      return entry->element;
+    LOG(INFO) << base::scriptchecker::g_name << "[ERROR] the task cannot access DOM "
+              << "[name, id, is_sensitive] = " << entry->element->nodeName() << ", "
+              << entry->element->IdForStyleResolution() << ", "
+              << entry->element->hasTaskSensitiveAttribute();
+    return nullptr;
+    /* Added End */
   }
 // As get()/getElementById() can legitimately be called while handling element
 // removals, allow failure iff we're in the scope of node removals.

@@ -357,5 +357,9 @@
     "webkitdirectory",
     "width",
     "wrap",
+
+    "task_sensitive",
+    "task_capability",
+    "riksy",
   ],
 }

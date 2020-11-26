@@ -23,21 +23,14 @@ Capability::Capability(Capability *capability) {
   capability_ = "";
 }
 
-Capability::Capability(Capability&& capability) {
-  SetFrom(&capability);
-  capability_ = "";
-}
+Capability::Capability(Capability&& capability) = default;
 
 Capability::~Capability() = default;
 
+Capability& Capability::operator=(Capability&& other) = default;
+
 bool Capability::operator==(const Capability& other) const {
   return capability_bit_map_ == other.capability_bit_map_;
-}
-
-Capability& Capability::operator=(Capability&& other) {
-  Capability* cap = new Capability();
-  cap->SetFrom(&other);
-  return *cap;
 }
 
 void Capability::LoadJSStringToCapability(std::string js_str_capability) {
@@ -46,8 +39,6 @@ void Capability::LoadJSStringToCapability(std::string js_str_capability) {
                 js_str_capability, capability_bit_map_, capability_js_wl);
 
     if(is_success) {
-      LOG(INFO) << g_name << "after Capability::LoadJSStringToCapability. "
-                << "Capability is " << ToJSString();
       capability_ = js_str_capability;
       is_restricted_ = true;
       return;
@@ -71,10 +62,13 @@ void Capability::SetFrom(Capability *capability) {
   is_restricted_ = capability->is_restricted_;
   if(is_restricted_) {
     capability_bit_map_ = capability->capability_bit_map_;
-    capability_js_wl.clear();
-    capability_js_wl.insert(capability->capability_js_wl.begin(),
-                            capability->capability_js_wl.end());
+    if(capability->capability_js_wl.size() > 0) {
+      capability_js_wl.clear();
+      capability_js_wl.insert(capability->capability_js_wl.begin(),
+                              capability->capability_js_wl.end());
+    }
   }
+  capability_ = capability->capability_;
 }
 
 void Capability::NarrowDownFrom(Capability* capability) {
@@ -98,9 +92,8 @@ void Capability::SetFromJSString(std::string capability_attached_in_js_string) {
   LoadJSStringToCapability(capability_attached_in_js_string);
 }
 
-int Capability::GetBitsForCapability(int target_capability) {
-  // TODO
-  return true;
+uint64_t Capability::GetBitmap() {
+  return capability_bit_map_;
 }
 
 bool Capability::ContainsInJSWL(std::string target_object) {
@@ -109,7 +102,6 @@ bool Capability::ContainsInJSWL(std::string target_object) {
 }
 
 bool Capability::IsRestricted() {
-  LOG(INFO) << g_name << "Capability::IsRestricted. " << is_restricted_;
   return is_restricted_;
 }
 
@@ -129,7 +121,7 @@ std::string Capability::ToJSString() {
     return capability_;
 
   std::string output = g_script_checker->
-          ToStringFromCapabilityBitmap(capability_bit_map_);
+          ToJSStringFromCapabilityBitmap(capability_bit_map_);
   if(capability_js_wl.size() > 0)
     output = output + CapabilityDefinition::cap_str_js_wl
             + CapabilityDefinition::cap_str_js_wl_key_value_sep_sysmbol;
@@ -138,6 +130,8 @@ std::string Capability::ToJSString() {
     output += iter->first;
     output += CapabilityDefinition::cap_str_js_wl_value_sep_sysmbol;
   }
+  if(capability_js_wl.size() > 0)
+    output[output.length() - 1] = CapabilityDefinition::cap_str_sep_symbol;
   capability_ = output;
 
   return output;
