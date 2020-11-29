@@ -23,6 +23,8 @@
 #include "services/service_manager/sandbox/switches.h"
 #include "third_party/icu/source/i18n/unicode/timezone.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace content {
 
 ZygoteCommunication::ZygoteCommunication()
@@ -195,6 +197,11 @@ pid_t ZygoteCommunication::ForkRequest(
   }
 
   ZygoteChildBorn(pid);
+
+  /* Added by Luo Wu */
+  base::scriptchecker::initHostScriptChecker();
+  /* Added End */
+
   return pid;
 }
 

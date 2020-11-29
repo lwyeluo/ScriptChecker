@@ -20,6 +20,8 @@
 #include "mojo/public/cpp/bindings/lib/validation_util.h"
 #include "mojo/public/cpp/bindings/sync_call_restrictions.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace mojo {
 
 // ----------------------------------------------------------------------------
@@ -265,6 +267,28 @@ bool InterfaceEndpointClient::AcceptWithResponder(
 
   message->set_request_id(request_id);
 
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_script_checker &&
+          base::scriptchecker::g_script_checker->IsCurrentTaskWithRestricted()) {
+    bool need_attach_capability = false;
+    switch (message->header()->name) {
+      case 1429814208:  // "kRenderFrameMessageFilter_GetCookies_Name";
+      case 804829219:  // "kRenderFrameMessageFilter_SetCookie_Name";
+        need_attach_capability = true;
+        break;
+      default:
+        break;
+    }
+    if(need_attach_capability) {
+      std::string capbility = base::scriptchecker::g_script_checker
+              ->GetCurrentTaskCapability()->ToIPCString();
+      message->SetAdditionalField(capbility);
+      LOG(INFO) << base::scriptchecker::g_name << " {IPC} attach capabilty: "
+                << capbility;
+    }
+  }
+  /* Added End */
+
   bool is_sync = message->has_flag(Message::kFlagIsSync);
   if (!controller_->SendMessage(message))
     return false;
@@ -303,6 +327,28 @@ bool InterfaceEndpointClient::AcceptWithResponder(
 
 bool InterfaceEndpointClient::HandleIncomingMessage(Message* message) {
   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_host_script_checker) {
+    // meaning the message carries capability
+    bool need_attach_capability = false;
+    switch (message->header()->name) {
+      case 1429814208:  // "kRenderFrameMessageFilter_GetCookies_Name";
+      case 804829219:  // "kRenderFrameMessageFilter_SetCookie_Name";
+        need_attach_capability = true;
+        break;
+      default:
+        break;
+    }
+    if(need_attach_capability) {
+      std::string capability = message->GetAdditionalField();
+      //  For Cookie, this principal is poped in
+      //    |content::RenderFrameMessageFilter::GetCookies|
+      //    or |content::RenderFrameMessageFilter::SetCookie|
+      base::scriptchecker::g_host_script_checker->push(
+            base::scriptchecker::QueueData(capability, __FUNCTION__));
+    }
+  }
+  /* End */
   return filters_.Accept(message);
 }
 

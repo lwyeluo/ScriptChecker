@@ -133,10 +133,6 @@ inline Element* TreeOrderedMap::Get(const AtomicString& key,
     /* Added by Luo Wu */
     if(entry->element->canAccessByScriptChecker())
       return entry->element;
-    LOG(INFO) << base::scriptchecker::g_name << "[ERROR] the task cannot access DOM "
-              << "[name, id, is_sensitive] = " << entry->element->nodeName() << ", "
-              << entry->element->IdForStyleResolution() << ", "
-              << entry->element->hasTaskSensitiveAttribute();
     return nullptr;
     /* Added End */
   }
@@ -153,10 +149,6 @@ inline Element* TreeOrderedMap::Get(const AtomicString& key,
     /* Added by Luo Wu */
     if(entry->element->canAccessByScriptChecker())
       return entry->element;
-    LOG(INFO) << base::scriptchecker::g_name << "[ERROR] the task cannot access DOM "
-              << "[name, id, is_sensitive] = " << entry->element->nodeName() << ", "
-              << entry->element->IdForStyleResolution() << ", "
-              << entry->element->hasTaskSensitiveAttribute();
     return nullptr;
     /* Added End */
   }

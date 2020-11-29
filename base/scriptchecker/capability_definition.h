@@ -53,15 +53,15 @@ class BASE_EXPORT CapabilityDefinition {
       bool Match(std::string in_capability_js_str, uint64_t& out_capability_bit_map,
                  std::map<std::string, bool>& out_capability_js_wl);
       std::string ToJSStringFromBitMap(uint64_t capability_bit_map);
-
-      // Security Monitor
-      bool DisallowedToAccessCookie(uint64_t capability_bit_map);
-      bool DisallowedToAccessNetwork(uint64_t capability_bit_map);
-      bool DisallowedToAccessDOM(uint64_t capability_bit_map,
-                                 bool is_ele_has_task_cap_attr);
     };
 
     Rules rule;
+
+    // Security Monitor
+    static bool DisallowedToAccessCookie(uint64_t capability_bit_map);
+    static bool DisallowedToAccessNetwork(uint64_t capability_bit_map);
+    static bool DisallowedToAccessDOM(uint64_t capability_bit_map,
+                                      bool is_ele_has_task_cap_attr);
 };
 
 }

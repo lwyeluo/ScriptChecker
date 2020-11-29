@@ -11,6 +11,7 @@ namespace scriptchecker {
 
 Capability::Capability() {
   capability_ = "";
+  capability_ipc_ = "";
   is_restricted_ = false;
 }
 
@@ -21,6 +22,7 @@ Capability::Capability(std::string js_str_capability) {
 Capability::Capability(Capability *capability) {
   SetFrom(capability);
   capability_ = "";
+  capability_ipc_ = "";
 }
 
 Capability::Capability(Capability&& capability) = default;
@@ -34,6 +36,7 @@ bool Capability::operator==(const Capability& other) const {
 }
 
 void Capability::LoadJSStringToCapability(std::string js_str_capability) {
+  capability_ipc_ = "";
   if(js_str_capability != "") {
     bool is_success = g_script_checker->MatchWithCapabilityJSRules(
                 js_str_capability, capability_bit_map_, capability_js_wl);
@@ -49,11 +52,14 @@ void Capability::LoadJSStringToCapability(std::string js_str_capability) {
 }
 
 void Capability::LoadIPCStringToCapability(std::string ipc_str_capability) {
+  capability_ = "";
   if(ipc_str_capability != "") {
-    // TODO
+    capability_bit_map_ = strtoul(ipc_str_capability.c_str(), NULL, 10);
+    capability_js_wl.clear();
     is_restricted_ = true;
     return;
   }
+  capability_ipc_ = "";
   is_restricted_ = false;
 }
 
@@ -69,19 +75,24 @@ void Capability::SetFrom(Capability *capability) {
     }
   }
   capability_ = capability->capability_;
+  capability_ipc_ = capability->capability_ipc_;
 }
 
 void Capability::NarrowDownFrom(Capability* capability) {
   if(!capability)
     return;
-  if(!is_restricted_)
+  if(!is_restricted_) {
     SetFrom(capability);
+    return;
+  }
 
   capability_bit_map_ |= capability->capability_bit_map_;
   for(auto iter = capability_js_wl.begin(); iter != capability_js_wl.end(); iter ++) {
     if(!capability->capability_js_wl.count(iter->first))
       capability_js_wl.erase(iter);
   }
+  capability_ = "";
+  capability_ipc_ = "";
 }
 
 void Capability::SetFromIPCMessage(std::string capability_attached_in_ipc) {
@@ -108,10 +119,11 @@ bool Capability::IsRestricted() {
 std::string Capability::ToIPCString() {
   if(!is_restricted_)
     return "";
-  if(capability_ != "")
-    return capability_;
-  // TODO
-  return "TODO-IPC";
+  if(capability_ipc_ != "")
+    return capability_ipc_;
+
+  // currently we only need to attach the bitmap into IPC message
+  return std::to_string(capability_bit_map_);
 }
 
 std::string Capability::ToJSString() {

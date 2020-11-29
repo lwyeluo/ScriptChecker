@@ -54,6 +54,10 @@ void WriteMessageHeader(uint32_t name,
     header->flags = flags;
     // The payload immediately follows the header.
     header->payload.Set(header + 1);
+    /* Added by Luo Wu */
+    //   clear padding
+    header->padding = 0;
+    /* Added End */
   } else if (flags &
              (Message::kFlagExpectsResponse | Message::kFlagIsResponse)) {
     // Version 1
@@ -62,12 +66,20 @@ void WriteMessageHeader(uint32_t name,
     header->version = 1;
     header->name = name;
     header->flags = flags;
+    /* Added by Luo Wu */
+    //   clear padding
+    header->padding = 0;
+    /* Added End */
   } else {
     internal::MessageHeader* header;
     AllocateHeaderFromBuffer(payload_buffer, &header);
     header->version = 0;
     header->name = name;
     header->flags = flags;
+    /* Added by Luo Wu */
+    //   clear padding
+    header->padding = 0;
+    /* Added End */
   }
 }
 
@@ -200,6 +212,11 @@ Message::Message(uint32_t name,
                                 &payload_buffer_);
   transferable_ = true;
   serialized_ = true;
+
+  /* Added by Luo Wu */
+  //   clear padding
+  header()->padding = 0;
+  /* Added End */
 }
 
 Message::Message(ScopedMessageHandle handle) {
@@ -273,6 +290,33 @@ void Message::Reset() {
   transferable_ = false;
   serialized_ = false;
 }
+
+/* Added by Luo Wu */
+std::string Message::GetAdditionalField() {
+  if(header()->padding == 0)
+    return "";
+  LOG(INFO) << "Message::GetAdditionalField. padding="
+            << header()->padding << ", " << header()->name;
+  char* addr = (char*)payload_buffer_.data() + header()->padding;
+  size_t len;
+  memcpy(&len, addr, sizeof(size_t));
+  return std::string(addr + sizeof(size_t), 0, len);
+}
+
+void Message::SetAdditionalField(std::string capability_in_ipc_string) {
+  size_t len = capability_in_ipc_string.length();
+
+  // 1. set padding, by default it is zero
+  header()->padding = payload_buffer_.cursor();
+
+  // 2. allocate new space for capabilty
+  void* start_addr = payload_buffer_.AllocateAndGet(len + sizeof(size_t) + 10);
+
+  // 3. append the data
+  memcpy((char*)start_addr, &len, sizeof (size_t));
+  memcpy((char*)start_addr + sizeof (size_t), capability_in_ipc_string.c_str(), len);
+}
+/* Added End */
 
 const uint8_t* Message::payload() const {
   if (version() < 2)

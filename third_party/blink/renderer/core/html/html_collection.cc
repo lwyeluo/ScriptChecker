@@ -212,12 +212,8 @@ Element* HTMLCollection::item(unsigned offset) const {
   //return collection_items_cache_.NodeAt(*this, offset);
   /* Added by Luo Wu */
   Element* ele = collection_items_cache_.NodeAt(*this, offset);
-  if(ele && !ele->canAccessByScriptChecker()) {
-    LOG(INFO) << base::scriptchecker::g_name << "[ERROR] the task cannot access DOM "
-              << "[name, id, is_sensitive] = " << ele->nodeName() << ", "
-              << ele->IdForStyleResolution() << ", " << ele->hasTaskSensitiveAttribute();
+  if(ele && !ele->canAccessByScriptChecker())
     return nullptr;
-  }
   return ele;
   /* Added End */
 }

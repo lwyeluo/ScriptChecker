@@ -1,5 +1,5 @@
 /*
- * The core of ScriptCheck
+ * The core of ScriptCheck running in the renderer process
  *  Author: Luo Wu
  */
 #include "base/scriptchecker/global.h"
@@ -112,24 +112,18 @@ CapabilityDefinition* ScriptChecker::GetCapabilityJSStringRules() {
 }
 
 // Security Monitor
-bool ScriptChecker::DisallowedToAccessCookie() {
-  if(!m_current_task_->IsTaskRestricted())
-    return false;
-  return m_capability_definition->rule.
-          DisallowedToAccessCookie(m_current_task_->capability_->GetBitmap());
-}
 bool ScriptChecker::DisallowedToAccessNetwork() {
   if(!m_current_task_->IsTaskRestricted())
     return false;
-  return m_capability_definition->rule.
-          DisallowedToAccessNetwork(m_current_task_->capability_->GetBitmap());
+  return CapabilityDefinition::DisallowedToAccessNetwork(
+              m_current_task_->capability_->GetBitmap());
 }
 bool ScriptChecker::DisallowedToAccessDOM(bool is_ele_has_task_cap_attr) {
   if(!m_current_task_->IsTaskRestricted())
     return false;
-  return m_capability_definition->rule.
-          DisallowedToAccessDOM(m_current_task_->capability_->GetBitmap(),
-                                is_ele_has_task_cap_attr);
+  return CapabilityDefinition::DisallowedToAccessDOM(
+              m_current_task_->capability_->GetBitmap(),
+              is_ele_has_task_cap_attr);
 }
 
 }

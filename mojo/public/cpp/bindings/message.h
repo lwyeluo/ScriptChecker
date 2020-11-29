@@ -93,6 +93,22 @@ class COMPONENT_EXPORT(MOJO_CPP_BINDINGS_BASE) Message {
   // Indicates whether this Message is serialized.
   bool is_serialized() const { return serialized_; }
 
+  /* Added by Luo Wu */
+  // We need to add the task's capability into IPC message,
+  //  such that, for example, the kernel process can make decision.
+  // The basic idea is to set message's UNUSED `padding` field to record
+  //   the size of appendded capability and attach the capability into
+  //   message.
+  // Message's format
+  //          msg | capabilty_len | capability_in_js_string
+  //   1. capabilty_len is the length (size_t) of capability_in_js_string
+  //   2. msg->header()->padding: 0 if no capability is attached,
+  //        otherwise it indicates the size of |msg|, i.e.,
+  //        `msg + msg->header()->padding` points to |capabilty_len|
+  std::string GetAdditionalField();
+  void SetAdditionalField(std::string capability_in_ipc_string);
+  /* Added End */
+
   // Access the raw bytes of the message.
   const uint8_t* data() const {
     DCHECK(payload_buffer_.is_valid());

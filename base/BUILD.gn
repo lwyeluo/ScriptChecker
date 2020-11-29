@@ -291,6 +291,9 @@ jumbo_component("base") {
     "scriptchecker/capability_definition.cc",
     "scriptchecker/script_checker.h",
     "scriptchecker/script_checker.cc",
+    "scriptchecker/host_script_checker_helper.h",
+    "scriptchecker/host_script_checker.h",
+    "scriptchecker/host_script_checker.cc",
 
     # This file depends on files from the "debug/allocator" target,
     # but this target does not depend on "debug/allocator".

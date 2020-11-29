@@ -10,11 +10,20 @@ namespace base {
 namespace scriptchecker {
 
 ScriptChecker* g_script_checker;
+HostScriptChecker* g_host_script_checker;
 
 void initScriptChecker() {
-  if (!g_script_checker)
+  if (!g_script_checker) {
     g_script_checker = new ScriptChecker();
-  LOG(INFO) << g_name << "init script checker...";
+    LOG(INFO) << g_name << "init script checker in renderer process...";
+  }
+}
+
+void initHostScriptChecker() {
+  if (!g_host_script_checker) {
+    g_host_script_checker = new HostScriptChecker();
+    LOG(INFO) << g_name << "init script checker in kernel process...";
+  }
 }
 
 }

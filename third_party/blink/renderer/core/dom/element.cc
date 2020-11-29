@@ -161,6 +161,7 @@
 #include "third_party/blink/renderer/platform/wtf/text/text_position.h"
 
 #include "base/scriptchecker/global.h"
+#include "third_party/blink/renderer/core/inspector/console_message.h"
 
 namespace blink {
 
@@ -399,9 +400,19 @@ bool Element::hasTaskSensitiveAttribute() {
 }
 
 bool Element::canAccessByScriptChecker() {
-  return !(base::scriptchecker::g_script_checker &&
+  if(base::scriptchecker::g_script_checker &&
            base::scriptchecker::g_script_checker->DisallowedToAccessDOM(
-              has_task_sensitve_attr_));
+              has_task_sensitve_attr_)) {
+    std::string message = "The task does not have the permission to "
+                     "access the DOM [name, id, is_task_sensitive] = ";
+    message = message + nodeName().Ascii().data() + ", "
+            + IdForStyleResolution().Ascii().data() + ", "
+            + std::to_string(hasTaskSensitiveAttribute());
+    GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
+        kJSMessageSource, kErrorMessageLevel, message.c_str()));
+    return false;
+  }
+  return true;
 }
 
 void Element::SynchronizeAllAttributes() const {

@@ -48,7 +48,8 @@ class BASE_EXPORT Capability {
     std::string ToString();
 
   private:
-    std::string capability_;
+    std::string capability_;  // in JS string format
+    std::string capability_ipc_;  // in IPC string format
     uint64_t capability_bit_map_;
     // maintain the WL for JS Access
     std::map<std::string, bool> capability_js_wl;

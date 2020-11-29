@@ -28,7 +28,6 @@ class BASE_EXPORT ScriptChecker {
     Capability* GetCurrentTaskCapability();
 
     // Security Monitor
-    bool DisallowedToAccessCookie();
     bool DisallowedToAccessNetwork();
     bool DisallowedToAccessDOM(bool is_ele_has_task_cap_attr);
 

@@ -120,7 +120,7 @@ std::string CapabilityDefinition::Rules::ToJSStringFromBitMap(
   return output;
 }
 
-bool CapabilityDefinition::Rules::DisallowedToAccessCookie(uint64_t capability_bit_map) {
+bool CapabilityDefinition::DisallowedToAccessCookie(uint64_t capability_bit_map) {
   uint64_t bit = capability_bit_map & (cap_no_cookie << cap_cookie_bit_offset);
   switch (bit >> cap_cookie_bit_offset) {
     case cap_no_cookie:
@@ -131,7 +131,7 @@ bool CapabilityDefinition::Rules::DisallowedToAccessCookie(uint64_t capability_b
       return true;
   }
 }
-bool CapabilityDefinition::Rules::DisallowedToAccessNetwork(uint64_t capability_bit_map) {
+bool CapabilityDefinition::DisallowedToAccessNetwork(uint64_t capability_bit_map) {
   uint64_t bit = capability_bit_map & (cap_no_network << cap_network_bit_offset);
   switch (bit >> cap_network_bit_offset) {
     case cap_no_network:
@@ -142,8 +142,8 @@ bool CapabilityDefinition::Rules::DisallowedToAccessNetwork(uint64_t capability_
       return true;
   }
 }
-bool CapabilityDefinition::Rules::DisallowedToAccessDOM(uint64_t capability_bit_map,
-                                                        bool is_ele_has_task_cap_attr) {
+bool CapabilityDefinition::DisallowedToAccessDOM(uint64_t capability_bit_map,
+                                                 bool is_ele_has_task_cap_attr) {
   uint64_t bit = capability_bit_map & (cap_no_dom << cap_dom_bit_offset);
   switch (bit >> cap_dom_bit_offset) {
     case cap_no_dom:

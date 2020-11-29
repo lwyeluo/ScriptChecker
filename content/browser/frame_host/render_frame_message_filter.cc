@@ -62,6 +62,8 @@
 #include "content/public/browser/plugin_service_filter.h"
 #endif
 
+#include "base/scriptchecker/global.h"
+
 namespace content {
 
 namespace {
@@ -458,6 +460,18 @@ void RenderFrameMessageFilter::SetCookie(int32_t render_frame_id,
                                          const GURL& site_for_cookies,
                                          const std::string& cookie_line,
                                          SetCookieCallback callback) {
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_host_script_checker &&
+          base::scriptchecker::g_host_script_checker
+          ->DisallowedToAccessCookie()) {
+    LOG(INFO) << base::scriptchecker::g_name
+              << "[ERROR] the task cannot access COOKIE!!! [url] ="
+              << url << ", " << site_for_cookies;
+    std::move(callback).Run();
+    return;
+  }
+  /* Added End */
+
   std::move(callback).Run();
   ChildProcessSecurityPolicyImpl* policy =
       ChildProcessSecurityPolicyImpl::GetInstance();
@@ -500,6 +514,18 @@ void RenderFrameMessageFilter::GetCookies(int render_frame_id,
                                           const GURL& url,
                                           const GURL& site_for_cookies,
                                           GetCookiesCallback callback) {
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_host_script_checker &&
+          base::scriptchecker::g_host_script_checker
+          ->DisallowedToAccessCookie()) {
+    LOG(INFO) << base::scriptchecker::g_name
+              << "[ERROR] the task cannot access COOKIE!!! [url] ="
+              << url << ", " << site_for_cookies;
+    std::move(callback).Run(std::string());
+    return;
+  }
+  /* Added End */
+
   ChildProcessSecurityPolicyImpl* policy =
       ChildProcessSecurityPolicyImpl::GetInstance();
   if (!policy->CanAccessDataForOrigin(render_process_id_, url)) {
