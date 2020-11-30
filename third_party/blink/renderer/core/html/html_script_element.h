@@ -49,6 +49,11 @@ class CORE_EXPORT HTMLScriptElement final : public HTMLElement,
   void setAsync(bool);
   bool async() const;
 
+  /* Added by Luo Wu */
+  bool risky() const override;
+  String CapabilityAttrbiuteValue() const override;
+  /* Added End */
+
   ScriptLoader* Loader() const final { return loader_.Get(); }
 
   bool IsScriptElement() const override { return true; }

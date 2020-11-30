@@ -105,6 +105,19 @@ class CORE_EXPORT ScriptController final
       const ScriptFetchOptions& = ScriptFetchOptions(),
       AccessControlStatus = kNotSharableCrossOrigin);
 
+  /* Added by Luo Wu */
+  //  execute the script in the risky world
+  void ExecuteScriptInRiskyWorld(
+      const String& script,
+      ScriptSourceLocationType = ScriptSourceLocationType::kUnknown,
+      ExecuteScriptPolicy = kDoNotExecuteScriptWhenScriptsDisabled);
+  void ExecuteScriptInRiskyWorld(
+      const ScriptSourceCode&,
+      const KURL& base_url = KURL(),
+      const ScriptFetchOptions& = ScriptFetchOptions(),
+      AccessControlStatus = kNotSharableCrossOrigin);
+  /* Added End */
+
   // Executes JavaScript in an isolated world. The script gets its own global
   // scope, its own prototypes for intrinsic JavaScript objects (String, Array,
   // and so-on), and its own wrappers for all DOM nodes and DOM constructors.
@@ -163,6 +176,15 @@ class CORE_EXPORT ScriptController final
                                                  const ScriptFetchOptions&,
                                                  AccessControlStatus,
                                                  ExecuteScriptPolicy);
+
+  /* Added by Luo Wu */
+  //  execute the script in the risky world with permissions
+  v8::Local<v8::Value> EvaluateScriptInRiskyWorld(const ScriptSourceCode&,
+                                                  const KURL& base_url,
+                                                  const ScriptFetchOptions&,
+                                                  AccessControlStatus,
+                                                  ExecuteScriptPolicy);
+  /* Added End */
 
   const Member<LocalFrame> frame_;
   const Member<LocalWindowProxyManager> window_proxy_manager_;

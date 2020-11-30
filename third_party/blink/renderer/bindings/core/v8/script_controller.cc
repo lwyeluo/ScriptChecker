@@ -65,6 +65,8 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 void ScriptController::Trace(blink::Visitor* visitor) {
@@ -362,6 +364,65 @@ v8::Local<v8::Value> ScriptController::EvaluateScriptInMainWorld(
 
   return handle_scope.Escape(object);
 }
+
+/* Added by Luo Wu */
+void ScriptController::ExecuteScriptInRiskyWorld(
+    const String& script,
+    ScriptSourceLocationType source_location_type,
+    ExecuteScriptPolicy policy) {
+  v8::HandleScope handle_scope(GetIsolate());
+  EvaluateScriptInRiskyWorld(ScriptSourceCode(script, source_location_type),
+                             KURL(), ScriptFetchOptions(),
+                             kNotSharableCrossOrigin, policy);
+}
+
+void ScriptController::ExecuteScriptInRiskyWorld(
+    const ScriptSourceCode& source_code,
+    const KURL& base_url,
+    const ScriptFetchOptions& fetch_options,
+    AccessControlStatus access_control_status) {
+  v8::HandleScope handle_scope(GetIsolate());
+  EvaluateScriptInRiskyWorld(source_code, base_url, fetch_options,
+                             access_control_status,
+                             kDoNotExecuteScriptWhenScriptsDisabled);
+}
+
+v8::Local<v8::Value> ScriptController::EvaluateScriptInRiskyWorld(
+    const ScriptSourceCode& source_code,
+    const KURL& base_url,
+    const ScriptFetchOptions& fetch_options,
+    AccessControlStatus access_control_status,
+    ExecuteScriptPolicy policy) {
+  if (policy == kDoNotExecuteScriptWhenScriptsDisabled &&
+      !GetFrame()->GetDocument()->CanExecuteScripts(kAboutToExecuteScript))
+    return v8::Local<v8::Value>();
+
+  if(base::scriptchecker::g_script_checker) {
+    LOG(INFO) << ">>> [RISKY] ScriptController::EvaluateScriptInRiskyWorld. [task_id]="
+              << base::scriptchecker::g_script_checker->GetCurrentTaskID();
+  }
+
+  // TODO(dcheng): Clean this up to not use ScriptState, to match
+  // executeScriptInIsolatedWorld.
+  ScriptState* script_state = ToScriptStateForRiskyWorld(GetFrame());
+  if (!script_state)
+    return v8::Local<v8::Value>();
+  v8::EscapableHandleScope handle_scope(GetIsolate());
+  ScriptState::Scope scope(script_state);
+
+  if (GetFrame()->Loader().StateMachine()->IsDisplayingInitialEmptyDocument())
+    GetFrame()->Loader().DidAccessInitialDocument();
+
+  v8::Local<v8::Value> object = ExecuteScriptAndReturnValue(
+      script_state->GetContext(), source_code, base_url, fetch_options,
+      access_control_status);
+
+  if (object.IsEmpty())
+    return v8::Local<v8::Value>();
+
+  return handle_scope.Escape(object);
+}
+/* Added End */
 
 void ScriptController::ExecuteScriptInIsolatedWorld(
     int world_id,

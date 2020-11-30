@@ -31,6 +31,22 @@ v8::Local<v8::Value> ToV8(DOMWindow* window,
   if (!frame)
     return v8::Local<v8::Object>();
 
+  /* Added by Luo Wu */
+  // distinguish the main world and risky world
+  if(frame->DomWindowForRiskyWorld() == window) {
+    // access the object in risky world
+    if(DOMWrapperWorld::Current(isolate).IsMainWorld()) {
+      // main world accesses risky world
+      return frame->GetWindowProxy(*window->getWorld())
+          ->GlobalProxyIfNotDetached();
+    }
+  } else if(DOMWrapperWorld::Current(isolate).IsRiskyWorld()) {
+    // risky world accesses normal world
+    return frame->GetWindowProxy(*window->getWorld())
+        ->GlobalProxyIfNotDetached();
+  }
+  /* Added End */
+
   // TODO(yukishiino): Make this function always return the non-empty handle
   // even if the frame is detached because the global proxy must always exist
   // per spec.

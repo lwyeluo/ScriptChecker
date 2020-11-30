@@ -36,6 +36,8 @@
 #include "third_party/blink/renderer/core/script/script_loader.h"
 #include "third_party/blink/renderer/core/script/script_runner.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 using namespace HTMLNames;
@@ -49,6 +51,11 @@ inline HTMLScriptElement::HTMLScriptElement(Document& document,
 
 HTMLScriptElement* HTMLScriptElement::Create(Document& document,
                                              const CreateElementFlags flags) {
+  if(base::scriptchecker::g_script_checker) {
+    LOG(INFO) << base::scriptchecker::g_name
+              << ">>> [Risky] HTMLScriptElement::Creates. TASK "
+              << base::scriptchecker::g_script_checker->GetCurrentTaskID();
+  }
   return new HTMLScriptElement(document, flags);
 }
 
@@ -119,6 +126,16 @@ void HTMLScriptElement::setAsync(bool async) {
 bool HTMLScriptElement::async() const {
   return FastHasAttribute(asyncAttr) || loader_->IsNonBlocking();
 }
+
+/* Added by Luo Wu */
+bool HTMLScriptElement::risky() const {
+  return FastHasAttribute(riskyAttr);
+}
+
+String HTMLScriptElement::CapabilityAttrbiuteValue() const {
+  return getAttribute(task_capabilityAttr).GetString();
+}
+/* Added End*/
 
 KURL HTMLScriptElement::Src() const {
   return GetDocument().CompleteURL(SourceAttributeValue());

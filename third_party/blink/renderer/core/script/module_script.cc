@@ -232,6 +232,12 @@ void ModuleScript::RunScript(LocalFrame* frame, const SecurityOrigin*) const {
                                   Modulator::CaptureEvalErrorFlag::kReport);
 }
 
+/* Added by Luo Wu */
+void ModuleScript::RunScriptInRiskyWorld(LocalFrame* frame,
+                                         const SecurityOrigin* origin,
+                                         String task_permisison) const {}
+/* Added End */
+
 String ModuleScript::InlineSourceTextForCSP() const {
   return source_text_;
 }

@@ -68,6 +68,10 @@
 
     // other browsing contexts
     [Replaceable, CrossOrigin] readonly attribute Window frames;
+    /* Added by Luo Wu */
+    [Replaceable, CrossOrigin] readonly attribute Window windowMain;
+    [Replaceable, CrossOrigin] readonly attribute Window windowRisky;
+    /* Added End */
     [Replaceable, CrossOrigin] readonly attribute unsigned long length;
     [Unforgeable, CrossOrigin] readonly attribute Window? top;
     // FIXME: opener should be of type any.

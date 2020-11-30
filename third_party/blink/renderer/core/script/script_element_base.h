@@ -39,6 +39,11 @@ class CORE_EXPORT ScriptElementBase : public GarbageCollectedMixin {
  public:
   static ScriptElementBase* FromElementIfPossible(Element*);
 
+  /* Added by Luo Wu */
+  virtual bool risky() const = 0;
+  virtual String CapabilityAttrbiuteValue() const = 0;
+  /* End */
+
   virtual bool AsyncAttributeValue() const = 0;
   virtual String CharsetAttributeValue() const = 0;
   virtual String CrossOriginAttributeValue() const = 0;

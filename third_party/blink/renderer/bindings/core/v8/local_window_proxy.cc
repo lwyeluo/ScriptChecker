@@ -63,6 +63,8 @@
 #include "third_party/blink/renderer/platform/wtf/assertions.h"
 #include "v8/include/v8.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 void LocalWindowProxy::DisposeContext(Lifecycle next_status,
@@ -136,7 +138,42 @@ void LocalWindowProxy::Initialize() {
       GetFrame()->GetInspectorTaskRunner());
   v8::HandleScope handle_scope(GetIsolate());
 
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_script_checker) {
+    if(world_->IsRiskyWorld()) {
+      // create a new DOM window for risky world, such that the main world and
+      //  risky world has chance to reference each other
+      GetFrame()->SetDOMWindowForRiskyWorld(LocalDOMWindow::Create(*GetFrame()));
+      GetFrame()->DomWindowForRiskyWorld()->initializeForRiskyWorld(world_.get());
+    } else if (world_->IsMainWorld()) {
+      // maintain the world
+      GetFrame()->DomWindow()->setWorld(world_.get());
+    }
+  }
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  uint64_t begin, end;
+  timeval tBegin, tEnd, tDiff;
+  gettimeofday(&tBegin, 0);
+  begin = base::scriptchecker::_rdtsc();
+#endif
+
+  /* Added End */
+
   CreateContext();
+
+  /* Added by Luo Wu */
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  end = base::scriptchecker::_rdtsc();
+  gettimeofday(&tEnd, 0);
+  base::scriptchecker::subTimeVal(tDiff, tBegin, tEnd);
+
+  LOG(INFO) << base::scriptchecker::g_name <<
+               ">>> LocalWindowProxy::Initialize. Initialize a new context. "
+               "[is_risky, cpu_cycle, time] ="
+            << world_->IsRiskyWorld() << ", " << (end - begin) << ", "
+            << (tDiff.tv_sec + (1.0 * tDiff.tv_usec)/1000000) << "s";
+#endif
+  /* Added End */
 
   ScriptState::Scope scope(script_state_.get());
   v8::Local<v8::Context> context = script_state_->GetContext();
@@ -160,7 +197,14 @@ void LocalWindowProxy::Initialize() {
         ContentSecurityPolicy::kWillNotThrowException, g_empty_string));
     context->SetErrorMessageForCodeGenerationFromStrings(
         V8String(GetIsolate(), csp->EvalDisabledErrorMessage()));
-  } else {
+  }
+  /* Added by Luo Wu */
+  else if(world_->IsRiskyWorld()) {
+    UpdateActivityLogger();
+    origin = GetFrame()->GetDocument()->GetSecurityOrigin();
+  }
+  /* Added End */
+  else {
     UpdateActivityLogger();
     origin = world_->IsolatedWorldSecurityOrigin();
     SetSecurityToken(origin);
@@ -184,6 +228,14 @@ void LocalWindowProxy::Initialize() {
 void LocalWindowProxy::CreateContext() {
   TRACE_EVENT1("v8", "LocalWindowProxy::CreateContext", "IsMainFrame",
                GetFrame()->IsMainFrame());
+
+  if(base::scriptchecker::g_script_checker) {
+    LOG(INFO) << base::scriptchecker::g_name
+              << ">>> [Risky] LocalWindowProxy::CreateContext. TASK "
+              << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
+              << world_->GetWorldId() << ", "
+              << global_proxy_.IsEmpty();
+  }
 
   // TODO(yukishiino): Remove this CHECK once crbug.com/713699 gets fixed.
   CHECK(IsMainThread());
@@ -213,7 +265,15 @@ void LocalWindowProxy::CreateContext() {
     v8::Isolate* isolate = GetIsolate();
     V8PerIsolateData::UseCounterDisabledScope use_counter_disabled(
         V8PerIsolateData::From(isolate));
-    Document* document = GetFrame()->GetDocument();
+
+    /* Modified by Luo Wu */
+    //Document* document = GetFrame()->GetDocument();
+    Document* document;
+    if(world_->IsRiskyWorld())
+      document = GetFrame()->DomWindowForRiskyWorld()->documentForRiskyWorld();
+    else
+      document = GetFrame()->GetDocument();
+    /* End */
 
     v8::Local<v8::Object> global_proxy = global_proxy_.NewLocal(isolate);
     context = V8ContextSnapshot::CreateContextFromSnapshot(
@@ -251,6 +311,11 @@ void LocalWindowProxy::InstallConditionalFeatures() {
 
   v8::Local<v8::Context> context = script_state_->GetContext();
 
+  LOG(INFO) << base::scriptchecker::g_name
+            << ">>> [JS] LocalWindowProxy::InstallConditionalFeatures. "
+            << (GetFrame()->DomWindowForRiskyWorld()->GetWrapperTypeInfo() ==
+                GetFrame()->DomWindow()->GetWrapperTypeInfo());
+
   // If the context was created from snapshot, all conditionally
   // enabled features are installed in
   // V8ContextSnapshot::InstallConditionalFeatures().
@@ -260,8 +325,15 @@ void LocalWindowProxy::InstallConditionalFeatures() {
   }
 
   v8::Local<v8::Object> global_proxy = context->Global();
-  const WrapperTypeInfo* wrapper_type_info =
-      GetFrame()->DomWindow()->GetWrapperTypeInfo();
+  /* Modified by Luo Wu */
+  //const WrapperTypeInfo* wrapper_type_info =
+  //    GetFrame()->DomWindow()->GetWrapperTypeInfo();
+  const WrapperTypeInfo* wrapper_type_info;
+  if(world_->IsRiskyWorld())
+    wrapper_type_info = GetFrame()->DomWindowForRiskyWorld()->GetWrapperTypeInfo();
+  else
+    wrapper_type_info = GetFrame()->DomWindow()->GetWrapperTypeInfo();
+  /* End */
 
   v8::Local<v8::Object> unused_prototype_object;
   v8::Local<v8::Function> unused_interface_object;
@@ -270,7 +342,9 @@ void LocalWindowProxy::InstallConditionalFeatures() {
       unused_interface_object,
       wrapper_type_info->domTemplate(GetIsolate(), World()));
 
-  if (World().IsMainWorld()) {
+  if (World().IsMainWorld()
+        /* Added by Luo Wu */ || World().IsRiskyWorld() /* End */
+      ) {
     // For the main world, install any remaining conditional bindings (i.e.
     // for origin trials, which do not apply to extensions). Some conditional
     // bindings cannot be enabled until the execution context is available
@@ -287,9 +361,21 @@ void LocalWindowProxy::SetupWindowPrototypeChain() {
 
   // Associate the window wrapper object and its prototype chain with the
   // corresponding native DOMWindow object.
-  DOMWindow* window = GetFrame()->DomWindow();
+  /* Modified by Luo Wu */
+  //DOMWindow* window = GetFrame()->DomWindow();
+  DOMWindow* window;
+  if(world_->IsRiskyWorld())
+    window = GetFrame()->DomWindowForRiskyWorld();
+  else
+    window = GetFrame()->DomWindow();
+  /* End */
   const WrapperTypeInfo* wrapper_type_info = window->GetWrapperTypeInfo();
   v8::Local<v8::Context> context = script_state_->GetContext();
+
+  LOG(INFO) << base::scriptchecker::g_name
+            << ">>> [JS] LocalWindowProxy::SetupWindowPrototypeChain. wrapper_class_id="
+            << wrapper_type_info->wrapper_class_id << ", " << world_->GetWorldId()
+            << ", " << this << ", " << (wrapper_type_info->Equals(&V8Window::wrapperTypeInfo));
 
   // The global proxy object.  Note this is not the global object.
   v8::Local<v8::Object> global_proxy = context->Global();
@@ -306,6 +392,9 @@ void LocalWindowProxy::SetupWindowPrototypeChain() {
   v8::Local<v8::Object> associated_wrapper =
       AssociateWithWrapper(window, wrapper_type_info, window_wrapper);
   DCHECK(associated_wrapper == window_wrapper);
+
+  LOG(INFO) << base::scriptchecker::g_name
+            << "\t address of window wrapper: " << *window_wrapper;
 
   // The prototype object of Window interface.
   v8::Local<v8::Object> window_prototype =

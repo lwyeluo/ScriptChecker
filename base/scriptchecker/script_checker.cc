@@ -91,6 +91,14 @@ Capability* ScriptChecker::GetCurrentTaskCapability() {
   return m_current_task_->capability_;
 }
 
+int ScriptChecker::GetCurrentTaskID() {
+  return m_current_task_->sequence_num;
+}
+
+void ScriptChecker::UpdateCurrentTaskCapability(std::string task_capability) {
+  m_current_task_->SetCapabilityFromJSString(task_capability);
+}
+
 std::string ScriptChecker::GetCurrentTaskCapabilityAsJSString() {
   return m_current_task_->GetCapbilityAsJSString();
 }

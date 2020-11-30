@@ -53,7 +53,10 @@ namespace {
 bool CanAccessWindowInternal(const LocalDOMWindow* accessing_window,
                              const DOMWindow* target_window) {
   SECURITY_CHECK(!(target_window && target_window->GetFrame()) ||
-                 target_window == target_window->GetFrame()->DomWindow());
+                 target_window == target_window->GetFrame()->DomWindow()
+                 /* Added by Luo Wu */ ||
+                 target_window == target_window->GetFrame()->DomWindowForRiskyWorld()
+                 /* End */);
 
   // It's important to check that target_window is a LocalDOMWindow: it's
   // possible for a remote frame and local frame to have the same security

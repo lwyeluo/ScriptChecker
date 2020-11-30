@@ -15,6 +15,8 @@
 #include "third_party/blink/renderer/platform/wtf/assertions.h"
 #include "third_party/blink/renderer/platform/wtf/forward.h"
 
+#include "third_party/blink/renderer/platform/bindings/dom_wrapper_world.h"
+
 namespace blink {
 
 class Document;
@@ -44,7 +46,11 @@ class CORE_EXPORT DOMWindow : public EventTargetWithInlineData,
     //   issues where executing script incorrectly schedules work on a detached
     //   frame.
     SECURITY_DCHECK(!frame_ ||
-                    (frame_->DomWindow() == this && frame_->GetPage()));
+                    (frame_->DomWindow() == this && frame_->GetPage())
+                    /* Added by Luo Wu */ ||
+                    (frame_->DomWindowForRiskyWorld() == this && frame_->GetPage())
+                    /* Added End */
+                    );
     return frame_;
   }
 
@@ -81,6 +87,14 @@ class CORE_EXPORT DOMWindow : public EventTargetWithInlineData,
   DOMWindow* opener() const;
   DOMWindow* parent() const;
   DOMWindow* top() const;
+
+  /* Added by Luo Wu */
+  // reference the risky world and main world
+  DOMWindow* windowMain() const;
+  DOMWindow* windowRisky() const;
+  DOMWrapperWorld* getWorld();
+  bool setWorld(DOMWrapperWorld*);
+  /* Added End */
 
   void focus(LocalDOMWindow* incumbent_window);
   virtual void blur() = 0;
@@ -129,6 +143,9 @@ class CORE_EXPORT DOMWindow : public EventTargetWithInlineData,
   const Member<WindowProxyManager> window_proxy_manager_;
   Member<InputDeviceCapabilitiesConstants> input_capabilities_;
   mutable TraceWrapperMember<Location> location_;
+
+  /* Added by Luo Wu */
+  scoped_refptr<DOMWrapperWorld> world_;
 
   // Set to true when close() has been called. Needed for
   // |window.closed| determinism; having it return 'true'

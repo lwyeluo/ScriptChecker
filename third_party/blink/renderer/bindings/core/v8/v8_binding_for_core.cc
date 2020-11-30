@@ -760,6 +760,12 @@ ScriptState* ToScriptStateForMainWorld(LocalFrame* frame) {
   return ToScriptState(frame, DOMWrapperWorld::MainWorld());
 }
 
+/* Added by Luo Wu */
+ScriptState* ToScriptStateForRiskyWorld(LocalFrame* frame) {
+  return ToScriptState(frame, DOMWrapperWorld::RiskyWorld());
+}
+/* Added End */
+
 bool IsValidEnum(const String& value,
                  const char** valid_values,
                  size_t length,

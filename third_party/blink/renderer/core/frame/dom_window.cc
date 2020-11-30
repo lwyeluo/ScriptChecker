@@ -81,7 +81,12 @@ DOMWindow* DOMWindow::self() const {
   if (!GetFrame())
     return nullptr;
 
-  return GetFrame()->DomWindow();
+  /* Modified by Luo Wu */
+  //return GetFrame()->DomWindow();
+  if(GetFrame()->DomWindow() == this)
+    return GetFrame()->DomWindow();
+  return GetFrame()->DomWindowForRiskyWorld();
+  /* End */
 }
 
 DOMWindow* DOMWindow::opener() const {
@@ -105,8 +110,41 @@ DOMWindow* DOMWindow::top() const {
   if (!GetFrame())
     return nullptr;
 
+  /* Added by Luo Wu */
+  // the top frame is itself
+  if(GetFrame()->Tree().Top() == GetFrame()) {
+    if(GetFrame()->DomWindow() == this)
+      return GetFrame()->DomWindow();
+    return GetFrame()->DomWindowForRiskyWorld();
+  }
+  /* Added End */
+
   return GetFrame()->Tree().Top().DomWindow();
 }
+
+/* Added by Luo Wu */
+// reference the risky world and main world
+DOMWindow* DOMWindow::windowMain() const {
+  if (!GetFrame())
+    return nullptr;
+  return GetFrame()->DomWindow();
+}
+
+DOMWindow* DOMWindow::windowRisky() const {
+  if (!GetFrame())
+    return nullptr;
+  return GetFrame()->DomWindowForRiskyWorld();
+}
+
+DOMWrapperWorld* DOMWindow::getWorld() {
+  return world_.get();
+}
+
+bool DOMWindow::setWorld(DOMWrapperWorld* world) {
+  world_ = world;
+  return true;
+}
+/* End */
 
 DOMWindow* DOMWindow::AnonymousIndexedGetter(uint32_t index) const {
   if (!GetFrame())
@@ -118,7 +156,8 @@ DOMWindow* DOMWindow::AnonymousIndexedGetter(uint32_t index) const {
 
 bool DOMWindow::IsCurrentlyDisplayedInFrame() const {
   if (GetFrame())
-    SECURITY_CHECK(GetFrame()->DomWindow() == this);
+    SECURITY_CHECK(GetFrame()->DomWindow() == this
+       /* Added by Luo Wu */ || GetFrame()->DomWindowForRiskyWorld() == this /* End */);
   return GetFrame() && GetFrame()->GetPage();
 }
 

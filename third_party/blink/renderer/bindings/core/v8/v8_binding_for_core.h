@@ -462,6 +462,10 @@ CORE_EXPORT ScriptState* ToScriptState(LocalFrame*, DOMWrapperWorld&);
 // ScriptState
 CORE_EXPORT ScriptState* ToScriptStateForMainWorld(LocalFrame*);
 
+/* Added by Luo Wu */
+CORE_EXPORT ScriptState* ToScriptStateForRiskyWorld(LocalFrame*);
+/* Added End */
+
 // Returns the frame object of the window object associated with
 // a context, if the window is currently being displayed in a Frame.
 CORE_EXPORT LocalFrame* ToLocalFrameIfNotDetached(v8::Local<v8::Context>);

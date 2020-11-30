@@ -74,6 +74,7 @@ class PLATFORM_EXPORT DOMWrapperWorld : public RefCounted<DOMWrapperWorld> {
     kTesting,
     kForV8ContextSnapshotNonMain,
     kWorker,
+    kRisky, /* Added by Luo Wu */
   };
 
   // Creates a world other than IsolatedWorld. Note this can return nullptr if
@@ -108,6 +109,9 @@ class PLATFORM_EXPORT DOMWrapperWorld : public RefCounted<DOMWrapperWorld> {
   }
 
   static DOMWrapperWorld& MainWorld();
+  /* Added by Luo Wu */
+  static DOMWrapperWorld& RiskyWorld();
+  /* Added End */
 
   static void SetNonMainWorldHumanReadableName(int world_id, const String&);
   String NonMainWorldHumanReadableName();
@@ -134,6 +138,9 @@ class PLATFORM_EXPORT DOMWrapperWorld : public RefCounted<DOMWrapperWorld> {
   static bool HasWrapperInAnyWorldInMainThread(ScriptWrappable*);
 
   bool IsMainWorld() const { return world_type_ == WorldType::kMain; }
+  /* Added by Luo Wu */
+  bool IsRiskyWorld() const { return world_type_ == WorldType::kRisky; }
+  /* Added End */
   bool IsWorkerWorld() const { return world_type_ == WorldType::kWorker; }
   bool IsIsolatedWorld() const {
     return world_type_ == WorldType::kIsolated ||

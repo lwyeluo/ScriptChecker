@@ -51,7 +51,7 @@ class WindowProxyManager : public GarbageCollected<WindowProxyManager> {
 
  protected:
   using IsolatedWorldMap = HeapHashMap<int, Member<WindowProxy>>;
-  enum class FrameType { kLocal, kRemote };
+  enum class FrameType { kLocal, kRemote /*Added by Luo Wu*/, kRisky /*End*/ };
 
   WindowProxyManager(Frame&, FrameType);
 
@@ -66,6 +66,7 @@ class WindowProxyManager : public GarbageCollected<WindowProxyManager> {
 
  protected:
   const Member<WindowProxy> window_proxy_;
+  Member<WindowProxy> window_proxy_for_risky_world_; /*Added by Luo Wu*/
   IsolatedWorldMap isolated_worlds_;
 };
 

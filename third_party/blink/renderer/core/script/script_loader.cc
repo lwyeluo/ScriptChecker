@@ -60,6 +60,8 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "third_party/blink/renderer/platform/wtf/text/string_hash.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 ScriptLoader::ScriptLoader(ScriptElementBase* element,
@@ -759,6 +761,23 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
     return;
   }
 
+  /* Added by Luo Wu */
+  String task_capability = "";
+  bool is_risky = false;
+  if(base::scriptchecker::g_script_checker) {
+    if(pending_script->GetElement()) {
+      is_risky = pending_script->GetElement()->risky();
+      task_capability = pending_script->GetElement()->CapabilityAttrbiuteValue();
+    }
+    LOG(INFO) << base::scriptchecker::g_name
+              << " >>> [RISKY] ScriptLoader::ExecuteScriptBlock. "
+                 "[task_id, url, risky, permission] is "
+              << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
+              << context_document->Url().GetString() << ", " << is_risky << ", "
+              << task_capability << ", " << pending_script->GetElement()->SourceAttributeValue();
+  }
+  /* Added End */
+
   bool error_occurred = false;
   Script* script = pending_script->GetSource(document_url, error_occurred);
 
@@ -850,7 +869,31 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
     // Note: This is where the script is compiled and actually executed.
     //    - "module":
     //    2. "Run the module script given by the script's script."
-    script->RunScript(frame, element_->GetDocument().GetSecurityOrigin());
+    /* Modified by Luo Wu */
+    //script->RunScript(frame, element_->GetDocument().GetSecurityOrigin());
+    if(base::scriptchecker::g_script_checker) {
+      base::scriptchecker::g_script_checker
+          ->UpdateCurrentTaskCapability(task_capability.Utf8().data());
+      LOG(INFO) << base::scriptchecker::g_name
+                << ">>> [JS] ScriptLoader::ExecuteScriptBlock. task_id, task_permission = "
+                << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
+                << base::scriptchecker::g_script_checker->GetCurrentTaskCapabilityAsJSString();
+    }
+
+    if(is_risky) {
+      script->RunScriptInRiskyWorld(frame,
+                                    element_->GetDocument().GetSecurityOrigin(),
+                                    task_capability);
+    } else {
+      script->RunScript(frame, element_->GetDocument().GetSecurityOrigin());
+    }
+
+    // reset the task permission
+    if(base::scriptchecker::g_script_checker) {
+      base::scriptchecker::g_script_checker
+          ->UpdateCurrentTaskCapability("");
+    }
+    /* End */
 
     // 6. "Set the script element's node document's currentScript attribute
     //     to old script element."

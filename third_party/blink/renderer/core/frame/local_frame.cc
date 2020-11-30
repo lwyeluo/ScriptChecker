@@ -496,6 +496,23 @@ void LocalFrame::SetDOMWindow(LocalDOMWindow* dom_window) {
   dom_window_ = dom_window;
 }
 
+/* Added by Luo Wu */
+LocalDOMWindow* LocalFrame::DomWindowForRiskyWorld() const {
+  return ToLocalDOMWindow(dom_window_for_risky_world_);
+}
+
+void LocalFrame::SetDOMWindowForRiskyWorld(LocalDOMWindow* dom_window) {
+  // ClearWindowProxy will detach the global proxy for main world,
+  //  we dont need to clear it
+  //if (dom_window)
+  //  GetScriptController().ClearWindowProxy();
+
+  if (this->DomWindowForRiskyWorld())
+    this->DomWindowForRiskyWorld()->Reset();
+  dom_window_for_risky_world_ = dom_window;
+}
+/* Added End */
+
 Document* LocalFrame::GetDocument() const {
   return DomWindow() ? DomWindow()->document() : nullptr;
 }

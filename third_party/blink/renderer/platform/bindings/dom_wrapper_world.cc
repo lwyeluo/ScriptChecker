@@ -88,6 +88,7 @@ DOMWrapperWorld::DOMWrapperWorld(v8::Isolate* isolate,
     case WorldType::kRegExp:
     case WorldType::kTesting:
     case WorldType::kForV8ContextSnapshotNonMain:
+    case WorldType::kRisky: /* Added by Luo Wu */
     case WorldType::kWorker: {
       WorldMap& map = GetWorldMap();
       DCHECK(!map.Contains(world_id_));
@@ -106,6 +107,16 @@ DOMWrapperWorld& DOMWrapperWorld::MainWorld() {
       (DOMWrapperWorld::Create(v8::Isolate::GetCurrent(), WorldType::kMain)));
   return *cached_main_world;
 }
+
+/* Added by Luo Wu */
+DOMWrapperWorld& DOMWrapperWorld::RiskyWorld() {
+  DCHECK(IsMainThread());
+  DEFINE_STATIC_REF(
+      DOMWrapperWorld, cached_risky_world,
+      (DOMWrapperWorld::Create(v8::Isolate::GetCurrent(), WorldType::kRisky)));
+  return *cached_risky_world;
+}
+/* Added End */
 
 void DOMWrapperWorld::AllWorldsInCurrentThread(
     Vector<scoped_refptr<DOMWrapperWorld>>& worlds) {
@@ -287,6 +298,7 @@ int DOMWrapperWorld::GenerateWorldIdForType(WorldType world_type) {
     case WorldType::kRegExp:
     case WorldType::kTesting:
     case WorldType::kForV8ContextSnapshotNonMain:
+    case WorldType::kRisky: /* Added by Luo Wu */
     case WorldType::kWorker:
       int world_id = *next_world_id;
       CHECK_GE(world_id, WorldId::kUnspecifiedWorldIdStart);

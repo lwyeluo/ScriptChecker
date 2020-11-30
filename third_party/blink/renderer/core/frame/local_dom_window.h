@@ -162,6 +162,11 @@ class CORE_EXPORT LocalDOMWindow final : public DOMWindow,
   // DOM Level 2 AbstractView Interface
   Document* document() const;
 
+  /* Added by Luo Wu */
+  bool initializeForRiskyWorld(DOMWrapperWorld* world);
+  Document* documentForRiskyWorld() const;
+  /* Added End */
+
   // CSSOM View Module
   StyleMedia* styleMedia() const;
 

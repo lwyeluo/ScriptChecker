@@ -52,6 +52,11 @@ class SVGScriptElement final : public SVGElement,
   virtual void Trace(blink::Visitor*);
   void TraceWrappers(const ScriptWrappableVisitor*) const;
 
+  /* Added by Luo Wu */
+  bool risky() const override;
+  String CapabilityAttrbiuteValue() const override;
+  /* Added End */
+
  private:
   SVGScriptElement(Document&, const CreateElementFlags);
 

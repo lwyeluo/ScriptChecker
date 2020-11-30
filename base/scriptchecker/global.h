@@ -8,6 +8,9 @@ namespace base {
 
 namespace scriptchecker {
 
+// some logs for micro-benchmark
+#define SCRIPT_CHECKER_INSPECT_TIME_USAGE
+
 const char BASE_EXPORT g_name[] = "[SCRIPTCHECKER] ";
 
 // ScriptChecker running in the renderer process
@@ -17,6 +20,16 @@ void BASE_EXPORT initScriptChecker();
 // ScriptChecker running in the browser kernel process
 extern HostScriptChecker* BASE_EXPORT g_host_script_checker;
 void BASE_EXPORT initHostScriptChecker();
+
+
+/************************************************************
+ *
+ *           Record Time Usages
+ *
+ **************************************************************/
+bool BASE_EXPORT subTimeVal(timeval &result, timeval& begin, timeval& end);
+extern "C" void rdtsc();
+uint64_t BASE_EXPORT _rdtsc();
 
 
 } // scriptchecker

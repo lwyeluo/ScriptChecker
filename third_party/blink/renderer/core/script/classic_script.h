@@ -41,6 +41,9 @@ class CORE_EXPORT ClassicScript final : public Script {
 
   ScriptType GetScriptType() const override { return ScriptType::kClassic; }
   void RunScript(LocalFrame*, const SecurityOrigin*) const override;
+  /* Added by Luo Wu */
+  void RunScriptInRiskyWorld(LocalFrame*, const SecurityOrigin*, String) const override;
+  /* Added End */
   String InlineSourceTextForCSP() const override {
     return script_source_code_.Source();
   }

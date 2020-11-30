@@ -387,6 +387,13 @@ void LocalDOMWindow::DocumentWasClosed() {
   EnqueuePageshowEvent(kPageshowEventNotPersisted);
   if (pending_state_object_)
     EnqueuePopstateEvent(std::move(pending_state_object_));
+
+  /* Added by Luo Wu */
+  // the event also need to be transfered to the risky world
+  if(GetFrame() && GetFrame()->DomWindow() == this
+     && GetFrame()->DomWindowForRiskyWorld())
+    GetFrame()->DomWindowForRiskyWorld()->DocumentWasClosed();
+  /* Added End */
 }
 
 void LocalDOMWindow::EnqueuePageshowEvent(PageshowEventPersistence persisted) {
@@ -450,7 +457,17 @@ void LocalDOMWindow::Dispose() {
 }
 
 ExecutionContext* LocalDOMWindow::GetExecutionContext() const {
-  return document_.Get();
+  /* Modified by Luo Wu */
+  //return document_.Get();
+
+  // even in the risky world, the execution context should refer to the normal document,
+  //  otherwise event listeners in risky world cannot be triggered
+  if(GetFrame()->DomWindow() == this)
+    return document_.Get();
+  else if(GetFrame()->DomWindowForRiskyWorld() == this)
+    return GetFrame()->DomWindow()->document();
+  return nullptr;
+  /* End */
 }
 
 const LocalDOMWindow* LocalDOMWindow::ToLocalDOMWindow() const {
@@ -1085,8 +1102,26 @@ String LocalDOMWindow::origin() const {
 }
 
 Document* LocalDOMWindow::document() const {
+  /* Modified by Luo Wu */
+  //return document_.Get();
+  if(GetFrame() && GetFrame()->DomWindowForRiskyWorld() == this)
+    return GetFrame()->DomWindow()->document();
+  return document_.Get();
+  /* End */
+}
+
+/* Added by Luo Wu */
+bool LocalDOMWindow::initializeForRiskyWorld(DOMWrapperWorld* world) {
+  ClearDocument();
+  document_ = Document::CreateForTest();
+  setWorld(world);
+  return true;
+}
+
+Document* LocalDOMWindow::documentForRiskyWorld() const {
   return document_.Get();
 }
+/* Added End */
 
 StyleMedia* LocalDOMWindow::styleMedia() const {
   if (!media_)

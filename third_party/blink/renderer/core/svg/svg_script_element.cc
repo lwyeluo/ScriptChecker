@@ -190,4 +190,14 @@ void SVGScriptElement::TraceWrappers(
   SVGElement::TraceWrappers(visitor);
 }
 
+/* Added by Luo Wu */
+bool SVGScriptElement::risky() const {
+  return false;;
+}
+
+String SVGScriptElement::CapabilityAttrbiuteValue() const {
+  return String();
+}
+/* Added End */
+
 }  // namespace blink

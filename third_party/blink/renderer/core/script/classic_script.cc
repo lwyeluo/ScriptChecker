@@ -7,6 +7,8 @@
 #include "third_party/blink/renderer/bindings/core/v8/script_controller.h"
 #include "third_party/blink/renderer/core/frame/local_frame.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 void ClassicScript::Trace(blink::Visitor* visitor) {
@@ -19,5 +21,17 @@ void ClassicScript::RunScript(LocalFrame* frame,
   frame->GetScriptController().ExecuteScriptInMainWorld(
       GetScriptSourceCode(), BaseURL(), FetchOptions(), access_control_status_);
 }
+
+/* Added by Luo Wu */
+void ClassicScript::RunScriptInRiskyWorld(LocalFrame* frame,
+                                          const SecurityOrigin* origin,
+                                          String task_capability) const {
+  LOG(INFO) << base::scriptchecker::g_name
+            << ">>> [RISKY] ClassicScript::RunScriptInRiskyWorld with capability "
+            << task_capability;
+  frame->GetScriptController().ExecuteScriptInRiskyWorld(
+      GetScriptSourceCode(), BaseURL(), FetchOptions(), access_control_status_);
+}
+/* Addded End */
 
 }  // namespace blink

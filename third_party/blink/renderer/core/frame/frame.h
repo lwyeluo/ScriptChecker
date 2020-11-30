@@ -107,6 +107,9 @@ class CORE_EXPORT Frame : public GarbageCollectedFinalized<Frame> {
   HTMLFrameOwnerElement* DeprecatedLocalOwner() const;
 
   DOMWindow* DomWindow() const { return dom_window_; }
+  /* Added by Luo Wu */
+  DOMWindow* DomWindowForRiskyWorld() const { return dom_window_for_risky_world_; }
+  /* Added End */
 
   FrameTree& Tree() const;
   ChromeClient& GetChromeClient() const;
@@ -217,6 +220,7 @@ class CORE_EXPORT Frame : public GarbageCollectedFinalized<Frame> {
   Member<Page> page_;
   Member<FrameOwner> owner_;
   Member<DOMWindow> dom_window_;
+  Member<DOMWindow> dom_window_for_risky_world_; /* Added by Luo Wu */
 
   // A LocalFrame is the primary "owner" of the activation state.  The state in
   // a RemoteFrame serves as a cache for the corresponding LocalFrame state (to

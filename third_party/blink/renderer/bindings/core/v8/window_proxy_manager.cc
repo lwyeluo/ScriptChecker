@@ -12,6 +12,9 @@ namespace blink {
 void WindowProxyManager::Trace(blink::Visitor* visitor) {
   visitor->Trace(frame_);
   visitor->Trace(window_proxy_);
+  /* Added by Luo Wu */
+  visitor->Trace(window_proxy_for_risky_world_);
+  /* Added End */
   visitor->Trace(isolated_worlds_);
 }
 
@@ -39,6 +42,12 @@ void WindowProxyManager::ReleaseGlobalProxies(
   global_proxies.ReserveInitialCapacity(1 + isolated_worlds_.size());
   global_proxies.emplace_back(&window_proxy_->World(),
                               window_proxy_->ReleaseGlobalProxy());
+  /* Added by Luo Wu */
+  if(window_proxy_for_risky_world_.Get()) {
+    global_proxies.emplace_back(&window_proxy_for_risky_world_->World(),
+                                window_proxy_for_risky_world_->ReleaseGlobalProxy());
+  }
+  /* Added End */
   for (auto& entry : isolated_worlds_) {
     global_proxies.emplace_back(
         &entry.value->World(),
@@ -77,6 +86,11 @@ WindowProxy* WindowProxyManager::CreateWindowProxy(DOMWrapperWorld& world) {
     case FrameType::kRemote:
       return RemoteWindowProxy::Create(
           isolate_, *static_cast<RemoteFrame*>(frame_.Get()), &world);
+    /* Added by Luo Wu */
+    case FrameType::kRisky:
+      return LocalWindowProxy::Create(
+        isolate_, *static_cast<LocalFrame*>(frame_.Get()), &world);
+    /* Added End */
   }
   NOTREACHED();
   return nullptr;
@@ -87,7 +101,18 @@ WindowProxy* WindowProxyManager::WindowProxyMaybeUninitialized(
   WindowProxy* window_proxy = nullptr;
   if (world.IsMainWorld()) {
     window_proxy = window_proxy_.Get();
-  } else {
+  }
+  /* Added by Luo Wu */
+  else if(world.IsRiskyWorld()) {
+//    LOG(INFO) << ">>> [RISKY] WindowProxyManager::WindowProxyMaybeUninitialized. >>>RISKY SCRIPT<<<"
+//              << window_proxy_for_risky_world_.Get();
+    if(!window_proxy_for_risky_world_.Get()) {
+      window_proxy_for_risky_world_ = CreateWindowProxy(world);
+    }
+    window_proxy = window_proxy_for_risky_world_.Get();
+  }
+  /* Added End */
+  else {
     IsolatedWorldMap::iterator iter = isolated_worlds_.find(world.GetWorldId());
     if (iter != isolated_worlds_.end()) {
       window_proxy = iter->value.Get();
@@ -103,6 +128,13 @@ void LocalWindowProxyManager::UpdateSecurityOrigin(
     const SecurityOrigin* security_origin) {
   static_cast<LocalWindowProxy*>(window_proxy_.Get())
       ->UpdateSecurityOrigin(security_origin);
+
+  /* Added by Luo Wu */
+  if(window_proxy_for_risky_world_.Get()) {
+    static_cast<LocalWindowProxy*>(window_proxy_for_risky_world_.Get())
+        ->UpdateSecurityOrigin(security_origin);
+  }
+  /* Added End */
 
   for (auto& entry : isolated_worlds_) {
     auto* isolated_window_proxy =

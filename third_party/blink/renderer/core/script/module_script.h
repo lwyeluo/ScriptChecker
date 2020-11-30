@@ -84,6 +84,9 @@ class CORE_EXPORT ModuleScript final : public Script, public TraceWrapperBase {
 
   ScriptType GetScriptType() const override { return ScriptType::kModule; }
   void RunScript(LocalFrame*, const SecurityOrigin*) const override;
+  /* Added by Luo Wu */
+  void RunScriptInRiskyWorld(LocalFrame*, const SecurityOrigin*, String) const override;
+  /* Added End */
   String InlineSourceTextForCSP() const override;
 
   friend class ModulatorImplBase;

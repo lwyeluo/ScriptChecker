@@ -33,6 +33,10 @@ class CORE_EXPORT Script : public GarbageCollectedFinalized<Script> {
   // depending on the script type.
   virtual void RunScript(LocalFrame*, const SecurityOrigin*) const = 0;
 
+  /* Added by Luo Wu */
+  virtual void RunScriptInRiskyWorld(LocalFrame*, const SecurityOrigin*, String) const = 0;
+  /* Added End */
+
   // For CSP check for inline scripts.
   virtual String InlineSourceTextForCSP() const = 0;
 

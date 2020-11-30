@@ -70,6 +70,9 @@ void Frame::Trace(blink::Visitor* visitor) {
   visitor->Trace(owner_);
   visitor->Trace(window_proxy_manager_);
   visitor->Trace(dom_window_);
+  /* Added by Luo Wu */
+  visitor->Trace(dom_window_for_risky_world_);
+  /* Added End */
   visitor->Trace(client_);
 }
 

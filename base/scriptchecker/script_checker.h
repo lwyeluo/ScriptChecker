@@ -26,6 +26,12 @@ class BASE_EXPORT ScriptChecker {
 
     bool IsCurrentTaskWithRestricted();
     Capability* GetCurrentTaskCapability();
+    int GetCurrentTaskID();
+
+    // <script xxx risky task_capability=""> should be run in risky task
+    // currently we dynamic change task's capability to run risky script
+    //   using new task later
+    void UpdateCurrentTaskCapability(std::string task_capability);
 
     // Security Monitor
     bool DisallowedToAccessNetwork();

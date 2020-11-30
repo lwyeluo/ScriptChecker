@@ -144,6 +144,10 @@ class CORE_EXPORT LocalFrame final : public Frame,
   LocalWindowProxy* WindowProxy(DOMWrapperWorld&);
   LocalDOMWindow* DomWindow() const;
   void SetDOMWindow(LocalDOMWindow*);
+  /* Added by Luo Wu */
+  LocalDOMWindow* DomWindowForRiskyWorld() const;
+  void SetDOMWindowForRiskyWorld(LocalDOMWindow*);
+  /* Added End */
   LocalFrameView* View() const override;
   Document* GetDocument() const;
   void SetPagePopupOwner(Element&);
