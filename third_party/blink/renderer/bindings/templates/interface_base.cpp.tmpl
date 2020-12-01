@@ -241,7 +241,10 @@ static const struct {
 {% block indexed_property_definer_callback %}{% endblock %}
 
 {% if has_access_check_callbacks and not is_partial %}
-bool {{v8_class_or_partial}}::securityCheck(v8::Local<v8::Context> accessingContext, v8::Local<v8::Object> accessedObject, v8::Local<v8::Value> data) {
+bool {{v8_class_or_partial}}::securityCheck(v8::Local<v8::Context> accessingContext,
+                                            v8::Local<v8::Object> accessedObject,
+                                            v8::Local<v8::Value> data
+                                            /* Added by Luo Wu */, std::string object_name /* End */) {
   {% if interface_name == 'Window' %}
   v8::Isolate* isolate = v8::Isolate::GetCurrent();
   v8::Local<v8::Object> window = V8Window::findInstanceInPrototypeChain(accessedObject, isolate);
@@ -249,7 +252,10 @@ bool {{v8_class_or_partial}}::securityCheck(v8::Local<v8::Context> accessingCont
     return false;  // the frame is gone.
 
   const DOMWindow* targetWindow = V8Window::ToImpl(window);
-  return BindingSecurity::ShouldAllowAccessTo(ToLocalDOMWindow(accessingContext), targetWindow, BindingSecurity::ErrorReportOption::kDoNotReport);
+  return BindingSecurity::ShouldAllowAccessTo(ToLocalDOMWindow(accessingContext),
+                                              targetWindow,
+                                              BindingSecurity::ErrorReportOption::kDoNotReport
+                                              /* Added by Luo Wu */, object_name /* End */);
   {% elif interface_name == 'Location' %}
   {{cpp_class}}* impl = {{v8_class}}::ToImpl(accessedObject);
   return BindingSecurity::ShouldAllowAccessTo(ToLocalDOMWindow(accessingContext), impl, BindingSecurity::ErrorReportOption::kDoNotReport);

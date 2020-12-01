@@ -108,8 +108,7 @@ uint64_t Capability::GetBitmap() {
 }
 
 bool Capability::ContainsInJSWL(std::string target_object) {
-  // TODO
-  return true;
+  return capability_js_wl.count(target_object);
 }
 
 bool Capability::IsRestricted() {

@@ -133,6 +133,11 @@ bool ScriptChecker::DisallowedToAccessDOM(bool is_ele_has_task_cap_attr) {
               m_current_task_->capability_->GetBitmap(),
               is_ele_has_task_cap_attr);
 }
+bool ScriptChecker::DisallowedToAccessJSObject(std::string object_name) {
+  if(!m_current_task_->IsTaskRestricted())
+    return false;
+  return !m_current_task_->capability_->ContainsInJSWL(object_name);
+}
 
 }
 

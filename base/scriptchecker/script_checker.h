@@ -36,6 +36,7 @@ class BASE_EXPORT ScriptChecker {
     // Security Monitor
     bool DisallowedToAccessNetwork();
     bool DisallowedToAccessDOM(bool is_ele_has_task_cap_attr);
+    bool DisallowedToAccessJSObject(std::string object_name);
 
     // update capability information with predefined rules
     bool MatchWithCapabilityJSRules(std::string in_capability_js_str,

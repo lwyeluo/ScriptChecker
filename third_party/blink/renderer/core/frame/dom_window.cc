@@ -304,6 +304,12 @@ String DOMWindow::CrossDomainAccessErrorMessage(
   if (calling_window_url.IsNull())
     return String();
 
+  /* Added by Luo Wu */
+  if(calling_window->GetFrame()->DomWindowForRiskyWorld() == calling_window) {
+    return String("Blocked risky world from accessing normal world");
+  }
+  /* Added End */
+
   // FIXME: This message, and other console messages, have extra newlines.
   // Should remove them.
   const SecurityOrigin* active_origin =

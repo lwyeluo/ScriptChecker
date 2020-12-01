@@ -46,17 +46,46 @@
 #include "third_party/blink/renderer/platform/bindings/wrapper_creation_security_check.h"
 #include "third_party/blink/renderer/platform/weborigin/security_origin.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 namespace {
 
 bool CanAccessWindowInternal(const LocalDOMWindow* accessing_window,
-                             const DOMWindow* target_window) {
+                             const DOMWindow* target_window
+                             /* Added by Luo Wu */, std::string object_name="" /* End */) {
   SECURITY_CHECK(!(target_window && target_window->GetFrame()) ||
                  target_window == target_window->GetFrame()->DomWindow()
                  /* Added by Luo Wu */ ||
                  target_window == target_window->GetFrame()->DomWindowForRiskyWorld()
                  /* End */);
+
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_script_checker &&
+          base::scriptchecker::g_script_checker->IsCurrentTaskWithRestricted()) {
+    // a restricted task, we need to check risky world
+    if(accessing_window == target_window) {
+      // they can be the same when the risky world/context is created
+      return true;
+    } else if(accessing_window->GetFrame()->DomWindowForRiskyWorld() == accessing_window) {
+      // risky code accesses normal code
+      bool cannot_access_ =
+              base::scriptchecker::g_script_checker->DisallowedToAccessJSObject(object_name);
+      if(cannot_access_) {
+        LOG(INFO) << base::scriptchecker::g_name << "[ERROR] The current task cannot access object ["
+                  << object_name << "] in main context from sandbox context";
+        return false;
+      }
+      // Note that passing the capability check does not mean the access is allowed,
+      //   it also has to check SOP
+    } else if((target_window == target_window->GetFrame()->DomWindowForRiskyWorld())
+              && (accessing_window->GetFrame() == target_window->GetFrame())) {
+      // Normal code accesses risky code. Grant it by default
+      return true;
+    }
+  }
+  /* Added End */
 
   // It's important to check that target_window is a LocalDOMWindow: it's
   // possible for a remote frame and local frame to have the same security
@@ -97,8 +126,11 @@ bool CanAccessWindow(const LocalDOMWindow* accessing_window,
 
 bool CanAccessWindow(const LocalDOMWindow* accessing_window,
                      const DOMWindow* target_window,
-                     BindingSecurity::ErrorReportOption reporting_option) {
-  if (CanAccessWindowInternal(accessing_window, target_window))
+                     BindingSecurity::ErrorReportOption reporting_option
+                     /* Added by Luo Wu */, std::string object_name="" /* End */
+        ) {
+  if (CanAccessWindowInternal(accessing_window, target_window
+                              /* Added by Luo Wu */, object_name /* End */))
     return true;
 
   if (accessing_window && target_window &&
@@ -154,7 +186,8 @@ bool BindingSecurity::ShouldAllowAccessTo(
 bool BindingSecurity::ShouldAllowAccessTo(
     const LocalDOMWindow* accessing_window,
     const DOMWindow* target,
-    ErrorReportOption reporting_option) {
+    ErrorReportOption reporting_option
+    /* Added by Luo Wu */, std::string object_name /* End */) {
   DCHECK(target);
 
   // TODO(https://crbug.com/723057): This is intended to match the legacy
@@ -165,7 +198,8 @@ bool BindingSecurity::ShouldAllowAccessTo(
   if (!target->GetFrame())
     return false;
 
-  bool can_access = CanAccessWindow(accessing_window, target, reporting_option);
+  bool can_access = CanAccessWindow(accessing_window, target, reporting_option
+                                    /* Added by Luo Wu */, object_name /* End */);
 
   if (!can_access) {
     UseCounter::Count(accessing_window->GetFrame(),
@@ -243,6 +277,11 @@ bool BindingSecurity::ShouldAllowAccessTo(
     ExceptionState& exception_state) {
   if (!target)
     return false;
+  /* Added by Luo Wu */
+  // the risky world can also access the host frame
+  if(accessing_window->GetFrame() == target->GetDocument().GetFrame())
+    return true;
+  /* Added End */
   return CanAccessWindow(accessing_window, target->GetDocument().domWindow(),
                          exception_state);
 }
@@ -253,6 +292,11 @@ bool BindingSecurity::ShouldAllowAccessTo(
     ErrorReportOption reporting_option) {
   if (!target)
     return false;
+  /* Added by Luo Wu */
+  // the risky world can also access the host frame
+  if(accessing_window->GetFrame() == target->GetDocument().GetFrame())
+    return true;
+  /* Added End */
   return CanAccessWindow(accessing_window, target->GetDocument().domWindow(),
                          reporting_option);
 }
@@ -263,6 +307,11 @@ bool BindingSecurity::ShouldAllowAccessToFrame(
     ExceptionState& exception_state) {
   if (!target || !target->GetSecurityContext())
     return false;
+  /* Added by Luo Wu */
+  // the risky world can also access the host frame
+  if(accessing_window->GetFrame() == target)
+    return true;
+  /* Added End */
   return CanAccessWindow(accessing_window, target->DomWindow(),
                          exception_state);
 }
@@ -273,6 +322,11 @@ bool BindingSecurity::ShouldAllowAccessToFrame(
     ErrorReportOption reporting_option) {
   if (!target || !target->GetSecurityContext())
     return false;
+  /* Added by Luo Wu */
+  // the risky world can also access the host frame
+  if(accessing_window->GetFrame() == target)
+    return true;
+  /* Added End */
   return CanAccessWindow(accessing_window, target->DomWindow(),
                          reporting_option);
 }
@@ -390,6 +444,13 @@ void BindingSecurity::FailedAccessCheckFor(v8::Isolate* isolate,
   // arguments, so the generated exception can be more descriptive.
   ExceptionState exception_state(isolate, ExceptionState::kUnknownContext,
                                  nullptr, nullptr);
+  /* Added by Luo Wu */
+  if(CurrentDOMWindow(isolate)->getWorld()->IsRiskyWorld()) {
+    String error_msg = "Blocked risky world from accessing normal world";
+    exception_state.ThrowSecurityError(error_msg, error_msg);
+    return;
+  }
+  /* Added End */
   exception_state.ThrowSecurityError(
       target->SanitizedCrossDomainAccessErrorMessage(CurrentDOMWindow(isolate)),
       target->CrossDomainAccessErrorMessage(CurrentDOMWindow(isolate)));

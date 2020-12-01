@@ -67,7 +67,9 @@ class CORE_EXPORT BindingSecurity {
                                   ExceptionState&);
   static bool ShouldAllowAccessTo(const LocalDOMWindow* accessing_window,
                                   const DOMWindow* target,
-                                  ErrorReportOption);
+                                  ErrorReportOption
+                                  /* Added by Luo Wu */, std::string object_name="" /* End */
+          );
 
   // Location
   static bool ShouldAllowAccessTo(const LocalDOMWindow* accessing_window,

@@ -213,7 +213,7 @@ class {{v8_class}} {
   {% endif %}
 
   {% if has_access_check_callbacks and not is_partial %}
-  {{exported}}static bool securityCheck(v8::Local<v8::Context>, v8::Local<v8::Object>, v8::Local<v8::Value>);
+  {{exported}}static bool securityCheck(v8::Local<v8::Context>, v8::Local<v8::Object>, v8::Local<v8::Value>/* Added by Luo Wu */, std::string /* End */);
   {% if has_cross_origin_named_getter %}
   {{exported}}static void crossOriginNamedGetter(v8::Local<v8::Name>, const v8::PropertyCallbackInfo<v8::Value>&);
   {% endif %}

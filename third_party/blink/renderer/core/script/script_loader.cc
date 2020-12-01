@@ -875,7 +875,7 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
       base::scriptchecker::g_script_checker
           ->UpdateCurrentTaskCapability(task_capability.Utf8().data());
       LOG(INFO) << base::scriptchecker::g_name
-                << ">>> [JS] ScriptLoader::ExecuteScriptBlock. task_id, task_permission = "
+                << ">>> [JS] ScriptLoader::ExecuteScriptBlock. task_id, task_capability = "
                 << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
                 << base::scriptchecker::g_script_checker->GetCurrentTaskCapabilityAsJSString();
     }

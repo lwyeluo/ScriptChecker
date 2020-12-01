@@ -906,8 +906,11 @@ deps = {
   'src/tools/swarming_client':
     Var('chromium_git') + '/infra/luci/client-py.git' + '@' +  Var('swarming_revision'),
 
+  # Modified by Luo Wu
+  #'src/v8':
+  #  Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
   'src/v8':
-    Var('chromium_git') + '/v8/v8.git' + '@' +  Var('v8_revision'),
+    'git@gitlab.com:luowu/scriptcheck-v8.git' + '@' + '64432b05ed5d5f7870fcc9d3a89b4498f1f3cde5';
 
   'src-internal': {
     'url': 'https://chrome-internal.googlesource.com/chrome/src-internal.git@b59810f75793af13e75f3bc7b0ca8e2101323d3b',
