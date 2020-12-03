@@ -275,6 +275,8 @@
 #include "third_party/blink/renderer/platform/wtf/text/text_encoding_registry.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
+#include "base/scriptchecker/global.h"
+
 #ifndef NDEBUG
 using WeakDocumentSet =
     blink::PersistentHeapHashSet<blink::WeakMember<blink::Document>>;
@@ -996,6 +998,43 @@ Element* Document::CreateElementForBinding(
 
   return element;
 }
+
+/* Added by Luo Wu */
+Element* Document::CreateElementForBindingWithRisky(const AtomicString& name,
+                                                    ExceptionState& exception_state) {
+  DCHECK(base::scriptchecker::g_script_checker);
+  Element* element = CreateElementForBinding(name, exception_state);
+  if(element) {
+    std::string capability = base::scriptchecker::g_script_checker
+            ->GetCurrentTaskCapabilityAsJSString();
+    LOG(INFO) << ">>> [RISKY] risky world creates a script element, add a risky attribute! [id, capability] ="
+              << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
+              << capability;
+    element->setAttribute(riskyAttr, "");
+    element->setAttribute(task_capabilityAttr, capability.c_str());
+  }
+  return element;
+}
+
+Element* Document::CreateElementForBindingWithRisky(
+    const AtomicString& local_name,
+    const StringOrDictionary& string_or_options,
+    ExceptionState& exception_state) {
+  DCHECK(base::scriptchecker::g_script_checker);
+  Element* element = CreateElementForBinding(local_name, string_or_options, exception_state);
+  if(element) {
+    std::string capability = base::scriptchecker::g_script_checker
+            ->GetCurrentTaskCapabilityAsJSString();
+    LOG(INFO) << ">>> [RISKY] risky world creates a script element, add a risky attribute! "
+              << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
+              << capability;
+    element->setAttribute(riskyAttr, "");
+    element->setAttribute(task_capabilityAttr, capability.c_str());
+  }
+  return element;
+}
+
+/* Added End */
 
 static inline QualifiedName CreateQualifiedName(
     const AtomicString& namespace_uri,

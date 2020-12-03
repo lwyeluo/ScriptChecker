@@ -72,7 +72,60 @@ static void {{method.name}}{{method.overload_index}}Method{{world_suffix}}(const
   V0CustomElementProcessingStack::CallbackDeliveryScope deliveryScope;
   {% endif %}
 
+  {% if method.name == "createElement" %}
+  /* Added by Luo Wu */
+  V8StringResource<> localName;
+  localName = info[0];
+  if (!localName.Prepare()) {
+    return;
+  }
+
+  {% if method.overload_index == 2 %}
+  StringOrDictionary options;
+  V8StringOrDictionary::ToImpl(info.GetIsolate(), info[1], options, UnionTypeConversionMode::kNullable, exceptionState);
+  if (exceptionState.HadException())
+    return;
+  {% endif %}
+
+  Element* result;
+  bool is_risky = false;
+  if(String(localName).LowerASCII() == "script") {
+    LocalDOMWindow* window = CurrentDOMWindow(info.GetIsolate());
+    if(window && window == impl->GetFrame()->DomWindowForRiskyWorld()) {
+      // here is to create an element in the risky world, we should take care of the SCRIPT.
+      // LOG(INFO) << ">>>> [RISKY] !!!!!!!!!!!!! Enter createElement";
+      is_risky = true;
+      {% if method.overload_index == 1 %}
+      result = impl->CreateElementForBindingWithRisky(localName, exceptionState);
+      {% elif method.overload_index == 2 %}
+      result = impl->CreateElementForBindingWithRisky(localName, options, exceptionState);
+      {% endif %}
+    }
+  }
+  if(!is_risky) {
+    {% if method.overload_index == 1 %}
+    result = impl->CreateElementForBinding(localName, exceptionState);
+    {% elif method.overload_index == 2 %}
+    result = impl->CreateElementForBinding(localName, options, exceptionState);
+    {% endif %}
+  }
+
+  if (exceptionState.HadException()) {
+    return;
+  }
+
+  {% if world_suffix == "ForMainWorld" %}
+  V8SetReturnValueForMainWorld(info, result);
+  {% elif world_suffix == "" %}
+  V8SetReturnValueFast(info, result, impl);
+  {% endif %}
+
+  /* Added End */
+  {% else %}
+
   {{function_call | trim | indent(2)}}
+
+  {% endif %}
 }
 {% endfilter %}
 {% endmacro %}

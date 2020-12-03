@@ -187,7 +187,10 @@ class DOMDataStore {
     // Verify our assumptions about the main world.
     DCHECK(wrappable);
     DCHECK(!wrappable->ContainsWrapper() || !wrappable->IsEqualTo(holder) ||
-           Current(v8::Isolate::GetCurrent()).is_main_world_);
+           Current(v8::Isolate::GetCurrent()).is_main_world_
+           /* Added by Luo Wu */|| DOMWrapperWorld::Current(
+               v8::Isolate::GetCurrent()).IsRiskyWorld() /* End */
+           );
     return wrappable->IsEqualTo(holder);
   }
 

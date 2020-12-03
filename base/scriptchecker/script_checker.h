@@ -17,10 +17,19 @@ class BASE_EXPORT ScriptChecker {
     ScriptChecker();
     ~ScriptChecker();
 
-    // Task Scheduler
+    /* Task Scheduler */
     void UpdateCurrentTask(PendingTask* task);
-    // Task Recorder
+
+    /* Task Recorder */
     void RecordNewTask(PendingTask* task);
+    //   The IPC task usually forms as two purposes, one is to trigger some listeners, and the
+    //     other is to let renderer process parse some data, e.g., a script and execute it.
+    //   The former's risky and capability should be attached on listener.
+    //   The latter we now only attach risky and task_capability attributes when the SCRIPT
+    //     tag is created. Need to consider more cases in this scenario later.
+    //   So we now always set the parameter as "", see:
+    //     ChannelAssociatedGroupController::AcceptOnProxyThread
+    //     Connector::ReadSingleMessage
     void RecordIPCTask(std::string capability_attached_in_ipc_message);
     void RecordTIMERTask(std::string capability_from_js_string, bool is_restricted);
 

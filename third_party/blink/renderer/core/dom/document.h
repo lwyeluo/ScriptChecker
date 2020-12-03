@@ -334,6 +334,13 @@ class CORE_EXPORT Document : public ContainerNode,
   Element* CreateElementForBinding(const AtomicString& local_name,
                                    const StringOrDictionary&,
                                    ExceptionState&);
+  /* Added by Luo Wu */
+  Element* CreateElementForBindingWithRisky(const AtomicString& local_name,
+                                            ExceptionState& = ASSERT_NO_EXCEPTION);
+  Element* CreateElementForBindingWithRisky(const AtomicString& local_name,
+                                            const StringOrDictionary&,
+                                            ExceptionState&);
+  /* Added End */
   Element* createElementNS(const AtomicString& namespace_uri,
                            const AtomicString& qualified_name,
                            ExceptionState&);
