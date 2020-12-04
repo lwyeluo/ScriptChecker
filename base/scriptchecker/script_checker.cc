@@ -12,6 +12,7 @@ namespace scriptchecker {
 ScriptChecker::ScriptChecker() {
   m_current_task_ = nullptr;
   m_capability_definition = new CapabilityDefinition();
+  m_async_exec_queue_ = new AsyncExecQueue();
 }
 
 ScriptChecker::~ScriptChecker() {
@@ -20,12 +21,15 @@ ScriptChecker::~ScriptChecker() {
 
 void ScriptChecker::UpdateCurrentTask(PendingTask* task) {
   DCHECK(task);
-//  if(m_current_task_ && m_current_task_->capability_) {
-//    delete m_current_task_->capability_;
-//  }
   m_current_task_ = task;
+
   LOG(INFO) << g_name << "ScriptChecker::UpdateCurrentTask. [seq, cap] = "
-            << m_current_task_->sequence_num << ", " << m_current_task_->GetCapbilityAsJSString();
+            << m_current_task_->sequence_num << ", " << m_current_task_->GetCapbilityAsJSString()
+            << ", " << m_current_task_->posted_from.function_name();
+}
+
+void ScriptChecker::RunAsyncExecTasks(base::debug::TaskAnnotator* task_annotator) {
+  m_async_exec_queue_->RunAll(task_annotator);
 }
 
 void ScriptChecker::RecordNewTask(PendingTask *task) {
@@ -52,7 +56,8 @@ void ScriptChecker::RecordNewTask(PendingTask *task) {
       case TaskType::IPC_TASK:
         // its capabilty is set accoding to the IPC message, see ScriptChecker::RecordIPCTask
         break;
-      case TaskType::TIMER_TASK:
+      case TaskType::NORMAL_TIMER_TASK:
+      case TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK:
         // we have set the capability according to the JS API's parameter, here we need to
         //  ensure that the assigned capability does not breach its parent
         task->NarrowDownCapability(m_current_task_->capability_);
@@ -67,20 +72,24 @@ void ScriptChecker::RecordNewTask(PendingTask *task) {
 //              << ", " << m_current_task_->GetCapbilityAsJSString();
 }
 
+void ScriptChecker::RecordNewAsyncExecTask(PendingTask &&task) {
+  DCHECK(task.task_type_in_scriptchecker_ == TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK);
+
+  LOG(INFO) << g_name << "ScriptChecker::RecordNewAsyncExecTask. [newtaskid] = "
+            << task.sequence_num;
+
+  // check capability
+  task.NarrowDownCapability(m_current_task_->capability_);
+  // record into async exec queue
+  m_async_exec_queue_->Push(std::move(task));
+}
+
 void ScriptChecker::RecordIPCTask(std::string capability_attached_in_ipc_message) {
   // here should be attached into the current task which forms as IPC_TASK
   DCHECK(m_current_task_);
   LOG(INFO) << g_name << "ScriptChecker::RecordIPCTask. [cap_in_ipc] = "
             << capability_attached_in_ipc_message;
   m_current_task_->SetCapabilityFromIPCMessage(capability_attached_in_ipc_message);
-}
-
-void ScriptChecker::RecordTIMERTask(std::string capability_from_js_string, bool is_restricted) {
-  // here should be attached into the current task which forms as TIMER_TASK
-  DCHECK(m_current_task_);
-  LOG(INFO) << g_name << "ScriptChecker::RecordTIMERTask. [cap_in_ipc] = "
-            << capability_from_js_string;
-  m_current_task_->SetCapabilityFromJSString(capability_from_js_string);
 }
 
 bool ScriptChecker::IsCurrentTaskWithRestricted() {

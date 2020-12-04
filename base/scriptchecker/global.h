@@ -10,6 +10,8 @@ namespace scriptchecker {
 
 // some logs for micro-benchmark
 #define SCRIPT_CHECKER_INSPECT_TIME_USAGE
+// to inspect the task relationships
+//#define SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
 
 const char BASE_EXPORT g_name[] = "[SCRIPTCHECKER] ";
 

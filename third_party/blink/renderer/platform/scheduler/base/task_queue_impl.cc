@@ -14,6 +14,9 @@
 #include "third_party/blink/renderer/platform/scheduler/base/work_queue.h"
 #include "third_party/blink/renderer/platform/scheduler/util/tracing_helper.h"
 
+#include "base/scriptchecker/global.h"
+#include "base/scriptchecker/task_type.h"
+
 namespace blink {
 namespace scheduler {
 
@@ -302,6 +305,17 @@ void TaskQueueImpl::ScheduleDelayedWorkTask(Task pending_task) {
 }
 
 void TaskQueueImpl::PushOntoImmediateIncomingQueueLocked(Task task) {
+  /* Added by Luo Wu */
+  // the SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK should be pushed on to our queue
+  if(base::scriptchecker::g_script_checker &&
+          (task.task_type_in_scriptchecker_ ==
+           base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK)) {
+    base::scriptchecker::g_script_checker->RecordNewAsyncExecTask(
+                (base::PendingTask)(std::move(task)));
+    return;
+  }
+  /* Added End */
+
   // If the |immediate_incoming_queue| is empty we need a DoWork posted to make
   // it run.
   bool was_immediate_incoming_queue_empty;

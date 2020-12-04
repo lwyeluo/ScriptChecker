@@ -35,7 +35,8 @@ class DOMTimerCoordinator {
                         TimeDelta timeout,
                         bool single_shot,
                         /* Added by Luo Wu */
-                        std::string capability = "");
+                        std::string capability = "",
+                        int task_type = 0/* End */);
 
   // Removes and disposes the timer with the specified ID, if any. This may
   // destroy the timer.

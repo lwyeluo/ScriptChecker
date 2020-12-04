@@ -34,6 +34,7 @@
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
 #include "base/scriptchecker/global.h"
+#include "base/scriptchecker/task_type.h"
 
 namespace blink {
 
@@ -62,11 +63,14 @@ int DOMTimer::Install(ExecutionContext* context,
                       TimeDelta timeout,
                       bool single_shot,
                       /* Added by Luo Wu */
-                      const String& capability) {
+                      const String& capability,
+                      int task_type
+                      /* End */) {
   int timeout_id = context->Timers()->InstallNewTimeout(context, action,
                                                         timeout, single_shot,
-                                                        /*Added by Luo Wu*/
-                                                        capability.Ascii().data());
+                                                        /* Added by Luo Wu */
+                                                        capability.Ascii().data(),
+                                                        task_type/* End */);
   return timeout_id;
 }
 
@@ -86,7 +90,9 @@ DOMTimer::DOMTimer(ExecutionContext* context,
                    bool single_shot,
                    int timeout_id,
                    /* Added by Luo Wu */
-                   std::string capability)
+                   std::string capability,
+                   int task_type
+                   /* End */)
     : PausableTimer(context, TaskType::kJavascriptTimer),
       timeout_id_(timeout_id),
       nesting_level_(context->Timers()->TimerNestingLevel() + 1),
@@ -100,6 +106,7 @@ DOMTimer::DOMTimer(ExecutionContext* context,
 
   /* Added by Luo Wu */
   capability_ = nullptr;
+  task_type_ = task_type;
   if(base::scriptchecker::g_script_checker &&
           capability != "" &&
           base::PlatformThread::CurrentId() == 1) {
@@ -112,15 +119,23 @@ DOMTimer::DOMTimer(ExecutionContext* context,
 
   TimeDelta interval_milliseconds =
       std::max(TimeDelta::FromMilliseconds(1), interval);
+  /* Added by Luo Wu */
+  if(task_type == base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK) {
+    // we need to schedule this task as soon as possible to maintain the code logic
+    interval_milliseconds = interval;
+  }
+  /* Added End */
   if (interval_milliseconds < kMinimumInterval &&
       nesting_level_ >= kMaxTimerNestingLevel)
     interval_milliseconds = kMinimumInterval;
   if (single_shot)
     StartOneShot(interval_milliseconds, FROM_HERE
-                 /* Added by Luo Wu */, capability_ /* Added End */);
+                 /* Added by Luo Wu */, capability_,
+                 task_type /* Added End */);
   else
     StartRepeating(interval_milliseconds, FROM_HERE
-                   /* Added by Luo Wu */, capability_ /* Added End */);
+                   /* Added by Luo Wu */, capability_,
+                   task_type /* Added End */);
 
   PauseIfNeeded();
   TRACE_EVENT_INSTANT1("devtools.timeline", "TimerInstall",
@@ -193,6 +208,11 @@ void DOMTimer::Fired() {
   // for one-shot timers.
   ScheduledAction* action = action_.Release();
   context->Timers()->RemoveTimeoutByID(timeout_id_);
+
+  if(base::scriptchecker::g_script_checker) {
+    LOG(INFO) << base::scriptchecker::g_name << "DOMTimer::Fired. [id] = "
+              << base::scriptchecker::g_script_checker->GetCurrentTaskID();
+  }
 
   action->Execute(context);
 

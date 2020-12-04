@@ -6,6 +6,8 @@
 
 #include "third_party/blink/renderer/platform/scheduler/base/work_queue_sets.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 namespace scheduler {
 namespace internal {
@@ -131,6 +133,7 @@ TaskQueueImpl::Task WorkQueue::TakeTaskFromWorkQueue() {
   DCHECK(!tasks_.empty());
 
   TaskQueueImpl::Task pending_task = tasks_.TakeFirst();
+
   // NB immediate tasks have a different pipeline to delayed ones.
   if (queue_type_ == QueueType::kImmediate && tasks_.empty()) {
     // Short-circuit the queue reload so that OnPopQueue does the right thing.

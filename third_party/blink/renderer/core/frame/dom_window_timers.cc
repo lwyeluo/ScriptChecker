@@ -41,6 +41,9 @@
 #include "third_party/blink/renderer/core/workers/worker_global_scope.h"
 #include "third_party/blink/renderer/platform/weborigin/security_violation_reporting_policy.h"
 
+#include "base/scriptchecker/global.h"
+#include "base/scriptchecker/task_type.h"
+
 namespace blink {
 
 namespace DOMWindowTimers {
@@ -84,7 +87,9 @@ int setTimeout(ScriptState* script_state,
                const ScriptValue& handler,
                int timeout,
                const Vector<ScriptValue>& arguments) {
-  return setTimeoutWR(script_state, event_target, handler, "", timeout, arguments);
+  return setTimeoutImpl(script_state, event_target, handler,
+                        "", timeout, arguments,
+                        base::scriptchecker::TaskType::NORMAL_TIMER_TASK);
 }
 
 int setTimeout(ScriptState* script_state,
@@ -92,7 +97,9 @@ int setTimeout(ScriptState* script_state,
                const String& handler,
                int timeout,
                const Vector<ScriptValue>& arguments) {
-  return setTimeoutWR(script_state, event_target, handler, "", timeout, arguments);
+  return setTimeoutImpl(script_state, event_target, handler,
+                        "", timeout, arguments,
+                        base::scriptchecker::TaskType::NORMAL_TIMER_TASK);
 }
 
 int setTimeoutWR(ScriptState* script_state,
@@ -101,6 +108,39 @@ int setTimeoutWR(ScriptState* script_state,
                  const String& capability,
                  int timeout,
                  const Vector<ScriptValue>& arguments) {
+  DCHECK(base::scriptchecker::g_script_checker);
+  int task_type = (timeout == 0) ?
+              base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK :
+              base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_NONZERO_TIMER_TASK;
+  LOG(INFO) << base::scriptchecker::g_name << "enter SETTIMEOUTWR. [id] = "
+            << base::scriptchecker::g_script_checker->GetCurrentTaskID();
+  return setTimeoutImpl(script_state, event_target, handler,
+                        capability, timeout, arguments, task_type);
+}
+
+int setTimeoutWR(ScriptState* script_state,
+                 EventTarget& event_target,
+                 const String& handler,
+                 const String& capability,
+                 int timeout,
+                 const Vector<ScriptValue>& arguments) {
+  DCHECK(base::scriptchecker::g_script_checker);
+  int task_type = (timeout == 0) ?
+              base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK :
+              base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_NONZERO_TIMER_TASK;
+  LOG(INFO) << base::scriptchecker::g_name << "enter SETTIMEOUTWR. [id] = "
+            << base::scriptchecker::g_script_checker->GetCurrentTaskID();
+  return setTimeoutImpl(script_state, event_target, handler,
+                        capability, timeout, arguments, task_type);
+}
+
+int setTimeoutImpl(ScriptState* script_state,
+                   EventTarget& event_target,
+                   const ScriptValue& handler,
+                   const String& capability,
+                   int timeout,
+                   const Vector<ScriptValue>& arguments,
+                   int task_type) {
   ExecutionContext* execution_context = event_target.GetExecutionContext();
   if (!IsAllowed(script_state, execution_context, false, g_empty_string))
     return 0;
@@ -112,15 +152,17 @@ int setTimeoutWR(ScriptState* script_state,
   ScheduledAction* action = ScheduledAction::Create(
       script_state, execution_context, handler, arguments);
   return DOMTimer::Install(execution_context, action,
-                           TimeDelta::FromMilliseconds(timeout), true, capability);
+                           TimeDelta::FromMilliseconds(timeout), true,
+                           capability, task_type);
 }
 
-int setTimeoutWR(ScriptState* script_state,
-                 EventTarget& event_target,
-                 const String& handler,
-                 const String& capability,
-                 int timeout,
-                 const Vector<ScriptValue>&) {
+int setTimeoutImpl(ScriptState* script_state,
+                   EventTarget& event_target,
+                   const String& handler,
+                   const String& capability,
+                   int timeout,
+                   const Vector<ScriptValue>&,
+                   int task_type) {
   ExecutionContext* execution_context = event_target.GetExecutionContext();
   if (!IsAllowed(script_state, execution_context, true, handler))
     return 0;
@@ -136,7 +178,8 @@ int setTimeoutWR(ScriptState* script_state,
   ScheduledAction* action =
       ScheduledAction::Create(script_state, execution_context, handler);
   return DOMTimer::Install(execution_context, action,
-                           TimeDelta::FromMilliseconds(timeout), true, capability);
+                           TimeDelta::FromMilliseconds(timeout), true,
+                           capability, task_type);
 }
 
 int setInterval(ScriptState* script_state,

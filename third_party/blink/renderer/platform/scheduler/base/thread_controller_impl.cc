@@ -166,7 +166,22 @@ void ThreadControllerImpl::DoWork(SequencedTaskSource::WorkType work_type) {
   base::WeakPtr<ThreadControllerImpl> weak_ptr = weak_factory_.GetWeakPtr();
   // TODO(scheduler-dev): Consider moving to a time based work batch instead.
   for (int i = 0; i < main_sequence_only().work_batch_size_; i++) {
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
+    if(base::scriptchecker::g_script_checker && base::PlatformThread::CurrentId() == 1) {
+      LOG(INFO) << "\tThreadControllerImpl::DoWork. " << this<< ", " << i << ", "
+                << main_sequence_only().work_batch_size_;
+    }
+#endif
     base::Optional<base::PendingTask> task = sequence_->TakeTask();
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
+    if(base::scriptchecker::g_script_checker && base::PlatformThread::CurrentId() == 1) {
+      if(!task)
+        LOG(INFO) << "\t\tno task " << this;
+      else
+        LOG(INFO) << "\t\t " << task->sequence_num << ", "
+                  << task->posted_from.ToString() << ", " << this;
+    }
+#endif
     if (!task)
       break;
 
@@ -177,6 +192,13 @@ void ThreadControllerImpl::DoWork(SequencedTaskSource::WorkType work_type) {
       return;
 
     sequence_->DidRunTask();
+
+    /* Added by Luo Wu */
+    // run the task's async exec tasks
+    if(base::scriptchecker::g_script_checker && base::PlatformThread::CurrentId() == 1) {
+      base::scriptchecker::g_script_checker->RunAsyncExecTasks(&task_annotator_);
+    }
+    /* Added End */
 
     // TODO(alexclarke): Find out why this is needed.
     if (main_sequence_only().nesting_depth > 0)

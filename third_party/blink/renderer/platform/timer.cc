@@ -59,8 +59,8 @@ void TimerBase::Start(TimeDelta next_fire_interval,
                       TimeDelta repeat_interval,
                       const base::Location& caller
                       /* Added by Luo Wu */ ,
-                      base::scriptchecker::Capability* capability
-                      /* Added End */) {
+                      base::scriptchecker::Capability* capability,
+                      int task_type/* Added End */) {
 #if DCHECK_IS_ON()
   DCHECK_EQ(thread_, CurrentThread());
 #endif
@@ -68,7 +68,7 @@ void TimerBase::Start(TimeDelta next_fire_interval,
   location_ = caller;
   repeat_interval_ = repeat_interval;
   SetNextFireTime(TimerCurrentTimeTicks(), next_fire_interval
-                  /* Added by Luo Wu */, capability /* Added End */);
+                  /* Added by Luo Wu */, capability, task_type /* Added End */);
 }
 
 void TimerBase::Stop() {
@@ -120,7 +120,8 @@ scoped_refptr<base::SingleThreadTaskRunner> TimerBase::TimerTaskRunner() const {
 
 void TimerBase::SetNextFireTime(TimeTicks now, TimeDelta delay
                                 /* Added by Luo Wu */ ,
-                                base::scriptchecker::Capability* capability
+                                base::scriptchecker::Capability* capability,
+                                int task_type
                                 /* Added End */) {
 #if DCHECK_IS_ON()
   DCHECK_EQ(thread_, CurrentThread());
@@ -138,10 +139,7 @@ void TimerBase::SetNextFireTime(TimeTicks now, TimeDelta delay
         location_,
         WTF::Bind(&TimerBase::RunInternal, weak_ptr_factory_.GetWeakPtr()),
         delay
-        /* Added by Luo Wu */ ,
-        capability,
-        base::scriptchecker::TaskType::TIMER_TASK
-        /* Added End */);
+        /* Added by Luo Wu */ , capability, task_type/* Added End */);
   }
 }
 

@@ -52,7 +52,9 @@ class CORE_EXPORT DOMTimer final : public GarbageCollectedFinalized<DOMTimer>,
                      TimeDelta timeout,
                      bool single_shot,
                      /* Added by Luo Wu */
-                     const String& capability = "");
+                     const String& capability = "",
+                     int task_type = 0
+                     /* End */);
   static void RemoveByID(ExecutionContext*, int timeout_id);
 
   ~DOMTimer() override;
@@ -78,9 +80,11 @@ class CORE_EXPORT DOMTimer final : public GarbageCollectedFinalized<DOMTimer>,
                           bool single_shot,
                           int timeout_id,
                           /* Added by Luo Wu */
-                          std::string capability = "") {
-    return new DOMTimer(context, action, timeout, single_shot, timeout_id,
-                        capability /* Added by Luo Wu*/);
+                          std::string capability = "",
+                          int task_type = 0
+                          /* End */) {
+    return new DOMTimer(context, action, timeout, single_shot, timeout_id
+                        /* Added by Luo Wu*/, capability, task_type/* End */);
   }
 
   DOMTimer(ExecutionContext*,
@@ -89,7 +93,9 @@ class CORE_EXPORT DOMTimer final : public GarbageCollectedFinalized<DOMTimer>,
            bool single_shot,
            int timeout_id,
            /* Added by Luo Wu */
-           std::string capability = "");
+           std::string capability = "",
+           int task_type = 0
+           /* End */);
   void Fired() override;
 
   scoped_refptr<base::SingleThreadTaskRunner> TimerTaskRunner() const override;
@@ -100,6 +106,7 @@ class CORE_EXPORT DOMTimer final : public GarbageCollectedFinalized<DOMTimer>,
   scoped_refptr<UserGestureToken> user_gesture_token_;
   /* Added by Luo Wu */
   base::scriptchecker::Capability* capability_;
+  bool task_type_;
   /* Added End */
 };
 

@@ -24,6 +24,8 @@
 #include "base/message_loop/message_pump_mac.h"
 #endif
 
+#include "base/scriptchecker/global.h"
+
 namespace base {
 
 namespace {
@@ -346,6 +348,13 @@ void MessageLoop::RunTask(PendingTask* pending_task) {
 
   // Execute the task and assume the worst: It is probably not reentrant.
   task_execution_allowed_ = false;
+
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
+  if(base::scriptchecker::g_script_checker && base::PlatformThread::CurrentId() == 1) {
+    LOG(INFO) << "\tMessageLoop::RunTask. " << pending_task->sequence_num << ", "
+              << pending_task->posted_from.ToString();
+  }
+#endif
 
   TRACE_TASK_EXECUTION("MessageLoop::RunTask", *pending_task);
   for (auto& observer : task_observers_)

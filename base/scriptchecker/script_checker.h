@@ -6,7 +6,9 @@
 #include "base/logging.h"
 #include "base/scriptchecker/capability.h"
 #include "base/scriptchecker/capability_definition.h"
+#include "base/scriptchecker/async_exec_queue.h"
 #include "base/pending_task.h"
+#include "base/debug/task_annotator.h"
 
 namespace base {
 
@@ -19,9 +21,11 @@ class BASE_EXPORT ScriptChecker {
 
     /* Task Scheduler */
     void UpdateCurrentTask(PendingTask* task);
+    void RunAsyncExecTasks(base::debug::TaskAnnotator*);
 
     /* Task Recorder */
     void RecordNewTask(PendingTask* task);
+    void RecordNewAsyncExecTask(PendingTask&& task);
     //   The IPC task usually forms as two purposes, one is to trigger some listeners, and the
     //     other is to let renderer process parse some data, e.g., a script and execute it.
     //   The former's risky and capability should be attached on listener.
@@ -31,7 +35,6 @@ class BASE_EXPORT ScriptChecker {
     //     ChannelAssociatedGroupController::AcceptOnProxyThread
     //     Connector::ReadSingleMessage
     void RecordIPCTask(std::string capability_attached_in_ipc_message);
-    void RecordTIMERTask(std::string capability_from_js_string, bool is_restricted);
 
     bool IsCurrentTaskWithRestricted();
     Capability* GetCurrentTaskCapability();
@@ -62,6 +65,8 @@ class BASE_EXPORT ScriptChecker {
     PendingTask* m_current_task_;
     // the capability map between the string and bitmap
     CapabilityDefinition* m_capability_definition;
+    // maintain the tasks created by SCRIPTCHECKER's async execution
+    AsyncExecQueue* m_async_exec_queue_;
 };
 
 }

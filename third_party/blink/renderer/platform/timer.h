@@ -55,40 +55,41 @@ class PLATFORM_EXPORT TimerBase {
              TimeDelta repeat_interval,
              const base::Location&
              /* Added by Luo Wu */ ,
-             base::scriptchecker::Capability* capability = nullptr
-             /* Added End */);
+             base::scriptchecker::Capability* capability = nullptr,
+             int task_type = 0/* Added End */);
   void Start(double next_fire_interval,
              double repeat_interval,
              const base::Location& from_here
              /* Added by Luo Wu */ ,
-             base::scriptchecker::Capability* capability = nullptr
-             /* Added End */) {
+             base::scriptchecker::Capability* capability = nullptr,
+             int task_type = 0/* Added End */) {
     Start(TimeDelta::FromSecondsD(next_fire_interval),
           TimeDelta::FromSecondsD(repeat_interval), from_here
-          /* Added by Luo Wu */ , capability /* Added End */);
+          /* Added by Luo Wu */ , capability, task_type /* Added End */);
   }
 
   void StartRepeating(TimeDelta repeat_interval, const base::Location& caller
                       /* Added by Luo Wu */ ,
-                      base::scriptchecker::Capability* capability = nullptr
-                      /* Added End */) {
+                      base::scriptchecker::Capability* capability = nullptr,
+                      int task_type = 0/* Added End */) {
     Start(repeat_interval, repeat_interval, caller
-          /* Added by Luo Wu */ , capability /* Added End */);
+          /* Added by Luo Wu */ , capability, task_type /* Added End */);
   }
 
   void StartOneShot(TimeDelta interval, const base::Location& caller
                     /* Added by Luo Wu */ ,
-                    base::scriptchecker::Capability* capability = nullptr
-                    /* Added End */) {
+                    base::scriptchecker::Capability* capability = nullptr,
+                    int task_type = 0/* Added End */) {
     Start(interval, TimeDelta(), caller
-          /* Added by Luo Wu */ , capability /* Added End */);
+          /* Added by Luo Wu */ , capability, task_type /* Added End */);
   }
   void StartOneShot(double interval, const base::Location& caller
                     /* Added by Luo Wu */ ,
-                    base::scriptchecker::Capability* capability = nullptr
-                    /* Added End */) {
+                    base::scriptchecker::Capability* capability = nullptr,
+                    int task_type = 0/* Added End */) {
     StartOneShot(TimeDelta::FromSecondsD(interval), caller
-                 /* Added by Luo Wu */ , capability /* Added End */);
+                 /* Added by Luo Wu */ , capability,
+                 task_type /* Added End */);
   }
 
   // Timer cancellation is fast enough that you shouldn't have to worry
@@ -132,8 +133,8 @@ class PLATFORM_EXPORT TimerBase {
 
   void SetNextFireTime(TimeTicks now, TimeDelta delay
                        /* Added by Luo Wu */ ,
-                       base::scriptchecker::Capability* capability = nullptr
-                       /* Added End */);
+                       base::scriptchecker::Capability* capability = nullptr,
+                       int task_type = 0/* Added End */);
 
   void RunInternal();
 
