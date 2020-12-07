@@ -41,6 +41,8 @@
 #include "third_party/blink/renderer/platform/wtf/threading_primitives.h"
 #endif
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 #if DCHECK_IS_ON()
@@ -103,6 +105,15 @@ static bool AddListenerToVector(EventListenerVector* vector,
   if (vector->Find(*registered_listener) != kNotFound)
     return false;  // Duplicate listener.
 
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_script_checker
+          && base::PlatformThread::CurrentId() == 1) {
+    base::scriptchecker::Capability* capability =
+            base::scriptchecker::g_script_checker->GetCurrentTaskCapability();
+    registered_listener->SetCapability(capability);
+  }
+  /* Added End */
+
   vector->push_back(*registered_listener);
   return true;
 }
@@ -147,6 +158,14 @@ static bool RemoveListenerFromVector(
   }
   *registered_listener = *it;
   *index_of_removed_listener = it - begin;
+
+  /* Added by Luo Wu */
+  if(base::scriptchecker::g_script_checker
+          && base::PlatformThread::CurrentId() == 1) {
+    registered_listener->ReleaseCapability();
+  }
+  /* Added End */
+
   listener_vector->EraseAt(*index_of_removed_listener);
   return true;
 }

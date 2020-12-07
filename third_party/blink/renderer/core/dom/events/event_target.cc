@@ -60,6 +60,8 @@
 #include "third_party/blink/renderer/platform/wtf/threading.h"
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 namespace {
 
@@ -368,6 +370,14 @@ bool EventTarget::AddEventListenerInternal(
                               argv.data());
   }
 
+  if(base::scriptchecker::g_script_checker &&
+          base::PlatformThread::CurrentId() == 1 &&
+          base::scriptchecker::g_script_checker->IsCurrentTaskWithRestricted()) {
+    LOG(INFO) << ">>> EventTarget::AddEventListenerInternal. [event_type, capability] = "
+              << event_type << ", "
+              << base::scriptchecker::g_script_checker->GetCurrentTaskCapabilityAsJSString();
+  }
+
   RegisteredEventListener registered_listener;
   bool added = EnsureEventTargetData().event_listener_map.Add(
       event_type, listener, options, &registered_listener);
@@ -513,6 +523,14 @@ bool EventTarget::SetAttributeEventListener(const AtomicString& event_type,
         IsInstrumentedForAsyncStack(event_type)) {
       probe::AsyncTaskScheduled(GetExecutionContext(), event_type, listener);
     }
+    /* Added by Luo Wu */
+    if(base::scriptchecker::g_script_checker
+            && base::PlatformThread::CurrentId() == 1) {
+      base::scriptchecker::Capability* capability =
+              base::scriptchecker::g_script_checker->GetCurrentTaskCapability();
+      registered_listener->SetCapability(capability);
+    }
+    /* Added End */
     registered_listener->SetCallback(listener);
     return true;
   }
@@ -784,6 +802,17 @@ bool EventTarget::FireEventListeners(Event* event,
       continue;
 
     EventListener* listener = registered_listener.Callback();
+
+    /* Added by Luo Wu */
+    if(base::scriptchecker::g_script_checker
+            && base::PlatformThread::CurrentId() == 1) {
+      base::scriptchecker::g_script_checker->UpdateCurrentTaskCapability(
+                  registered_listener.GetCapability());
+      LOG(INFO) << ">>> [Event] EventTarget::FireEventListeners. " << event->type()
+                << ", " << registered_listener.GetCapability()->ToString();
+    }
+    /* Added End */
+
     // The listener will be retained by Member<EventListener> in the
     // registeredListener, i and size are updated with the firing event iterator
     // in case the listener is removed from the listener vector below.
@@ -808,6 +837,14 @@ bool EventTarget::FireEventListeners(Event* event,
     // event listeners, even though that violates some versions of the DOM spec.
     listener->handleEvent(context, event);
     fired_listener = true;
+
+    /* Added by Luo Wu */
+    if(base::scriptchecker::g_script_checker
+            && base::PlatformThread::CurrentId() == 1) {
+      base::scriptchecker::g_script_checker
+              ->UpdateCurrentTaskCapability("");
+    }
+    /* Added End */
 
     // If we're about to report this event listener as blocking, make sure it
     // wasn't removed while handling the event.

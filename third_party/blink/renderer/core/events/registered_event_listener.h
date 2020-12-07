@@ -30,6 +30,8 @@
 #include "third_party/blink/renderer/core/dom/events/event_listener.h"
 #include "third_party/blink/renderer/platform/bindings/trace_wrapper_member.h"
 
+#include "base/scriptchecker/capability.h"
+
 namespace blink {
 
 class RegisteredEventListener {
@@ -42,7 +44,8 @@ class RegisteredEventListener {
         once_(false),
         blocked_event_warning_emitted_(false),
         passive_forced_for_document_target_(false),
-        passive_specified_(false) {}
+        passive_specified_(false)
+        /* Added by Luo Wu */, capability_(nullptr) /* End */ {}
 
   RegisteredEventListener(EventListener* listener,
                           const AddEventListenerOptionsResolved& options)
@@ -53,7 +56,8 @@ class RegisteredEventListener {
         blocked_event_warning_emitted_(false),
         passive_forced_for_document_target_(
             options.PassiveForcedForDocumentTarget()),
-        passive_specified_(options.PassiveSpecified()) {}
+        passive_specified_(options.PassiveSpecified())
+        /* Added by Luo Wu */, capability_(nullptr) /* End */ {}
 
   void Trace(blink::Visitor* visitor) { visitor->Trace(callback_); }
   void TraceWrappers(const ScriptWrappableVisitor* visitor) const {
@@ -121,6 +125,14 @@ class RegisteredEventListener {
   unsigned blocked_event_warning_emitted_ : 1;
   unsigned passive_forced_for_document_target_ : 1;
   unsigned passive_specified_ : 1;
+  /* Added by Luo Wu */
+  base::scriptchecker::Capability* capability_;
+
+ public:
+  base::scriptchecker::Capability* GetCapability();
+  void SetCapability(base::scriptchecker::Capability* capability);
+  void ReleaseCapability();
+  /* Added End */
 };
 
 }  // namespace blink

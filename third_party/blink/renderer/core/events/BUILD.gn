@@ -59,6 +59,7 @@ blink_core_sources("events") {
     "promise_rejection_event.cc",
     "promise_rejection_event.h",
     "registered_event_listener.h",
+    "registered_event_listener.cc", # Added by Luo Wu
     "resource_progress_event.cc",
     "resource_progress_event.h",
     "security_policy_violation_event.cc",

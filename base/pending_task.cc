@@ -54,7 +54,9 @@ bool PendingTask::operator<(const PendingTask& other) const {
 }
 
 void PendingTask::SetCapability(base::scriptchecker::Capability* in_capability) {
-  capability_ = new base::scriptchecker::Capability(in_capability);
+  if(!capability_)
+    capability_ = new base::scriptchecker::Capability();
+  capability_->SetFrom(in_capability);
   has_set_capability = true;
 }
 
