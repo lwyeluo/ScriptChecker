@@ -65,6 +65,12 @@ class BASE_EXPORT TaskRunner
   // Equivalent to PostDelayedTask(from_here, task, 0).
   bool PostTask(const Location& from_here, OnceClosure task);
 
+  /* Added by Luo Wu */
+  bool PostAsyncExecTask(const Location& from_here, OnceClosure task,
+                         base::scriptchecker::Capability* capability = nullptr,
+                         int task_type_in_scriptchecker = 0);
+  /* Added End */
+
   // Like PostTask, but tries to run the posted task only after |delay_ms|
   // has passed. Implementations should use a tick clock, rather than wall-
   // clock time, to implement |delay|.

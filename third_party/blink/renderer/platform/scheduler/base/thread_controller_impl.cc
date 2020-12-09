@@ -13,6 +13,7 @@
 #include "third_party/blink/renderer/platform/scheduler/base/lazy_now.h"
 
 #include "base/scriptchecker/global.h"
+#include "base/scriptchecker/task_type.h"
 
 namespace blink {
 namespace scheduler {
@@ -218,7 +219,12 @@ void ThreadControllerImpl::DoWork(SequencedTaskSource::WorkType work_type) {
       // The next task needs to run immediately, post a continuation if needed.
       if (!any_sequence().immediate_do_work_posted) {
         any_sequence().immediate_do_work_posted = true;
-        task_runner_->PostTask(FROM_HERE, immediate_do_work_closure_);
+        /* Modified by Luo Wu */
+        //task_runner_->PostTask(FROM_HERE, immediate_do_work_closure_);
+        task_runner_->PostAsyncExecTask(FROM_HERE, immediate_do_work_closure_, nullptr,
+                                        base::scriptchecker::TaskType::SCHEDULER_TASK);
+        // this task_runner points to `MessageLoopTaskRunner::PostDelayedTask`
+        /* End */
       }
     } else if (delay_till_next_task < base::TimeDelta::Max()) {
       // The next task needs to run after a delay, post a continuation if
@@ -229,7 +235,8 @@ void ThreadControllerImpl::DoWork(SequencedTaskSource::WorkType work_type) {
         cancelable_delayed_do_work_closure_.Reset(delayed_do_work_closure_);
         task_runner_->PostDelayedTask(
             FROM_HERE, cancelable_delayed_do_work_closure_.callback(),
-            delay_till_next_task);
+            delay_till_next_task /* Added by Luo Wu */, nullptr,
+                    base::scriptchecker::TaskType::SCHEDULER_TASK/*End*/);
       }
     } else {
       // There is no next task scheduled.

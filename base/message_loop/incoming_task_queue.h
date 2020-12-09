@@ -75,7 +75,11 @@ class BASE_EXPORT IncomingTaskQueue
   bool AddToIncomingQueue(const Location& from_here,
                           OnceClosure task,
                           TimeDelta delay,
-                          Nestable nestable);
+                          Nestable nestable
+                          /*Added by Luo Wu*/ ,
+                          base::scriptchecker::Capability* capability = nullptr,
+                          int task_type_in_scriptchecker = 0  /* see base::scriptchecker::TaskType */
+                          /* Added End */);
 
   // Disconnects |this| from the parent message loop.
   void WillDestroyCurrentMessageLoop();

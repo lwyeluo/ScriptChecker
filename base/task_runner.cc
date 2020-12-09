@@ -44,6 +44,15 @@ bool TaskRunner::PostTask(const Location& from_here, OnceClosure task) {
   return PostDelayedTask(from_here, std::move(task), base::TimeDelta());
 }
 
+/* Added by Luo Wu */
+bool TaskRunner::PostAsyncExecTask(const Location& from_here, OnceClosure task,
+                                   base::scriptchecker::Capability* capability,
+                                   int task_type_in_scriptchecker) {
+  return PostDelayedTask(from_here, std::move(task), base::TimeDelta(),
+                         capability, task_type_in_scriptchecker);
+}
+/* Added End */
+
 bool TaskRunner::PostTaskAndReply(const Location& from_here,
                                   OnceClosure task,
                                   OnceClosure reply) {

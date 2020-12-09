@@ -33,7 +33,10 @@ bool MessageLoopTaskRunner::PostDelayedTask(const Location& from_here,
                                             /* Added End */) {
   DCHECK(!task.is_null()) << from_here.ToString();
   return incoming_queue_->AddToIncomingQueue(from_here, std::move(task), delay,
-                                             Nestable::kNestable);
+                                             Nestable::kNestable
+                                             /*Added by Luo Wu*/ ,capability,
+                                             task_type_in_scriptchecker
+                                             /* Added End */);
 }
 
 bool MessageLoopTaskRunner::PostNonNestableDelayedTask(

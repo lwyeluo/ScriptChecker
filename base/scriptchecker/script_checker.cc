@@ -59,6 +59,8 @@ void ScriptChecker::RecordNewTask(PendingTask *task) {
         break;
       case TaskType::IPC_TASK:
         // its capabilty is set accoding to the IPC message, see ScriptChecker::RecordIPCTask
+      case TaskType::SCHEDULER_TASK:
+        // its capability should be full privilege
         break;
       case TaskType::NORMAL_TIMER_TASK:
       case TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK:

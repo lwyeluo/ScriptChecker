@@ -64,7 +64,11 @@ IncomingTaskQueue::IncomingTaskQueue(MessageLoop* message_loop)
 bool IncomingTaskQueue::AddToIncomingQueue(const Location& from_here,
                                            OnceClosure task,
                                            TimeDelta delay,
-                                           Nestable nestable) {
+                                           Nestable nestable
+                                           /*Added by Luo Wu*/ ,
+                                           base::scriptchecker::Capability* capability,
+                                           int task_type_in_scriptchecker
+                                           /* Added End */) {
   // Use CHECK instead of DCHECK to crash earlier. See http://crbug.com/711167
   // for details.
   CHECK(task);
@@ -73,7 +77,9 @@ bool IncomingTaskQueue::AddToIncomingQueue(const Location& from_here,
       << " seconds from here: " << from_here.ToString();
 
   PendingTask pending_task(from_here, std::move(task),
-                           CalculateDelayedRuntime(delay), nestable);
+                           CalculateDelayedRuntime(delay), nestable
+                           /*Added by Luo Wu*/ , capability,
+                           task_type_in_scriptchecker/* Added End */);
 #if defined(OS_WIN)
   // We consider the task needs a high resolution timer if the delay is
   // more than 0 and less than 32ms. This caps the relative error to
