@@ -61,29 +61,11 @@
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 
 #include "base/scriptchecker/global.h"
+#include "third_party/blink/renderer/core/dom/events/scriptchecker/restricted_listener.h"
+#include "third_party/blink/renderer/core/dom/events/scriptchecker/listener_runner.h"
 
 namespace blink {
 namespace {
-
-enum PassiveForcedListenerResultType {
-  kPreventDefaultNotCalled,
-  kDocumentLevelTouchPreventDefaultCalled,
-  kPassiveForcedListenerResultTypeMax
-};
-
-Event::PassiveMode EventPassiveMode(
-    const RegisteredEventListener& event_listener) {
-  if (!event_listener.Passive()) {
-    if (event_listener.PassiveSpecified())
-      return Event::PassiveMode::kNotPassive;
-    return Event::PassiveMode::kNotPassiveDefault;
-  }
-  if (event_listener.PassiveForcedForDocumentTarget())
-    return Event::PassiveMode::kPassiveForcedDocumentLevel;
-  if (event_listener.PassiveSpecified())
-    return Event::PassiveMode::kPassive;
-  return Event::PassiveMode::kPassiveDefault;
-}
 
 Settings* WindowSettings(LocalDOMWindow* executing_window) {
   if (executing_window) {
@@ -118,27 +100,6 @@ double BlockedEventsWarningThreshold(ExecutionContext* context,
     return 0.0;
   return PerformanceMonitor::Threshold(context,
                                        PerformanceMonitor::kBlockedEvent);
-}
-
-void ReportBlockedEvent(ExecutionContext* context,
-                        const Event* event,
-                        RegisteredEventListener* registered_listener,
-                        double delayed_seconds) {
-  if (registered_listener->Callback()->GetType() !=
-      EventListener::kJSEventListenerType)
-    return;
-
-  String message_text = String::Format(
-      "Handling of '%s' input event was delayed for %ld ms due to main thread "
-      "being busy. "
-      "Consider marking event handler as 'passive' to make the page more "
-      "responsive.",
-      event->type().GetString().Utf8().data(), lround(delayed_seconds * 1000));
-
-  PerformanceMonitor::ReportGenericViolation(
-      context, PerformanceMonitor::kBlockedEvent, message_text, delayed_seconds,
-      GetFunctionLocation(context, registered_listener->Callback()));
-  registered_listener->SetBlockedEventWarningEmitted();
 }
 
 // UseCounts the event if it has the specified type. Returns true iff the event
@@ -801,17 +762,10 @@ bool EventTarget::FireEventListeners(Event* event,
         registered_listener.Capture())
       continue;
 
-    EventListener* listener = registered_listener.Callback();
+    /* Modified by Luo Wu */
+    // the code to run a listener is moved into RunEventListener
 
-    /* Added by Luo Wu */
-    if(base::scriptchecker::g_script_checker
-            && base::PlatformThread::CurrentId() == 1) {
-      base::scriptchecker::g_script_checker->UpdateCurrentTaskCapability(
-                  registered_listener.GetCapability());
-      LOG(INFO) << ">>> [Event] EventTarget::FireEventListeners. " << event->type()
-                << ", " << registered_listener.GetCapability()->ToString();
-    }
-    /* Added End */
+    EventListener* listener = registered_listener.Callback();
 
     // The listener will be retained by Member<EventListener> in the
     // registeredListener, i and size are updated with the firing event iterator
@@ -825,49 +779,34 @@ bool EventTarget::FireEventListeners(Event* event,
     if (event->ImmediatePropagationStopped())
       break;
 
-    event->SetHandlingPassive(EventPassiveMode(registered_listener));
-    bool passive_forced = registered_listener.PassiveForcedForDocumentTarget();
-
-    probe::UserCallback probe(context, nullptr, event->type(), false, this);
-    probe::AsyncTask async_task(
-        context, V8AbstractEventListener::Cast(listener), "event",
-        IsInstrumentedForAsyncStack(event->type()));
-
-    // To match Mozilla, the AT_TARGET phase fires both capturing and bubbling
-    // event listeners, even though that violates some versions of the DOM spec.
-    listener->handleEvent(context, event);
-    fired_listener = true;
-
-    /* Added by Luo Wu */
-    if(base::scriptchecker::g_script_checker
-            && base::PlatformThread::CurrentId() == 1) {
-      base::scriptchecker::g_script_checker
-              ->UpdateCurrentTaskCapability("");
-    }
-    /* Added End */
-
     // If we're about to report this event listener as blocking, make sure it
     // wasn't removed while handling the event.
+    bool flag_should_report = false;
+    double report_time = 0;
     if (should_report_blocked_event && i > 0 &&
-        entry[i - 1].Callback() == listener && !entry[i - 1].Passive() &&
+        entry[i - 1].Callback() == registered_listener.Callback() &&
+        !entry[i - 1].Passive() &&
         !entry[i - 1].BlockedEventWarningEmitted() &&
         !event->defaultPrevented()) {
-      ReportBlockedEvent(context, event, &entry[i - 1],
-                         (now - event->PlatformTimeStamp()).InSecondsF());
+      flag_should_report = true;
+      report_time = (now - event->PlatformTimeStamp()).InSecondsF();
     }
 
-    if (passive_forced) {
-      DEFINE_STATIC_LOCAL(EnumerationHistogram, passive_forced_histogram,
-                          ("Event.PassiveForcedEventDispatchCancelled",
-                           kPassiveForcedListenerResultTypeMax));
-      PassiveForcedListenerResultType breakage_type = kPreventDefaultNotCalled;
-      if (event->PreventDefaultCalledDuringPassive())
-        breakage_type = kDocumentLevelTouchPreventDefaultCalled;
-
-      passive_forced_histogram.Count(breakage_type);
+    // run the listener
+    base::scriptchecker::Capability* capability
+            = registered_listener.GetCapability();
+    if(capability && capability->IsRestricted() &&
+            base::scriptchecker::g_script_checker) {
+      if(!g_restricted_listener)
+        InitRestrictedListenerForScriptChecker();
+      g_restricted_listener->AddRestrictedListener(
+                  ListenerTaskArgs(&entry, i-1, flag_should_report,
+                                   report_time, capability),
+                  this, event, context);
+    } else {
+      RunEventListener(this, &entry, i-1, event, context, flag_should_report, report_time);
     }
-
-    event->SetHandlingPassive(Event::PassiveMode::kNotPassive);
+    /* End */
 
     CHECK_LE(i, size);
   }

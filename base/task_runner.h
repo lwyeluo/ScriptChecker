@@ -66,9 +66,9 @@ class BASE_EXPORT TaskRunner
   bool PostTask(const Location& from_here, OnceClosure task);
 
   /* Added by Luo Wu */
-  bool PostAsyncExecTask(const Location& from_here, OnceClosure task,
-                         base::scriptchecker::Capability* capability = nullptr,
-                         int task_type_in_scriptchecker = 0);
+  bool PostTaskWithScriptCheckTaskType(const Location& from_here, OnceClosure task,
+                                       base::scriptchecker::Capability* capability = nullptr,
+                                       int task_type_in_scriptchecker = 0);
   /* Added End */
 
   // Like PostTask, but tries to run the posted task only after |delay_ms|

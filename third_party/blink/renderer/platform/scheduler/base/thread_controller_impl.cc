@@ -189,17 +189,17 @@ void ThreadControllerImpl::DoWork(SequencedTaskSource::WorkType work_type) {
     TRACE_TASK_EXECUTION("ThreadControllerImpl::DoWork", *task);
     task_annotator_.RunTask("ThreadControllerImpl::DoWork", &*task);
 
-    if (!weak_ptr)
-      return;
-
-    sequence_->DidRunTask();
-
     /* Added by Luo Wu */
     // run the task's async exec tasks
     if(base::scriptchecker::g_script_checker && base::PlatformThread::CurrentId() == 1) {
       base::scriptchecker::g_script_checker->RunAsyncExecTasks(&task_annotator_);
     }
     /* Added End */
+
+    if (!weak_ptr)
+      return;
+
+    sequence_->DidRunTask();
 
     // TODO(alexclarke): Find out why this is needed.
     if (main_sequence_only().nesting_depth > 0)
@@ -221,8 +221,9 @@ void ThreadControllerImpl::DoWork(SequencedTaskSource::WorkType work_type) {
         any_sequence().immediate_do_work_posted = true;
         /* Modified by Luo Wu */
         //task_runner_->PostTask(FROM_HERE, immediate_do_work_closure_);
-        task_runner_->PostAsyncExecTask(FROM_HERE, immediate_do_work_closure_, nullptr,
-                                        base::scriptchecker::TaskType::SCHEDULER_TASK);
+        task_runner_->PostTaskWithScriptCheckTaskType(
+                    FROM_HERE, immediate_do_work_closure_, nullptr,
+                    base::scriptchecker::TaskType::SCHEDULER_TASK);
         // this task_runner points to `MessageLoopTaskRunner::PostDelayedTask`
         /* End */
       }

@@ -59,14 +59,15 @@ void ScriptChecker::RecordNewTask(PendingTask *task) {
         break;
       case TaskType::IPC_TASK:
         // its capabilty is set accoding to the IPC message, see ScriptChecker::RecordIPCTask
-      case TaskType::SCHEDULER_TASK:
-        // its capability should be full privilege
-        break;
       case TaskType::NORMAL_TIMER_TASK:
+      case TaskType::SETTIMEOUTWR_DELAY_NONZERO_TIMER_TASK:
       case TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK:
         // we have set the capability according to the JS API's parameter, here we need to
         //  ensure that the assigned capability does not breach its parent
         task->NarrowDownCapability(m_current_task_->capability_);
+        break;
+      case TaskType::SCHEDULER_TASK:
+        // its capability should be full privilege
         break;
       default:
         // here is unreachable
@@ -79,13 +80,16 @@ void ScriptChecker::RecordNewTask(PendingTask *task) {
 }
 
 void ScriptChecker::RecordNewAsyncExecTask(PendingTask &&task) {
-  DCHECK(task.task_type_in_scriptchecker_ == TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK);
+  DCHECK(task.task_type_in_scriptchecker_ == TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK ||
+         task.task_type_in_scriptchecker_ == TaskType::RESTRICTED_LISTENER_TASK);
 
   LOG(INFO) << g_name << "ScriptChecker::RecordNewAsyncExecTask. [newtaskid] = "
-            << task.sequence_num;
+            << task.sequence_num << ", " << m_current_task_->task_type_in_scriptchecker_
+            << ", " << GetCurrentTaskCapabilityAsJSString();
 
   // check capability
-  task.NarrowDownCapability(m_current_task_->capability_);
+  if(m_current_task_->IsTaskRestricted())
+    task.NarrowDownCapability(m_current_task_->capability_);
   // record into async exec queue
   m_async_exec_queue_->Push(std::move(task));
 }

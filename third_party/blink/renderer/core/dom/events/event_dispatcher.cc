@@ -45,6 +45,8 @@
 #include "third_party/blink/renderer/platform/event_dispatch_forbidden_scope.h"
 #include "third_party/blink/renderer/platform/instrumentation/tracing/trace_event.h"
 
+#include "third_party/blink/renderer/core/dom/events/scriptchecker/restricted_listener.h"
+
 namespace blink {
 
 DispatchEventResult EventDispatcher::DispatchEvent(Node& node, Event* event) {
@@ -179,8 +181,23 @@ DispatchEventResult EventDispatcher::Dispatch() {
         DispatchEventAtBubbling();
     }
   }
-  DispatchEventPostProcess(activation_target,
-                           pre_dispatch_event_handler_result);
+  /* Modified by Luo Wu */
+  // since we create new tasks for restricted listeners, we cannot directly
+  // call DispatchEventPostProcess. Instead, it should be called when all
+  // restricted listener tasks are done.
+
+  // DispatchEventPostProcess(activation_target,
+  //                          pre_dispatch_event_handler_result);
+
+  if(g_restricted_listener && g_restricted_listener->HasRestrictedListener()) {
+    g_restricted_listener->AddTerminateTask(activation_target,
+                                            pre_dispatch_event_handler_result,
+                                            node_, event_);
+  } else {
+    DispatchEventPostProcess(activation_target,
+                             pre_dispatch_event_handler_result);
+  }
+  /* End */
   return EventTarget::GetDispatchEventResult(*event_);
 }
 
