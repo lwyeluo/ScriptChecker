@@ -62,6 +62,9 @@
 #include "third_party/blink/renderer/platform/shared_buffer.h"
 #include "third_party/blink/renderer/platform/wtf/auto_reset.h"
 
+#include "base/scriptchecker/global.h"
+#include "third_party/blink/renderer/core/scriptchecker/restricted_frame_parser.h"
+
 namespace blink {
 
 using namespace HTMLNames;
@@ -281,8 +284,16 @@ void HTMLDocumentParser::RunScriptsForPausedTreeBuilder() {
   Element* script_element =
       tree_builder_->TakeScriptToProcess(script_start_position);
   // We will not have a scriptRunner when parsing a DocumentFragment.
-  if (script_runner_)
-    script_runner_->ProcessScriptElement(script_element, script_start_position);
+  if (script_runner_) {
+    /* Modified by Luo Wu */
+    // script_runner_->ProcessScriptElement(script_element, script_start_position);
+    if(!RestrictedFrameParser::PostRestrictedTaskIfNecessary(
+                script_runner_, script_element, script_start_position)) {
+      // here is the normal way to execute script
+      script_runner_->ProcessScriptElement(script_element, script_start_position);
+    }
+    /* End */
+  }
   CheckIfBodyStylesheetAdded();
 }
 
@@ -614,6 +625,18 @@ void HTMLDocumentParser::PumpPendingSpeculations() {
     CheckIfBodyStylesheetAdded();
     if (!IsParsing() || IsPaused() || IsScheduledForUnpause())
       break;
+
+    /* Added by Luo Wu */
+    if(base::scriptchecker::g_script_checker &&
+            base::scriptchecker::g_script_checker->
+            IsCurrentTaskHasRestrictedFrameParserTask()) {
+      LOG(INFO) << base::scriptchecker::g_name << "HTMLDocumentParser::PumpPendingSpeculations. "
+                << "Found risky script. Wait the new restricted frame parser task, or launch a "
+                << "unrestricted task to parse others when the risky script is done.";
+      parser_scheduler_->ScheduleForUnpause();
+      break;
+    }
+    /* Added End */
 
     if (speculations_.IsEmpty() ||
         parser_scheduler_->YieldIfNeeded(
@@ -1096,8 +1119,26 @@ void HTMLDocumentParser::NotifyScriptLoaded(PendingScript* pending_script) {
   }
 
   script_runner_->ExecuteScriptsWaitingForLoad(pending_script);
-  if (!IsPaused())
+
+  /* Modified by Luo Wu */
+  // if (!IsPaused())
+  //   ResumeParsingAfterPause();
+
+  // when the finished script is risky, we need to use new unrestricted task to
+  //  parse the remainings
+  if (!IsPaused()) {
+    if(base::scriptchecker::g_script_checker &&
+            base::scriptchecker::g_script_checker->
+            IsCurrentTaskHasRestrictedFrameParserTask()) {
+      base::OnceClosure callback = base::BindOnce(
+                  &HTMLDocumentParser::ResumeParsingAfterPause,
+                  base::Unretained(this));
+      RestrictedFrameParser::PostNormalTaskToContinueParsing(std::move(callback));
+      return;
+    }
     ResumeParsingAfterPause();
+  }
+  /* Added End */
 }
 
 void HTMLDocumentParser::ExecuteScriptsWaitingForResources() {

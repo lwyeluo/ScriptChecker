@@ -229,6 +229,7 @@ void LocalWindowProxy::CreateContext() {
   TRACE_EVENT1("v8", "LocalWindowProxy::CreateContext", "IsMainFrame",
                GetFrame()->IsMainFrame());
 
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
   if(base::scriptchecker::g_script_checker) {
     LOG(INFO) << base::scriptchecker::g_name
               << ">>> [Risky] LocalWindowProxy::CreateContext. TASK "
@@ -236,6 +237,7 @@ void LocalWindowProxy::CreateContext() {
               << world_->GetWorldId() << ", "
               << global_proxy_.IsEmpty();
   }
+#endif
 
   // TODO(yukishiino): Remove this CHECK once crbug.com/713699 gets fixed.
   CHECK(IsMainThread());
@@ -311,11 +313,6 @@ void LocalWindowProxy::InstallConditionalFeatures() {
 
   v8::Local<v8::Context> context = script_state_->GetContext();
 
-  LOG(INFO) << base::scriptchecker::g_name
-            << ">>> [JS] LocalWindowProxy::InstallConditionalFeatures. "
-            << (GetFrame()->DomWindowForRiskyWorld()->GetWrapperTypeInfo() ==
-                GetFrame()->DomWindow()->GetWrapperTypeInfo());
-
   // If the context was created from snapshot, all conditionally
   // enabled features are installed in
   // V8ContextSnapshot::InstallConditionalFeatures().
@@ -372,11 +369,6 @@ void LocalWindowProxy::SetupWindowPrototypeChain() {
   const WrapperTypeInfo* wrapper_type_info = window->GetWrapperTypeInfo();
   v8::Local<v8::Context> context = script_state_->GetContext();
 
-  LOG(INFO) << base::scriptchecker::g_name
-            << ">>> [JS] LocalWindowProxy::SetupWindowPrototypeChain. wrapper_class_id="
-            << wrapper_type_info->wrapper_class_id << ", " << world_->GetWorldId()
-            << ", " << this << ", " << (wrapper_type_info->Equals(&V8Window::wrapperTypeInfo));
-
   // The global proxy object.  Note this is not the global object.
   v8::Local<v8::Object> global_proxy = context->Global();
   CHECK(global_proxy_ == global_proxy);
@@ -392,9 +384,6 @@ void LocalWindowProxy::SetupWindowPrototypeChain() {
   v8::Local<v8::Object> associated_wrapper =
       AssociateWithWrapper(window, wrapper_type_info, window_wrapper);
   DCHECK(associated_wrapper == window_wrapper);
-
-  LOG(INFO) << base::scriptchecker::g_name
-            << "\t address of window wrapper: " << *window_wrapper;
 
   // The prototype object of Window interface.
   v8::Local<v8::Object> window_prototype =

@@ -209,10 +209,12 @@ void DOMTimer::Fired() {
   ScheduledAction* action = action_.Release();
   context->Timers()->RemoveTimeoutByID(timeout_id_);
 
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
   if(base::scriptchecker::g_script_checker) {
     LOG(INFO) << base::scriptchecker::g_name << "DOMTimer::Fired. [id] = "
               << base::scriptchecker::g_script_checker->GetCurrentTaskID();
   }
+#endif
 
   action->Execute(context);
 

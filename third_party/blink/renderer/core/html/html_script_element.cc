@@ -51,11 +51,13 @@ inline HTMLScriptElement::HTMLScriptElement(Document& document,
 
 HTMLScriptElement* HTMLScriptElement::Create(Document& document,
                                              const CreateElementFlags flags) {
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
   if(base::scriptchecker::g_script_checker) {
     LOG(INFO) << base::scriptchecker::g_name
               << ">>> [Risky] HTMLScriptElement::Creates. TASK "
               << base::scriptchecker::g_script_checker->GetCurrentTaskID();
   }
+#endif
   return new HTMLScriptElement(document, flags);
 }
 

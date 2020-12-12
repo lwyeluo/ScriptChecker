@@ -26,6 +26,12 @@ class BASE_EXPORT ScriptChecker {
     /* Task Recorder */
     void RecordNewTask(PendingTask* task);
     void RecordNewAsyncExecTask(PendingTask&& task);
+    // <script xxx risky task_capability="xxx"> should be run in risky task
+    void RecordRestrictedFrameParserTask(PendingTask&& task);
+    // the risky script is finished, so we need to launch new unrestricted
+    //  task to parse remaining items
+    void RecordNormalRestrictedFrameParserTask(PendingTask&& task);
+    void FinishRestrictedFrameParserTask();
     //   The IPC task usually forms as two purposes, one is to trigger some listeners, and the
     //     other is to let renderer process parse some data, e.g., a script and execute it.
     //   The former's risky and capability should be attached on listener.
@@ -36,20 +42,14 @@ class BASE_EXPORT ScriptChecker {
     //     Connector::ReadSingleMessage
     void RecordIPCTask(std::string capability_attached_in_ipc_message);
 
+    /* Information of Current Task */
     bool IsCurrentTaskWithRestricted();
     Capability* GetCurrentTaskCapability();
+    std::string GetCurrentTaskCapabilityAsJSString();
     int GetCurrentTaskID();
+    bool IsCurrentTaskHasRestrictedFrameParserTask();
 
-    // <script xxx risky task_capability=""> should be run in risky task.
-    // currently we dynamic change task's capability to run risky script
-    //   using new task later
-    void UpdateCurrentTaskCapability(std::string task_capability);
-    // listener with restricted capability should be run in risky task.
-    // currently we dynamic change task's capability to run risky script
-    //   using new task later
-    void UpdateCurrentTaskCapability(Capability* capability);
-
-    // Security Monitor
+    /* Security Monitor */
     bool DisallowedToAccessNetwork();
     bool DisallowedToAccessDOM(bool is_ele_has_task_cap_attr);
     bool DisallowedToAccessJSObject(std::string object_name);
@@ -62,8 +62,6 @@ class BASE_EXPORT ScriptChecker {
     std::string ToJSStringFromCapabilityBitmap(uint64_t capability_bitmap);
     CapabilityDefinition* GetCapabilityJSStringRules();
 
-    std::string GetCurrentTaskCapabilityAsJSString();
-
   private:
     // maintain the current task
     PendingTask* m_current_task_;
@@ -71,6 +69,8 @@ class BASE_EXPORT ScriptChecker {
     CapabilityDefinition* m_capability_definition;
     // maintain the tasks created by SCRIPTCHECKER's async execution
     AsyncExecQueue* m_async_exec_queue_;
+    // whether the current task has restricted frame parser task
+    bool m_has_restricted_frame_parser_task_;
 };
 
 }

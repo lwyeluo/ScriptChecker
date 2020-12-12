@@ -13,6 +13,7 @@ ScriptChecker::ScriptChecker() {
   m_current_task_ = nullptr;
   m_capability_definition = new CapabilityDefinition();
   m_async_exec_queue_ = new AsyncExecQueue();
+  m_has_restricted_frame_parser_task_ = false;
 }
 
 ScriptChecker::~ScriptChecker() {
@@ -22,6 +23,8 @@ ScriptChecker::~ScriptChecker() {
 void ScriptChecker::UpdateCurrentTask(PendingTask* task) {
   DCHECK(task);
   m_current_task_ = task;
+
+  m_has_restricted_frame_parser_task_ = false;
 
 #ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
   LOG(INFO) << g_name << "ScriptChecker::UpdateCurrentTask. [seq, cap] = "
@@ -82,6 +85,7 @@ void ScriptChecker::RecordNewTask(PendingTask *task) {
 void ScriptChecker::RecordNewAsyncExecTask(PendingTask &&task) {
   DCHECK(task.task_type_in_scriptchecker_ == TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK ||
          task.task_type_in_scriptchecker_ == TaskType::RESTRICTED_LISTENER_TASK);
+  DCHECK(task.capability_);
 
   LOG(INFO) << g_name << "ScriptChecker::RecordNewAsyncExecTask. [newtaskid] = "
             << task.sequence_num << ", " << m_current_task_->task_type_in_scriptchecker_
@@ -94,13 +98,35 @@ void ScriptChecker::RecordNewAsyncExecTask(PendingTask &&task) {
   m_async_exec_queue_->Push(std::move(task));
 }
 
+void ScriptChecker::RecordRestrictedFrameParserTask(PendingTask&& task) {
+  DCHECK(task.task_type_in_scriptchecker_ == TaskType::RESTRICTED_FRAME_PARSER_TASK);
+  DCHECK(task.capability_);
+  LOG(INFO) << g_name << "ScriptChecker::RecordRestrictedFrameParserTask. [newtaskid] = "
+            << task.sequence_num << ", " << task.capability_->ToString();
+  // record into async exec queue
+  m_async_exec_queue_->Push(std::move(task));
+  // update the flag
+  m_has_restricted_frame_parser_task_ = true;
+}
+
+void ScriptChecker::RecordNormalRestrictedFrameParserTask(PendingTask &&task) {
+  DCHECK(task.task_type_in_scriptchecker_ == TaskType::NORMAL_FRAME_PARSER_TASK);
+  DCHECK(!task.capability_);
+  LOG(INFO) << g_name << "ScriptChecker::RecordNormalRestrictedFrameParserTask. [newtaskid] = "
+            << task.sequence_num;
+  // record into async exec queue
+  m_async_exec_queue_->Push(std::move(task));
+  // update the flag
+  m_has_restricted_frame_parser_task_ = false;
+}
+
+void ScriptChecker::FinishRestrictedFrameParserTask() {
+  m_has_restricted_frame_parser_task_ = true;
+}
+
 void ScriptChecker::RecordIPCTask(std::string capability_attached_in_ipc_message) {
   // here should be attached into the current task which forms as IPC_TASK
   DCHECK(m_current_task_);
-#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
-  LOG(INFO) << g_name << "ScriptChecker::RecordIPCTask. [cap_in_ipc] = "
-            << capability_attached_in_ipc_message;
-#endif
   m_current_task_->SetCapabilityFromIPCMessage(capability_attached_in_ipc_message);
 }
 
@@ -116,13 +142,8 @@ int ScriptChecker::GetCurrentTaskID() {
   return m_current_task_->sequence_num;
 }
 
-void ScriptChecker::UpdateCurrentTaskCapability(std::string task_capability) {
-  m_current_task_->SetCapabilityFromJSString(task_capability);
-}
-
-void ScriptChecker::UpdateCurrentTaskCapability(Capability* capability) {
-  if(capability && capability->IsRestricted())
-    m_current_task_->NarrowDownCapability(capability);
+bool ScriptChecker::IsCurrentTaskHasRestrictedFrameParserTask() {
+  return m_has_restricted_frame_parser_task_;
 }
 
 std::string ScriptChecker::GetCurrentTaskCapabilityAsJSString() {

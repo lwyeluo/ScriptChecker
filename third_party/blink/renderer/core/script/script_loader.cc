@@ -769,12 +769,14 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
       is_risky = pending_script->GetElement()->risky();
       task_capability = pending_script->GetElement()->CapabilityAttrbiuteValue();
     }
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
     LOG(INFO) << base::scriptchecker::g_name
               << " >>> [RISKY] ScriptLoader::ExecuteScriptBlock. "
-                 "[task_id, url, risky, permission] is "
+                 "[task_id, url, risky, capability] is "
               << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
               << context_document->Url().GetString() << ", " << is_risky << ", "
               << task_capability << ", " << pending_script->GetElement()->SourceAttributeValue();
+#endif
   }
   /* Added End */
 
@@ -871,27 +873,15 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
     //    2. "Run the module script given by the script's script."
     /* Modified by Luo Wu */
     //script->RunScript(frame, element_->GetDocument().GetSecurityOrigin());
-    if(base::scriptchecker::g_script_checker) {
-      base::scriptchecker::g_script_checker
-          ->UpdateCurrentTaskCapability(task_capability.Utf8().data());
-      LOG(INFO) << base::scriptchecker::g_name
-                << ">>> [JS] ScriptLoader::ExecuteScriptBlock. task_id, task_capability = "
-                << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
-                << base::scriptchecker::g_script_checker->GetCurrentTaskCapabilityAsJSString();
-    }
-
-    if(is_risky) {
+    if(base::scriptchecker::g_script_checker && is_risky) {
       script->RunScriptInRiskyWorld(frame,
                                     element_->GetDocument().GetSecurityOrigin(),
                                     task_capability);
+      // set the flag, such that the remaining items will be parsed in
+      //  unrestricted task
+      base::scriptchecker::g_script_checker->FinishRestrictedFrameParserTask();
     } else {
       script->RunScript(frame, element_->GetDocument().GetSecurityOrigin());
-    }
-
-    // reset the task permission
-    if(base::scriptchecker::g_script_checker) {
-      base::scriptchecker::g_script_checker
-          ->UpdateCurrentTaskCapability("");
     }
     /* End */
 

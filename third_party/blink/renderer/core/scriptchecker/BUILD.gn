@@ -10,6 +10,8 @@ blink_core_sources("scriptchecker") {
   sources = [
     "restricted_listener.h",
     "restricted_listener.cc",
+    "restricted_frame_parser.h",
+    "restricted_frame_parser.cc",
     "listener_runner.h",
     "listener_runner.cc",
   ]
