@@ -1,12 +1,13 @@
 /*
- *
- *
+ * Separate some of the listener runner from current blink, for the purpose of
+ * run restricted listener in new child task
+ *  Author: Luo Wu
  */
 
 #include "base/macros.h"
 #include "base/scriptchecker/global.h"
-#include "third_party/blink/renderer/core/dom/events/scriptchecker/listener_runner.h"
-#include "third_party/blink/renderer/core/dom/events/scriptchecker/restricted_listener.h"
+#include "third_party/blink/renderer/core/scriptchecker/listener_runner.h"
+#include "third_party/blink/renderer/core/scriptchecker/restricted_listener.h"
 #include "third_party/blink/renderer/core/frame/PerformanceMonitor.h"
 #include "third_party/blink/renderer/bindings/core/v8/script_event_listener.h"
 #include "third_party/blink/renderer/platform/histogram.h"

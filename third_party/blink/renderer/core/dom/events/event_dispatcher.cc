@@ -45,7 +45,7 @@
 #include "third_party/blink/renderer/platform/event_dispatch_forbidden_scope.h"
 #include "third_party/blink/renderer/platform/instrumentation/tracing/trace_event.h"
 
-#include "third_party/blink/renderer/core/dom/events/scriptchecker/restricted_listener.h"
+#include "third_party/blink/renderer/core/scriptchecker/restricted_listener.h"
 
 namespace blink {
 

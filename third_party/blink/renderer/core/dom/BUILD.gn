@@ -300,12 +300,6 @@ blink_core_sources("dom") {
     "whitespace_attacher.h",
     "xml_document.cc",
     "xml_document.h",
-
-    # Added by Luo Wu
-    "events/scriptchecker/restricted_listener.h",
-    "events/scriptchecker/restricted_listener.cc",
-    "events/scriptchecker/listener_runner.h",
-    "events/scriptchecker/listener_runner.cc",
   ]
 
   public_deps = [

@@ -1,10 +1,10 @@
 /*
- *
- *
+ * The core of ScriptCheck to run restricted listener in a new child task
+ *  Author: Luo Wu
  */
 
-#include "third_party/blink/renderer/core/dom/events/scriptchecker/restricted_listener.h"
-#include "third_party/blink/renderer/core/dom/events/scriptchecker/listener_runner.h"
+#include "third_party/blink/renderer/core/scriptchecker/restricted_listener.h"
+#include "third_party/blink/renderer/core/scriptchecker/listener_runner.h"
 
 #include "base/scriptchecker/global.h"
 #include "base/scriptchecker/task_type.h"

@@ -61,8 +61,8 @@
 #include "third_party/blink/renderer/platform/wtf/vector.h"
 
 #include "base/scriptchecker/global.h"
-#include "third_party/blink/renderer/core/dom/events/scriptchecker/restricted_listener.h"
-#include "third_party/blink/renderer/core/dom/events/scriptchecker/listener_runner.h"
+#include "third_party/blink/renderer/core/scriptchecker/restricted_listener.h"
+#include "third_party/blink/renderer/core/scriptchecker/listener_runner.h"
 
 namespace blink {
 namespace {

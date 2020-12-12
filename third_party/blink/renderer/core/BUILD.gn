@@ -192,6 +192,7 @@ component("core") {
     "//third_party/blink/renderer/core/context_features",
     "//third_party/blink/renderer/core/css",
     "//third_party/blink/renderer/core/dom",
+    "//third_party/blink/renderer/core/scriptchecker", # added by Luo Wu
     "//third_party/blink/renderer/core/editing",
     "//third_party/blink/renderer/core/events",
     "//third_party/blink/renderer/core/execution_context",
