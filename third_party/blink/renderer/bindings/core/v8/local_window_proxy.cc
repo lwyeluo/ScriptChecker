@@ -150,29 +150,13 @@ void LocalWindowProxy::Initialize() {
       GetFrame()->DomWindow()->setWorld(world_.get());
     }
   }
-#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
-  uint64_t begin, end;
-  timeval tBegin, tEnd, tDiff;
-  gettimeofday(&tBegin, 0);
-  begin = base::scriptchecker::_rdtsc();
-#endif
-
+  TIME_MEASUREMENT_BEGIN
   /* Added End */
 
   CreateContext();
 
   /* Added by Luo Wu */
-#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
-  end = base::scriptchecker::_rdtsc();
-  gettimeofday(&tEnd, 0);
-  base::scriptchecker::subTimeVal(tDiff, tBegin, tEnd);
-
-  LOG(INFO) << base::scriptchecker::g_name <<
-               ">>> LocalWindowProxy::Initialize. Initialize a new context. "
-               "[is_risky, cpu_cycle, time] ="
-            << world_->IsRiskyWorld() << ", " << (end - begin) << ", "
-            << (tDiff.tv_sec + (1.0 * tDiff.tv_usec)/1000000) << "s";
-#endif
+  TIME_MEASUREMENT_END_WITH_DATA("is_risky", world_->IsRiskyWorld())
   /* Added End */
 
   ScriptState::Scope scope(script_state_.get());

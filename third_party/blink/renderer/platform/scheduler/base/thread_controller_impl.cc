@@ -189,17 +189,26 @@ void ThreadControllerImpl::DoWork(SequencedTaskSource::WorkType work_type) {
     TRACE_TASK_EXECUTION("ThreadControllerImpl::DoWork", *task);
     task_annotator_.RunTask("ThreadControllerImpl::DoWork", &*task);
 
-    /* Added by Luo Wu */
-    // run the task's async exec tasks
-    if(base::scriptchecker::g_script_checker && base::PlatformThread::CurrentId() == 1) {
-      base::scriptchecker::g_script_checker->RunAsyncExecTasks(&task_annotator_);
-    }
-    /* Added End */
+    /* Modified by Luo Wu */
+//    if (!weak_ptr)
+//      return;
 
-    if (!weak_ptr)
+//    sequence_->DidRunTask();
+
+    if (!weak_ptr) {
+      // run the task's async exec tasks
+      if(base::scriptchecker::g_script_checker && base::PlatformThread::CurrentId() == 1) {
+        base::scriptchecker::g_script_checker->RunAsyncExecTasks();
+      }
       return;
+    }
 
     sequence_->DidRunTask();
+    // run the task's async exec tasks
+    if(base::scriptchecker::g_script_checker && base::PlatformThread::CurrentId() == 1) {
+      base::scriptchecker::g_script_checker->RunAsyncExecTasks();
+    }
+    /* Added End */
 
     // TODO(alexclarke): Find out why this is needed.
     if (main_sequence_only().nesting_depth > 0)

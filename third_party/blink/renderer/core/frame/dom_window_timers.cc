@@ -112,7 +112,7 @@ int setTimeoutWR(ScriptState* script_state,
   int task_type = (timeout == 0) ?
               base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK :
               base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_NONZERO_TIMER_TASK;
-  LOG(INFO) << base::scriptchecker::g_name << "enter SETTIMEOUTWR. [id] = "
+  LOG(INFO) << base::scriptchecker::g_name << "enter SETTIMEOUTWR. 1 [id] = "
             << base::scriptchecker::g_script_checker->GetCurrentTaskID();
   return setTimeoutImpl(script_state, event_target, handler,
                         capability, timeout, arguments, task_type);
@@ -128,7 +128,7 @@ int setTimeoutWR(ScriptState* script_state,
   int task_type = (timeout == 0) ?
               base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK :
               base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_NONZERO_TIMER_TASK;
-  LOG(INFO) << base::scriptchecker::g_name << "enter SETTIMEOUTWR. [id] = "
+  LOG(INFO) << base::scriptchecker::g_name << "enter SETTIMEOUTWR. 2 [id] = "
             << base::scriptchecker::g_script_checker->GetCurrentTaskID();
   return setTimeoutImpl(script_state, event_target, handler,
                         capability, timeout, arguments, task_type);

@@ -403,6 +403,7 @@ bool Element::canAccessByScriptChecker() {
   if(base::scriptchecker::g_script_checker &&
            base::scriptchecker::g_script_checker->DisallowedToAccessDOM(
               has_task_sensitve_attr_)) {
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
     std::string message = "The task does not have the permission to "
                      "access the DOM [name, id, is_task_sensitive] = ";
     message = message + nodeName().Ascii().data() + ", "
@@ -410,6 +411,7 @@ bool Element::canAccessByScriptChecker() {
             + std::to_string(hasTaskSensitiveAttribute());
     GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
         kJSMessageSource, kErrorMessageLevel, message.c_str()));
+#endif
     return false;
   }
   return true;

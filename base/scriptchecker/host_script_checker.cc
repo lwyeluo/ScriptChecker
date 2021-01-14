@@ -26,9 +26,6 @@ bool HostScriptChecker::DisallowedToAccessCookie() {
   QueueData queueData = getAndPop();
   DCHECK_QUEUE_DATA_FUNCTION_WITH_SIZE(queueData, "HandleIncomingMessage");
 
-  LOG(INFO) << g_name << "HostScriptChecker::DisallowedToAccessCookie "
-            << queueData.data_;
-
   Capability* capability = new Capability();
   capability->SetFromIPCMessage(queueData.data_);
   return CapabilityDefinition::DisallowedToAccessCookie(capability->GetBitmap());

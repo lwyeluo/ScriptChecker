@@ -5,7 +5,6 @@
 #include <string>
 #include "base/logging.h"
 #include "base/pending_task.h"
-#include "base/debug/task_annotator.h"
 #include "base/containers/queue.h"
 
 namespace base {
@@ -21,7 +20,7 @@ namespace scriptchecker {
   public:
    void Push(PendingTask&&);
    void Clear();
-   void RunAll(base::debug::TaskAnnotator*);
+   void RunAll();
 
    AsyncExecQueue();
    ~AsyncExecQueue();

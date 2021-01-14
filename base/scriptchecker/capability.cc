@@ -21,8 +21,6 @@ Capability::Capability(std::string js_str_capability) {
 
 Capability::Capability(Capability *capability) {
   SetFrom(capability);
-  capability_ = "";
-  capability_ipc_ = "";
 }
 
 Capability::Capability(Capability&& capability) = default;
@@ -56,6 +54,7 @@ void Capability::LoadIPCStringToCapability(std::string ipc_str_capability) {
   if(ipc_str_capability != "") {
     capability_bit_map_ = strtoul(ipc_str_capability.c_str(), NULL, 10);
     capability_js_wl.clear();
+    capability_ipc_ = ipc_str_capability;
     is_restricted_ = true;
     return;
   }

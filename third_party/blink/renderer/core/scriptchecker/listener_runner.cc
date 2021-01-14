@@ -90,12 +90,14 @@ void RunEventListener(EventTarget* event_target,
   //fired_listener = true;
 
   /* Added by Luo Wu */
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   if(base::scriptchecker::g_script_checker
           && base::PlatformThread::CurrentId() == 1) {
     LOG(INFO) << ">>> [Event] EventTarget::FireEventListeners. Finished one listener: "
               << "[event, capability] = " << event->type() << ", "
               << base::scriptchecker::g_script_checker->GetCurrentTaskCapabilityAsJSString();
   }
+#endif
   /* Added End */
 
   // If we're about to report this event listener as blocking, make sure it

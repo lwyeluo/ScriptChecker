@@ -8,7 +8,6 @@
 #include "base/scriptchecker/capability_definition.h"
 #include "base/scriptchecker/async_exec_queue.h"
 #include "base/pending_task.h"
-#include "base/debug/task_annotator.h"
 
 namespace base {
 
@@ -21,13 +20,15 @@ class BASE_EXPORT ScriptChecker {
 
     /* Task Scheduler */
     void UpdateCurrentTask(PendingTask* task);
-    void RunAsyncExecTasks(base::debug::TaskAnnotator*);
+    void RunAsyncExecTasks();
 
     /* Task Recorder */
     void RecordNewTask(PendingTask* task);
     void RecordNewAsyncExecTask(PendingTask&& task);
     // <script xxx risky task_capability="xxx"> should be run in risky task
     void RecordRestrictedFrameParserTask(PendingTask&& task);
+    // <script src="xxx" risky task_capability="xxx">: the ipc task should be risky
+    void RecordRiskyScriptDownloadededFromNetwork(std::string capability_in_js);
     // the risky script is finished, so we need to launch new unrestricted
     //  task to parse remaining items
     void RecordNormalRestrictedFrameParserTask(PendingTask&& task);

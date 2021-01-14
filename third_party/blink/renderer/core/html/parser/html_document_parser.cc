@@ -1118,6 +1118,11 @@ void HTMLDocumentParser::NotifyScriptLoaded(PendingScript* pending_script) {
     return;
   }
 
+  /* Added by Luo Wu */
+  // a script is downloaded from network, we need to check if it is a risky script
+  RestrictedFrameParser::SetIPCTaskCapabilityIfNecessary(pending_script->GetElement());
+  /* Added End */
+
   script_runner_->ExecuteScriptsWaitingForLoad(pending_script);
 
   /* Modified by Luo Wu */

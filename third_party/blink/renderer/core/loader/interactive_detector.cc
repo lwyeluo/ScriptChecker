@@ -13,6 +13,8 @@
 #include "third_party/blink/renderer/platform/loader/fetch/resource_fetcher.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 // Required length of main thread and network quiet window for determining

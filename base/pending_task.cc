@@ -93,7 +93,8 @@ std::string PendingTask::GetCapbilityAsIPCMessage() {
 bool PendingTask::IsTaskRestricted() {
   if(!has_set_capability)
     return false;
-  DCHECK(capability_);
+  if(!capability_)
+    return false;
   return capability_->IsRestricted();
 }
 

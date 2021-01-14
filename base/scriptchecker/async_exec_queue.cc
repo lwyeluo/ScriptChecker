@@ -25,12 +25,14 @@ void AsyncExecQueue::Clear() {
     async_exec_queue_.pop_back();
 }
 
-void AsyncExecQueue::RunAll(base::debug::TaskAnnotator* task_annotator) {
+void AsyncExecQueue::RunAll() {
   for(size_t i = 0; i < async_exec_queue_.size(); i ++) {
     base::Optional<base::PendingTask> task = std::move(async_exec_queue_[i]);
 
     LOG(INFO) << g_name << "\tRun Async Exec Task [tid] = " << task->sequence_num;
-    task_annotator->RunTask(__FUNCTION__, &*task);
+    //task_annotator->RunTask(__FUNCTION__, &*task);
+    base::scriptchecker::g_script_checker->UpdateCurrentTask(&*task);
+    std::move(task->task).Run();
   }
   Clear();
 }

@@ -283,8 +283,10 @@ bool InterfaceEndpointClient::AcceptWithResponder(
       std::string capbility = base::scriptchecker::g_script_checker
               ->GetCurrentTaskCapability()->ToIPCString();
       message->SetAdditionalField(capbility);
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
       LOG(INFO) << base::scriptchecker::g_name << " {IPC} attach capabilty: "
                 << capbility;
+#endif
     }
   }
   /* Added End */

@@ -16,6 +16,9 @@ class CORE_EXPORT RestrictedFrameParser {
   static void PostNormalTaskToContinueParsing(
           base::OnceClosure callback);
 
+  static void SetIPCTaskCapabilityIfNecessary(
+          ScriptElementBase* element);
+
 };
 }
 

@@ -781,6 +781,15 @@ class ChannelAssociatedGroupController
     if (!endpoint)
       return true;
 
+    /* Added by Luo Wu */
+    if(base::scriptchecker::g_script_checker &&
+            base::PlatformThread::CurrentId() == 1) {
+      // obtain the capability attached in IPC
+      std::string capability = "";
+      base::scriptchecker::g_script_checker->RecordIPCTask(capability);
+    }
+    /* Added End */
+
     mojo::InterfaceEndpointClient* client = endpoint->client();
     if (!client || !endpoint->task_runner()->RunsTasksInCurrentSequence()) {
       // No client has been bound yet or the client runs tasks on another

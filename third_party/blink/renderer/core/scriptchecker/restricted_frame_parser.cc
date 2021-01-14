@@ -15,10 +15,13 @@ bool RestrictedFrameParser::PostRestrictedTaskIfNecessary(
         HTMLParserScriptRunner* script_runner,
         Element* script_element,
         const TextPosition& script_start_position) {
-  if(!(base::scriptchecker::g_script_checker &&
-       base::scriptchecker::g_script_checker->
-       IsCurrentTaskHasRestrictedFrameParserTask()))
+  if(!base::scriptchecker::g_script_checker)
     return false;
+  if(base::scriptchecker::g_script_checker->
+          IsCurrentTaskHasRestrictedFrameParserTask()) {
+    // the task has risky script, so run it
+    return false;
+  }
 
   base::scriptchecker::Capability* capability = nullptr;
   ScriptElementBase* element = ScriptElementBase::FromElementIfPossible(script_element);
@@ -56,6 +59,21 @@ void RestrictedFrameParser::PostNormalTaskToContinueParsing(
   pending_task.sequence_num = -100; // just to identify the task
   base::scriptchecker::g_script_checker->
           RecordNormalRestrictedFrameParserTask(std::move(pending_task));
+}
+
+void RestrictedFrameParser::SetIPCTaskCapabilityIfNecessary(
+        ScriptElementBase* element) {
+  // the ipc task should be normal task
+  if(base::scriptchecker::g_script_checker &&
+          !base::scriptchecker::g_script_checker->IsCurrentTaskWithRestricted()) {
+    // the downloaded script should be risky
+    if(element && element->risky()) {
+      std::string capability_str = element->CapabilityAttrbiuteValue().Utf8().data();
+      // update capability
+      base::scriptchecker::g_script_checker->
+              RecordRiskyScriptDownloadededFromNetwork(capability_str);
+    }
+  }
 }
 
 }

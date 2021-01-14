@@ -7,6 +7,8 @@
 #include "{{filename}}"
 {% endfor %}
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 {% set dom_template = '%s::domTemplate' % v8_class if not is_array_buffer_or_view else 'nullptr' %}
 {% set parent_wrapper_type_info = '&V8%s::wrapperTypeInfo' % parent_interface
