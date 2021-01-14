@@ -72,7 +72,37 @@ static void {{method.name}}{{method.overload_index}}Method{{world_suffix}}(const
   V0CustomElementProcessingStack::CallbackDeliveryScope deliveryScope;
   {% endif %}
 
+  {# Modified by Luo Wu #}
+  {# comment the previous code: {{function_call | trim | indent(2)}} #}
+
+  {% if method.name == "getElementById" and cpp_class == "Document" %}
+  if (UNLIKELY(info.Length() < 1)) {
+    V8ThrowException::ThrowTypeError(info.GetIsolate(), ExceptionMessages::FailedToExecute("getElementById", "Document", ExceptionMessages::NotEnoughArguments(1, info.Length())));
+    return;
+  }
+
+  V8StringResource<> elementId;
+  elementId = info[0];
+  if (!elementId.Prepare())
+    return;
+
+  TIME_MEASUREMENT_BEGIN;
+  Element* result = NonElementParentNode::getElementById(*impl, elementId);
+  TIME_MEASUREMENT_END_WITH_DATA("DomId", String(elementId));
+
+  {% if world_suffix == "ForMainWorld" %}
+  V8SetReturnValueForMainWorld(info, result);
+  {% elif world_suffix == "" %}
+  V8SetReturnValueFast(info, result, impl);
+  {% endif %}
+
+  {% else %}
+
   {{function_call | trim | indent(2)}}
+
+  {% endif %}
+
+  {# Modified End #}
 }
 {% endfilter %}
 {% endmacro %}
