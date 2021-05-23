@@ -86,9 +86,15 @@ static void {{method.name}}{{method.overload_index}}Method{{world_suffix}}(const
   if (!elementId.Prepare())
     return;
 
-  TIME_MEASUREMENT_BEGIN;
-  Element* result = NonElementParentNode::getElementById(*impl, elementId);
-  TIME_MEASUREMENT_END_WITH_DATA("DomId", String(elementId));
+  Element* result;
+  bool needToMeasure = String(elementId).Contains("block-form-input");
+  if(needToMeasure) {
+    TIME_MEASUREMENT_BEGIN;
+    result = NonElementParentNode::getElementById(*impl, elementId);
+    TIME_MEASUREMENT_END_WITH_DATA("DomId", String(elementId));
+  } else {
+    result = NonElementParentNode::getElementById(*impl, elementId);
+  }
 
   {% if world_suffix == "ForMainWorld" %}
   V8SetReturnValueForMainWorld(info, result);
@@ -568,7 +574,17 @@ void {{v8_class_or_partial}}::{{method.name}}MethodCallback{{world_suffix}}(cons
   {% elif method.is_post_message %}
   {{cpp_class_or_partial}}V8Internal::postMessageImpl("{{interface_name}}", {{v8_class}}::ToImpl(info.Holder()), info);
   {% else %}
+
+  {% if method.name == "send" and cpp_class_or_partial == "XMLHttpRequest" %}
+  TIME_MEASUREMENT_BEGIN;
+  {% endif %}
+
   {{cpp_class_or_partial}}V8Internal::{{method.name}}Method{{world_suffix}}(info);
+
+  {% if method.name == "send" and cpp_class_or_partial == "XMLHttpRequest" %}
+  TIME_MEASUREMENT_END;
+  {% endif %}
+
   {% endif %}
 }
 {% endmacro %}
