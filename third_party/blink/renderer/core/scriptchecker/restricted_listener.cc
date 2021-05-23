@@ -25,22 +25,27 @@ void RunRestrictedListener(size_t idx_for_pending_tasks,
                            ExecutionContext* context) {
   ListenerTaskArgs* args = g_restricted_listener->
           GetListenerTaskArgs(idx_for_pending_tasks);
-  RunEventListener(event_target, args->entry,
-                   args->idx_in_entry, event,
+  RunEventListener(event_target, &args->registered_listener, event,
                    context, args->flag_should_report,
                    args->report_time);
+  if(idx_for_pending_tasks == g_restricted_listener->GetNumberOfTasks() - 1) {
+      // all pending listeners are run, so clear it
+      g_restricted_listener->Clear();
+  }
 }
 
 ListenerTaskArgs::ListenerTaskArgs(
-        EventListenerVector* entry, int idx_in_entry,
+        RegisteredEventListener* in_registered_listener,
         bool flag_should_report, double report_time,
         base::scriptchecker::Capability* capability) :
-    entry(entry), idx_in_entry(idx_in_entry),
+    //registered_listener(registered_listener),
     flag_should_report(flag_should_report),
-    report_time(report_time), capability(capability) {}
+    report_time(report_time), capability(capability) {
+  registered_listener = *in_registered_listener;
+}
 
 ListenerTaskArgs::ListenerTaskArgs() :
-    entry(nullptr), idx_in_entry(0), flag_should_report(false),
+    registered_listener(RegisteredEventListener()), flag_should_report(false),
     report_time(0), capability(nullptr) {}
 
 RestrictedListener::RestrictedListener(){
@@ -58,9 +63,6 @@ void RestrictedListener::AddRestrictedListener(ListenerTaskArgs args,
   listener_task_args_.push_back(args);
   size_t num = listener_task_args_.size() - 1;
 
-  LOG(INFO) << "EventTarget::FireEventListeners. listener is restricted, push it as a new task."
-            << ", " << args.entry->size() << ", " << args.idx_in_entry;
-
   base::PendingTask pending_task(
               FROM_HERE, base::BindOnce(&RunRestrictedListener, num, event_target, event, context),
               TimeTicks(), base::Nestable::kNestable, listener_task_args_[num].capability,
@@ -73,8 +75,6 @@ void RestrictedListener::AddTerminateTask(Node* activation_target,
                                           EventDispatchHandlingState* pre_dispatch_event_handler_result,
                                           Node* node_, Event* event_) {
   size_t num = listener_task_args_.size() - 1;
-
-  LOG(INFO) << "RestrictedListener::AddTerminateTask.";
 
   base::PendingTask pending_task(
               FROM_HERE, base::BindOnce(&RunDispatchEventPostProcess,

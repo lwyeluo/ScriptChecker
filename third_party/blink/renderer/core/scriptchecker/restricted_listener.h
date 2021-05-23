@@ -7,15 +7,14 @@
 namespace blink {
 
 struct CORE_EXPORT ListenerTaskArgs {
-  EventListenerVector* entry;
-  int idx_in_entry;
+  RegisteredEventListener registered_listener;
   bool flag_should_report;
   double report_time;
 
   base::scriptchecker::Capability* capability;
 
   ListenerTaskArgs();
-  ListenerTaskArgs(EventListenerVector* entry, int idx_in_entry,
+  ListenerTaskArgs(RegisteredEventListener* registered_listener,
                    bool flag_should_report, double report_time,
                    base::scriptchecker::Capability* capability);
 };

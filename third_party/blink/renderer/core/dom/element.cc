@@ -1573,7 +1573,9 @@ void Element::AttributeChanged(const AttributeModificationParams& params) {
   }
   /* Added by Luo Wu */
   else if (name == HTMLNames::task_sensitiveAttr) {
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
     LOG(INFO) << ">>> Element::AttributeChanged " << name;
+#endif
     if(params.old_value == g_null_atom &&
        params.reason == AttributeModificationReason::kDirectly)
       has_task_sensitve_attr_ = false;

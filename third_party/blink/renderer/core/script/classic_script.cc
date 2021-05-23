@@ -26,9 +26,11 @@ void ClassicScript::RunScript(LocalFrame* frame,
 void ClassicScript::RunScriptInRiskyWorld(LocalFrame* frame,
                                           const SecurityOrigin* origin,
                                           String task_capability) const {
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   LOG(INFO) << base::scriptchecker::g_name
             << ">>> [RISKY] ClassicScript::RunScriptInRiskyWorld with capability "
             << task_capability;
+#endif
   frame->GetScriptController().ExecuteScriptInRiskyWorld(
       GetScriptSourceCode(), BaseURL(), FetchOptions(), access_control_status_);
 }

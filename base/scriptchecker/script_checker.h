@@ -21,6 +21,17 @@ class BASE_EXPORT ScriptChecker {
     /* Task Scheduler */
     void UpdateCurrentTask(PendingTask* task);
     void RunAsyncExecTasks();
+    size_t GetAsyncExecTaskSize();
+
+    /* Measure the time usage for schedule an async task for setTimeoutWR */
+    struct TIME_MEASURE {
+      timeval time_begin, time_end, time_diff;
+      uint64_t cpu_begin, cpu_end;
+      int task_id;
+      bool is_valid;
+    };
+    void StartTimeMeasureForAsyncTask();
+    void FinishTimeMeasureForAsyncTask();
 
     /* Task Recorder */
     void RecordNewTask(PendingTask* task);
@@ -49,6 +60,7 @@ class BASE_EXPORT ScriptChecker {
     std::string GetCurrentTaskCapabilityAsJSString();
     int GetCurrentTaskID();
     bool IsCurrentTaskHasRestrictedFrameParserTask();
+    bool IsCurrentTaskNormalFrameParser();
 
     /* Security Monitor */
     bool DisallowedToAccessNetwork();
@@ -72,6 +84,8 @@ class BASE_EXPORT ScriptChecker {
     AsyncExecQueue* m_async_exec_queue_;
     // whether the current task has restricted frame parser task
     bool m_has_restricted_frame_parser_task_;
+    // to measure the time usage for an async task by setTimeoutWR
+    std::map<int, struct TIME_MEASURE*> m_time_measure_map_;
 };
 
 }

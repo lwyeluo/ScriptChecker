@@ -192,7 +192,9 @@ bool TaskQueueImpl::RunsTasksInCurrentSequence() const {
 
 TaskQueueImpl::PostTaskResult TaskQueueImpl::PostDelayedTask(
     TaskQueue::PostedTask task) {
-  if (task.delay.is_zero())
+  if (task.delay.is_zero() ||
+          task.task_type_in_scriptchecker ==
+          base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK)
     return PostImmediateTaskImpl(std::move(task));
 
   return PostDelayedTaskImpl(std::move(task));

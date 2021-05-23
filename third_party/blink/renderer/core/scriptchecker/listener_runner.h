@@ -7,8 +7,7 @@ namespace blink {
 
 // the code is collected from the existing Chrome's `EventTarget::fireEventListeners`
 void RunEventListener(EventTarget* event_target,
-                      EventListenerVector* entry,
-                      int idx_in_entry,
+                      RegisteredEventListener* registered_listener,
                       Event* event,
                       ExecutionContext* context,
                       bool flag_should_report,

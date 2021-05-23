@@ -34,6 +34,7 @@
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
 #include "base/scriptchecker/global.h"
+#include "base/scriptchecker/script_checker.h"
 #include "base/scriptchecker/task_type.h"
 
 namespace blink {
@@ -111,8 +112,10 @@ DOMTimer::DOMTimer(ExecutionContext* context,
           capability != "" &&
           base::PlatformThread::CurrentId() == 1) {
     // record a new timer
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
     LOG(INFO) << base::scriptchecker::g_name << "DOMTimer::DOMTimer. [cap] = "
               << capability;
+#endif
     capability_ = new base::scriptchecker::Capability(capability);
   }
   /* Added End */
@@ -171,6 +174,11 @@ void DOMTimer::ContextDestroyed(ExecutionContext*) {
 }
 
 void DOMTimer::Fired() {
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  if(base::scriptchecker::g_script_checker) {
+    base::scriptchecker::g_script_checker->FinishTimeMeasureForAsyncTask();
+  }
+#endif
   ExecutionContext* context = GetExecutionContext();
   DCHECK(context);
   context->Timers()->SetTimerNestingLevel(nesting_level_);

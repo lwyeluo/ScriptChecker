@@ -67,13 +67,11 @@ void ReportBlockedEvent(ExecutionContext* context,
 }
 
 void RunEventListener(EventTarget* event_target,
-                      EventListenerVector* entry,
-                      int idx_in_entry,
+                      RegisteredEventListener* registered_listener,
                       Event* event,
                       ExecutionContext* context,
                       bool flag_should_report,
                       double report_time) {
-  RegisteredEventListener* registered_listener = &entry->at(idx_in_entry);
   EventListener* listener = registered_listener->Callback();
 
   event->SetHandlingPassive(EventPassiveMode(*registered_listener));
@@ -103,8 +101,7 @@ void RunEventListener(EventTarget* event_target,
   // If we're about to report this event listener as blocking, make sure it
   // wasn't removed while handling the event.
   if (flag_should_report) {
-    RegisteredEventListener* previous_registered_listener = &entry->at(idx_in_entry-1);
-    ReportBlockedEvent(context, event, previous_registered_listener, report_time);
+    ReportBlockedEvent(context, event, registered_listener, report_time);
   }
 
   if (passive_forced) {
@@ -124,10 +121,6 @@ void RunEventListener(EventTarget* event_target,
 void RunDispatchEventPostProcess(Node* activation_target,
                                  EventDispatchHandlingState* pre_dispatch_event_handler_result,
                                  Node* node_, Event* event_) {
-  // clear all resources first
-  DCHECK(g_restricted_listener);
-  g_restricted_listener->Clear();
-
   event_->SetTarget(EventPath::EventTargetRespectingTargetRules(*node_));
   // https://dom.spec.whatwg.org/#concept-event-dispatch
   // 14. Unset event’s dispatch flag, stop propagation flag, and stop immediate

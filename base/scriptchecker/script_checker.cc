@@ -38,6 +38,45 @@ void ScriptChecker::RunAsyncExecTasks() {
   m_async_exec_queue_->RunAll();
 }
 
+size_t ScriptChecker::GetAsyncExecTaskSize() {
+  return m_async_exec_queue_->Size();
+}
+
+void ScriptChecker::StartTimeMeasureForAsyncTask() {
+  struct TIME_MEASURE *time_measure = new struct TIME_MEASURE();
+  memset(time_measure, 0, sizeof(struct TIME_MEASURE));
+  gettimeofday(&time_measure->time_begin, 0);
+  time_measure->cpu_begin = _rdtsc();
+  time_measure->task_id = m_async_exec_queue_->GetLastTaskId();
+  time_measure->is_valid = true;
+
+  m_time_measure_map_[time_measure->task_id] = time_measure;
+}
+
+void ScriptChecker::FinishTimeMeasureForAsyncTask() {
+  auto iter = m_time_measure_map_.find(GetCurrentTaskID());
+  if(iter == m_time_measure_map_.end())
+    return;
+
+  struct TIME_MEASURE* time_measure = m_time_measure_map_[GetCurrentTaskID()];
+  if(time_measure->is_valid) {
+    gettimeofday(&time_measure->time_end, 0);
+    time_measure->cpu_end = _rdtsc();
+
+    subTimeVal(time_measure->time_diff,
+               time_measure->time_begin,
+               time_measure->time_end);
+
+    LOG(INFO) << g_name << "ScheduleAsnycTaskForSetTimeoutWR"
+              << "[is_risky_task, cpu_cycle, time] = " << IsCurrentTaskWithRestricted() << ", "
+              << (time_measure->cpu_end - time_measure->cpu_begin) << ", "
+              << (time_measure->time_diff.tv_sec * 1000000 + time_measure->time_diff.tv_usec) << "μs! ";
+
+    delete time_measure;
+    m_time_measure_map_.erase(iter);
+  }
+}
+
 void ScriptChecker::RecordNewTask(PendingTask *task) {
   // the task is from other thread, so the new task
   //   cannot use the current task as its parent
@@ -89,10 +128,11 @@ void ScriptChecker::RecordNewAsyncExecTask(PendingTask &&task) {
          task.task_type_in_scriptchecker_ == TaskType::RESTRICTED_LISTENER_TASK);
   DCHECK(task.capability_);
 
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   LOG(INFO) << g_name << "ScriptChecker::RecordNewAsyncExecTask. [newtaskid] = "
             << task.sequence_num << ", " << m_current_task_->task_type_in_scriptchecker_
             << ", " << GetCurrentTaskCapabilityAsJSString();
-
+#endif
   // check capability
   if(m_current_task_->IsTaskRestricted())
     task.NarrowDownCapability(m_current_task_->capability_);
@@ -103,8 +143,10 @@ void ScriptChecker::RecordNewAsyncExecTask(PendingTask &&task) {
 void ScriptChecker::RecordRestrictedFrameParserTask(PendingTask&& task) {
   DCHECK(task.task_type_in_scriptchecker_ == TaskType::RESTRICTED_FRAME_PARSER_TASK);
   DCHECK(task.capability_);
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   LOG(INFO) << g_name << "ScriptChecker::RecordRestrictedFrameParserTask. [newtaskid] = "
             << task.sequence_num << ", " << task.capability_->ToString();
+#endif
   // record into async exec queue
   m_async_exec_queue_->Push(std::move(task));
   // update the flag
@@ -113,15 +155,19 @@ void ScriptChecker::RecordRestrictedFrameParserTask(PendingTask&& task) {
 
 void ScriptChecker::RecordRiskyScriptDownloadededFromNetwork(
         std::string capability_in_js) {
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   LOG(INFO) << ">>> ScriptChecker::RecordRiskyScriptDownloadededFromNetwork";
+#endif
   m_current_task_->SetCapabilityFromJSString(capability_in_js);
 }
 
 void ScriptChecker::RecordNormalRestrictedFrameParserTask(PendingTask &&task) {
   DCHECK(task.task_type_in_scriptchecker_ == TaskType::NORMAL_FRAME_PARSER_TASK);
   DCHECK(!task.capability_);
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   LOG(INFO) << g_name << "ScriptChecker::RecordNormalRestrictedFrameParserTask. [newtaskid] = "
             << task.sequence_num;
+#endif
   // record into async exec queue
   m_async_exec_queue_->Push(std::move(task));
   // update the flag
@@ -152,6 +198,13 @@ int ScriptChecker::GetCurrentTaskID() {
 
 bool ScriptChecker::IsCurrentTaskHasRestrictedFrameParserTask() {
   return m_has_restricted_frame_parser_task_;
+}
+
+bool ScriptChecker::IsCurrentTaskNormalFrameParser() {
+  if(m_current_task_)
+    return m_current_task_->task_type_in_scriptchecker_
+            == TaskType::NORMAL_FRAME_PARSER_TASK;
+  return false;
 }
 
 std::string ScriptChecker::GetCurrentTaskCapabilityAsJSString() {
@@ -189,6 +242,8 @@ bool ScriptChecker::DisallowedToAccessDOM(bool is_ele_has_task_cap_attr) {
               is_ele_has_task_cap_attr);
 }
 bool ScriptChecker::DisallowedToAccessJSObject(std::string object_name) {
+  if(object_name == "") // we dont know the object, update this code in the futher
+    return false;
   if(!m_current_task_->IsTaskRestricted())
     return false;
   return !m_current_task_->capability_->ContainsInJSWL(object_name);

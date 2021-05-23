@@ -64,6 +64,7 @@
 
 #include "base/scriptchecker/global.h"
 #include "third_party/blink/renderer/core/scriptchecker/restricted_frame_parser.h"
+#include "base/debug/stack_trace.h"
 
 namespace blink {
 
@@ -628,11 +629,15 @@ void HTMLDocumentParser::PumpPendingSpeculations() {
 
     /* Added by Luo Wu */
     if(base::scriptchecker::g_script_checker &&
-            base::scriptchecker::g_script_checker->
-            IsCurrentTaskHasRestrictedFrameParserTask()) {
+            (base::scriptchecker::g_script_checker->
+            IsCurrentTaskHasRestrictedFrameParserTask() ||
+             base::scriptchecker::g_script_checker->GetAsyncExecTaskSize())
+            ) {
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
       LOG(INFO) << base::scriptchecker::g_name << "HTMLDocumentParser::PumpPendingSpeculations. "
                 << "Found risky script. Wait the new restricted frame parser task, or launch a "
                 << "unrestricted task to parse others when the risky script is done.";
+#endif
       parser_scheduler_->ScheduleForUnpause();
       break;
     }
@@ -1089,6 +1094,16 @@ void HTMLDocumentParser::ResumeParsingAfterPause() {
       DCHECK(!last_chunk_before_pause_);
       PumpPendingSpeculations();
     }
+    /* Added by Luo Wu */
+    //  this function can be called for scriptChecker's task when the
+    //   restricted frame parser task is done. The problem is that if
+    //   ResumeParsingAfterYield runs before the risky script is downloaded,
+    //   then the parse task will be never rewaked, so we need to invoke
+    //   ResumeParsingAfterYield in this situation (when the task is unpaused).
+    else if(!IsScheduledForUnpause()){
+      ResumeParsingAfterYield();
+    }
+    /* End */
     return;
   }
 
@@ -1134,7 +1149,8 @@ void HTMLDocumentParser::NotifyScriptLoaded(PendingScript* pending_script) {
   if (!IsPaused()) {
     if(base::scriptchecker::g_script_checker &&
             base::scriptchecker::g_script_checker->
-            IsCurrentTaskHasRestrictedFrameParserTask()) {
+            IsCurrentTaskHasRestrictedFrameParserTask()
+            ) {
       base::OnceClosure callback = base::BindOnce(
                   &HTMLDocumentParser::ResumeParsingAfterPause,
                   base::Unretained(this));

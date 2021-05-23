@@ -106,12 +106,12 @@ static bool AddListenerToVector(EventListenerVector* vector,
     return false;  // Duplicate listener.
 
   /* Added by Luo Wu */
-  if(base::scriptchecker::g_script_checker
-          && base::PlatformThread::CurrentId() == 1) {
-    base::scriptchecker::Capability* capability =
-            base::scriptchecker::g_script_checker->GetCurrentTaskCapability();
-    registered_listener->SetCapability(capability);
-  }
+//  if(base::scriptchecker::g_script_checker
+//          && base::PlatformThread::CurrentId() == 1) {
+//    base::scriptchecker::Capability* capability =
+//            base::scriptchecker::g_script_checker->GetCurrentTaskCapability();
+//    registered_listener->SetCapability(capability);
+//  }
   /* Added End */
 
   vector->push_back(*registered_listener);

@@ -21,12 +21,15 @@ namespace scriptchecker {
    void Push(PendingTask&&);
    void Clear();
    void RunAll();
+   size_t Size();
+   int GetLastTaskId();
 
    AsyncExecQueue();
    ~AsyncExecQueue();
 
   private:
    std::vector<PendingTask> async_exec_queue_;
+   int last_task_id_;
  };
 
 }

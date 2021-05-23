@@ -331,6 +331,7 @@ bool EventTarget::AddEventListenerInternal(
                               argv.data());
   }
 
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   if(base::scriptchecker::g_script_checker &&
           base::PlatformThread::CurrentId() == 1 &&
           base::scriptchecker::g_script_checker->IsCurrentTaskWithRestricted()) {
@@ -338,6 +339,7 @@ bool EventTarget::AddEventListenerInternal(
               << event_type << ", "
               << base::scriptchecker::g_script_checker->GetCurrentTaskCapabilityAsJSString();
   }
+#endif
 
   RegisteredEventListener registered_listener;
   bool added = EnsureEventTargetData().event_listener_map.Add(
@@ -800,11 +802,11 @@ bool EventTarget::FireEventListeners(Event* event,
       if(!g_restricted_listener)
         InitRestrictedListenerForScriptChecker();
       g_restricted_listener->AddRestrictedListener(
-                  ListenerTaskArgs(&entry, i-1, flag_should_report,
+                  ListenerTaskArgs(&registered_listener, flag_should_report,
                                    report_time, capability),
                   this, event, context);
     } else {
-      RunEventListener(this, &entry, i-1, event, context, flag_should_report, report_time);
+      RunEventListener(this, &registered_listener, event, context, flag_should_report, report_time);
     }
     /* End */
 

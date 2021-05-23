@@ -254,6 +254,28 @@ bool {{v8_class_or_partial}}::securityCheck(v8::Local<v8::Context> accessingCont
     return false;  // the frame is gone.
 
   const DOMWindow* targetWindow = V8Window::ToImpl(window);
+
+  /* check the time usage between main context and sandbox context */
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  if(object_name == "mainLog" || object_name.find("riskyLog") == 0) {
+    std::string access_type = "";
+    const LocalDOMWindow* accessing_window = ToLocalDOMWindow(accessingContext);
+    if(accessing_window->GetFrame()->DomWindowForRiskyWorld() == accessing_window) {
+      // risky code accesses normal code
+      access_type = "risky_access_main";
+    } else if((targetWindow == targetWindow->GetFrame()->DomWindowForRiskyWorld())
+               && (accessing_window->GetFrame() == targetWindow->GetFrame())) {
+      access_type = "main_access_risky";
+    }
+    TIME_MEASUREMENT_BEGIN;
+    bool ret = BindingSecurity::ShouldAllowAccessTo(ToLocalDOMWindow(accessingContext),
+                                                    targetWindow,
+                                                    BindingSecurity::ErrorReportOption::kDoNotReport
+                                                    /* Added by Luo Wu */, object_name /* End */);
+    TIME_MEASUREMENT_END_WITH_DATA("TYPE", access_type);
+    return ret;
+  }
+#endif
   return BindingSecurity::ShouldAllowAccessTo(ToLocalDOMWindow(accessingContext),
                                               targetWindow,
                                               BindingSecurity::ErrorReportOption::kDoNotReport

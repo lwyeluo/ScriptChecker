@@ -87,9 +87,24 @@ int setTimeout(ScriptState* script_state,
                const ScriptValue& handler,
                int timeout,
                const Vector<ScriptValue>& arguments) {
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  if(timeout == -1) {
+    TIME_MEASUREMENT_BEGIN;
+    int ret = setTimeoutImpl(script_state, event_target, handler,
+                             "", 0, arguments,
+                             base::scriptchecker::TaskType::NORMAL_TIMER_TASK);
+    TIME_MEASUREMENT_END;
+    return ret;
+  } else {
+    return setTimeoutImpl(script_state, event_target, handler,
+                          "", 0, arguments,
+                          base::scriptchecker::TaskType::NORMAL_TIMER_TASK);
+  }
+#else
   return setTimeoutImpl(script_state, event_target, handler,
                         "", timeout, arguments,
                         base::scriptchecker::TaskType::NORMAL_TIMER_TASK);
+#endif
 }
 
 int setTimeout(ScriptState* script_state,
@@ -97,9 +112,24 @@ int setTimeout(ScriptState* script_state,
                const String& handler,
                int timeout,
                const Vector<ScriptValue>& arguments) {
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  if(timeout == -1) {
+    TIME_MEASUREMENT_BEGIN;
+    int ret = setTimeoutImpl(script_state, event_target, handler,
+                             "", 0, arguments,
+                             base::scriptchecker::TaskType::NORMAL_TIMER_TASK);
+    TIME_MEASUREMENT_END;
+    return ret;
+  } else {
+    return setTimeoutImpl(script_state, event_target, handler,
+                          "", timeout, arguments,
+                          base::scriptchecker::TaskType::NORMAL_TIMER_TASK);
+  }
+#else
   return setTimeoutImpl(script_state, event_target, handler,
                         "", timeout, arguments,
                         base::scriptchecker::TaskType::NORMAL_TIMER_TASK);
+#endif
 }
 
 int setTimeoutWR(ScriptState* script_state,
@@ -109,13 +139,32 @@ int setTimeoutWR(ScriptState* script_state,
                  int timeout,
                  const Vector<ScriptValue>& arguments) {
   DCHECK(base::scriptchecker::g_script_checker);
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  // record the current size of ScriptChecker's aysnc queue
+  size_t size_of_async_queue = base::scriptchecker::g_script_checker
+          ->GetAsyncExecTaskSize();
+  TIME_MEASUREMENT_BEGIN;
+#endif
   int task_type = (timeout == 0) ?
               base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK :
               base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_NONZERO_TIMER_TASK;
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   LOG(INFO) << base::scriptchecker::g_name << "enter SETTIMEOUTWR. 1 [id] = "
             << base::scriptchecker::g_script_checker->GetCurrentTaskID();
-  return setTimeoutImpl(script_state, event_target, handler,
-                        capability, timeout, arguments, task_type);
+#endif
+  int ret = setTimeoutImpl(script_state, event_target, handler,
+                           capability, timeout, arguments, task_type);
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  int has_new_task = base::scriptchecker::g_script_checker
+          ->GetAsyncExecTaskSize() - size_of_async_queue;
+  if(has_new_task == 1) {
+    // print the time usage for generating new task by setTimeoutWR
+    TIME_MEASUREMENT_END;
+    // start to record the time usage for schedule the timer task
+    base::scriptchecker::g_script_checker->StartTimeMeasureForAsyncTask();
+  }
+#endif
+  return ret;
 }
 
 int setTimeoutWR(ScriptState* script_state,
@@ -125,13 +174,32 @@ int setTimeoutWR(ScriptState* script_state,
                  int timeout,
                  const Vector<ScriptValue>& arguments) {
   DCHECK(base::scriptchecker::g_script_checker);
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  // record the current size of ScriptChecker's aysnc queue
+  size_t size_of_async_queue = base::scriptchecker::g_script_checker
+          ->GetAsyncExecTaskSize();
+  TIME_MEASUREMENT_BEGIN;
+#endif
   int task_type = (timeout == 0) ?
               base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK :
               base::scriptchecker::TaskType::SETTIMEOUTWR_DELAY_NONZERO_TIMER_TASK;
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
   LOG(INFO) << base::scriptchecker::g_name << "enter SETTIMEOUTWR. 2 [id] = "
             << base::scriptchecker::g_script_checker->GetCurrentTaskID();
-  return setTimeoutImpl(script_state, event_target, handler,
-                        capability, timeout, arguments, task_type);
+#endif
+  int ret = setTimeoutImpl(script_state, event_target, handler,
+                           capability, timeout, arguments, task_type);
+#ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
+  int has_new_task = base::scriptchecker::g_script_checker
+          ->GetAsyncExecTaskSize() - size_of_async_queue;
+  if(has_new_task == 1) {
+    // print the time usage for generating new task by setTimeoutWR
+    TIME_MEASUREMENT_END;
+    // start to record the time usage for schedule the timer task
+    base::scriptchecker::g_script_checker->StartTimeMeasureForAsyncTask();
+  }
+#endif
+  return ret;
 }
 
 int setTimeoutImpl(ScriptState* script_state,
