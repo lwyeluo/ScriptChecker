@@ -466,7 +466,7 @@ void RenderFrameMessageFilter::SetCookie(int32_t render_frame_id,
           ->DisallowedToAccessCookie()) {
 #ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
     LOG(INFO) << base::scriptchecker::g_name
-              << "[ERROR] the task cannot access COOKIE!!! [url] ="
+              << "[ERROR] the task cannot access COOKIE!!! [url] = "
               << url << ", " << site_for_cookies;
 #endif
     std::move(callback).Run();
@@ -523,7 +523,7 @@ void RenderFrameMessageFilter::GetCookies(int render_frame_id,
 #ifdef SCRIPT_CHECKER_INSPECT_TIME_USAGE
 #else
     LOG(INFO) << base::scriptchecker::g_name
-              << "[ERROR] the task cannot access COOKIE!!! [url] ="
+              << "[ERROR] the task cannot access COOKIE!!! [url] = "
               << url << ", " << site_for_cookies;
 #endif
     std::move(callback).Run(std::string());

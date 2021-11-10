@@ -159,6 +159,7 @@ class CORE_EXPORT Element : public ContainerNode {
   /* Added by Luo Wu */
  public:
   bool hasTaskSensitiveAttribute();
+  void setTaskSensitiveAttribute(); /* to test alexa top */
   bool canAccessByScriptChecker();
  private:
   bool has_task_sensitve_attr_;

@@ -92,7 +92,8 @@ void ScriptChecker::RecordNewTask(PendingTask *task) {
               << ", " << task->GetCapbilityAsJSString()
               << ", " << m_current_task_->IsTaskRestricted() << ", "
               << m_current_task_->GetCapbilityAsJSString() << ", "
-              << m_current_task_->sequence_num;
+              << m_current_task_->sequence_num << ", "
+              << task->posted_from.ToString();
 #endif
     // try to update the capability with its parent task
     switch(task->task_type_in_scriptchecker_) {
@@ -122,6 +123,17 @@ void ScriptChecker::RecordNewTask(PendingTask *task) {
 //    LOG(INFO) << "\t\tm_current_task's [seq, cap] = " << m_current_task_->sequence_num
 //              << ", " << m_current_task_->GetCapbilityAsJSString();
 }
+
+#ifndef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
+void ScriptChecker::UpdateCurrentTaskCapability(std::string task_capability) {
+  m_current_task_->SetCapabilityFromJSString(task_capability);
+}
+
+void ScriptChecker::UpdateCurrentTaskCapability(Capability* capability) {
+  if(capability && capability->IsRestricted())
+    m_current_task_->NarrowDownCapability(capability);
+}
+#endif
 
 void ScriptChecker::RecordNewAsyncExecTask(PendingTask &&task) {
   DCHECK(task.task_type_in_scriptchecker_ == TaskType::SETTIMEOUTWR_DELAY_ZERO_TIMER_TASK ||
@@ -247,6 +259,12 @@ bool ScriptChecker::DisallowedToAccessJSObject(std::string object_name) {
   if(!m_current_task_->IsTaskRestricted())
     return false;
   return !m_current_task_->capability_->ContainsInJSWL(object_name);
+}
+bool ScriptChecker::DisallowedToAccessCookie() {
+  if(!m_current_task_->IsTaskRestricted())
+    return false;
+  return CapabilityDefinition::DisallowedToAccessCookie(
+              m_current_task_->capability_->GetBitmap());
 }
 
 }

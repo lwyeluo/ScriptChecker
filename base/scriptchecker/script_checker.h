@@ -54,6 +54,17 @@ class BASE_EXPORT ScriptChecker {
     //     Connector::ReadSingleMessage
     void RecordIPCTask(std::string capability_attached_in_ipc_message);
 
+#ifndef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
+    // <script xxx risky task_capability=""> should be run in risky task.
+    // currently we dynamic change task's capability to run risky script
+    //   using new task later
+    void UpdateCurrentTaskCapability(std::string task_capability);
+    // listener with restricted capability should be run in risky task.
+    // currently we dynamic change task's capability to run risky script
+    //   using new task later
+    void UpdateCurrentTaskCapability(Capability* capability);
+#endif
+
     /* Information of Current Task */
     bool IsCurrentTaskWithRestricted();
     Capability* GetCurrentTaskCapability();
@@ -65,6 +76,7 @@ class BASE_EXPORT ScriptChecker {
     /* Security Monitor */
     bool DisallowedToAccessNetwork();
     bool DisallowedToAccessDOM(bool is_ele_has_task_cap_attr);
+    bool DisallowedToAccessCookie();
     bool DisallowedToAccessJSObject(std::string object_name);
 
     // update capability information with predefined rules

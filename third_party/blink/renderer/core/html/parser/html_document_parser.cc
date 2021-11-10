@@ -287,12 +287,15 @@ void HTMLDocumentParser::RunScriptsForPausedTreeBuilder() {
   // We will not have a scriptRunner when parsing a DocumentFragment.
   if (script_runner_) {
     /* Modified by Luo Wu */
-    // script_runner_->ProcessScriptElement(script_element, script_start_position);
+#ifdef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
     if(!RestrictedFrameParser::PostRestrictedTaskIfNecessary(
                 script_runner_, script_element, script_start_position)) {
       // here is the normal way to execute script
       script_runner_->ProcessScriptElement(script_element, script_start_position);
     }
+#else
+     script_runner_->ProcessScriptElement(script_element, script_start_position);
+#endif
     /* End */
   }
   CheckIfBodyStylesheetAdded();
@@ -628,6 +631,7 @@ void HTMLDocumentParser::PumpPendingSpeculations() {
       break;
 
     /* Added by Luo Wu */
+#ifdef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
     if(base::scriptchecker::g_script_checker &&
             (base::scriptchecker::g_script_checker->
             IsCurrentTaskHasRestrictedFrameParserTask() ||
@@ -641,6 +645,7 @@ void HTMLDocumentParser::PumpPendingSpeculations() {
       parser_scheduler_->ScheduleForUnpause();
       break;
     }
+#endif
     /* Added End */
 
     if (speculations_.IsEmpty() ||
@@ -1095,6 +1100,7 @@ void HTMLDocumentParser::ResumeParsingAfterPause() {
       PumpPendingSpeculations();
     }
     /* Added by Luo Wu */
+#ifdef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
     //  this function can be called for scriptChecker's task when the
     //   restricted frame parser task is done. The problem is that if
     //   ResumeParsingAfterYield runs before the risky script is downloaded,
@@ -1103,6 +1109,7 @@ void HTMLDocumentParser::ResumeParsingAfterPause() {
     else if(!IsScheduledForUnpause()){
       ResumeParsingAfterYield();
     }
+#endif
     /* End */
     return;
   }
@@ -1134,16 +1141,16 @@ void HTMLDocumentParser::NotifyScriptLoaded(PendingScript* pending_script) {
   }
 
   /* Added by Luo Wu */
+#ifdef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
   // a script is downloaded from network, we need to check if it is a risky script
   RestrictedFrameParser::SetIPCTaskCapabilityIfNecessary(pending_script->GetElement());
+#endif
   /* Added End */
 
   script_runner_->ExecuteScriptsWaitingForLoad(pending_script);
 
   /* Modified by Luo Wu */
-  // if (!IsPaused())
-  //   ResumeParsingAfterPause();
-
+#ifdef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
   // when the finished script is risky, we need to use new unrestricted task to
   //  parse the remainings
   if (!IsPaused()) {
@@ -1159,6 +1166,10 @@ void HTMLDocumentParser::NotifyScriptLoaded(PendingScript* pending_script) {
     }
     ResumeParsingAfterPause();
   }
+#else
+  if (!IsPaused())
+    ResumeParsingAfterPause();
+#endif
   /* Added End */
 }
 

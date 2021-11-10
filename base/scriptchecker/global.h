@@ -12,10 +12,13 @@ namespace scriptchecker {
 //#define SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
 
 // to print the result of task-based capability check
-//#define SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
+#define SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
 
 // some logs for micro-benchmark
 //#define SCRIPT_CHECKER_INSPECT_TIME_USAGE
+
+//seperate frame parser
+//#define SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
 
 /*
  * core logic of #ifdef

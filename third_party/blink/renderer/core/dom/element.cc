@@ -399,15 +399,44 @@ bool Element::hasTaskSensitiveAttribute() {
   return has_task_sensitve_attr_;
 }
 
+void Element::setTaskSensitiveAttribute() {
+  has_task_sensitve_attr_ = true;
+}
+
 bool Element::canAccessByScriptChecker() {
+  /* to test Aleax top 1000 */
+  bool should_be_sensitive = has_task_sensitve_attr_;
+  if (base::scriptchecker::g_script_checker) {
+      String outhtml = OuterHTMLAsString();
+      std::string str_html = outhtml.Utf8().data();
+      size_t idx = str_html.find(">");
+      std::string str_self = "";
+      if (idx != std::string::npos) {
+          str_self = str_html.substr(0, idx + 1);
+      }
+      if (str_self.find("passwd") != std::string::npos ||
+              str_self.find("password") != std::string::npos ||
+              str_self.find("user") != std::string::npos) {
+          setTaskSensitiveAttribute();
+          should_be_sensitive = true;
+
+          std::string msg = ">>> Element::canAccessByScriptChecker. we find passwd/password/user, "
+                            "so we tag it be sensitive... ";
+          LOG(INFO) << msg << ", " << str_self;
+      }
+  }
   if(base::scriptchecker::g_script_checker &&
            base::scriptchecker::g_script_checker->DisallowedToAccessDOM(
-              has_task_sensitve_attr_)) {
+              should_be_sensitive)) {
 #ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
+    String outhtml = OuterHTMLAsString();
+    std::string str_html = outhtml.Utf8().data();
+
     std::string message = "The task does not have the permission to "
-                     "access the DOM [name, id, is_task_sensitive] = ";
-    message = message + nodeName().Ascii().data() + ", "
-            + IdForStyleResolution().Ascii().data() + ", "
+                     "access the DOM [url, info, is_task_sensitive] = ";
+    message = message + GetDocument().Url().GetString().Utf8().data() + ", ";
+    message += str_html.substr(0, str_html.size() > 100 ? 100 : str_html.size());
+    message = message + ", "
             + std::to_string(hasTaskSensitiveAttribute());
     GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
         kJSMessageSource, kErrorMessageLevel, message.c_str()));

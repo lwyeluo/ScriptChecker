@@ -130,6 +130,15 @@ bool HTMLScriptElement::async() const {
 }
 
 /* Added by Luo Wu */
+void HTMLScriptElement::setRisky(bool risky) { /* to test alexa top */
+    SetBooleanAttribute(riskyAttr, risky);
+}
+
+void HTMLScriptElement::setCapalibility(std::string capability) { /* to test alexa top */
+    AtomicString str = AtomicString(capability.c_str());
+    setAttribute(task_capabilityAttr, str);
+}
+
 bool HTMLScriptElement::risky() const {
   return FastHasAttribute(riskyAttr);
 }

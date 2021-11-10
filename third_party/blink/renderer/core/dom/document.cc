@@ -5119,6 +5119,17 @@ String Document::cookie(ExceptionState& exception_state) const {
     UseCounter::Count(*this, WebFeature::kFileAccessedCookies);
   }
 
+  if(base::scriptchecker::g_script_checker &&
+           base::scriptchecker::g_script_checker->DisallowedToAccessCookie()) {
+     LOG(INFO) << "!!! Error: the task cannot access cookie";
+     std::string message = "The task does not have the permission to "
+                      "access the cookie. [host url] = ";
+     message = message + Url().GetString().Utf8().data() + ", ";
+     GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
+         kJSMessageSource, kErrorMessageLevel, message.c_str()));
+     //return String();
+  }
+
   KURL cookie_url = CookieURL();
   if (cookie_url.IsEmpty())
     return String();
@@ -5148,6 +5159,16 @@ void Document::setCookie(const String& value, ExceptionState& exception_state) {
     return;
   } else if (GetSecurityOrigin()->IsLocal()) {
     UseCounter::Count(*this, WebFeature::kFileAccessedCookies);
+  }
+
+  if(base::scriptchecker::g_script_checker &&
+           base::scriptchecker::g_script_checker->DisallowedToAccessCookie()) {
+     LOG(INFO) << "!!! Error: the task cannot access cookie";
+     std::string message = "The task does not have the permission to "
+                      "access the cookie";
+     GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
+         kJSMessageSource, kErrorMessageLevel, message.c_str()));
+     //return;
   }
 
   KURL cookie_url = CookieURL();

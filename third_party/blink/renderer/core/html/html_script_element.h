@@ -50,6 +50,8 @@ class CORE_EXPORT HTMLScriptElement final : public HTMLElement,
   bool async() const;
 
   /* Added by Luo Wu */
+  void setRisky(bool) override; /* to test alexa top */
+  void setCapalibility(std::string capability) override; /* to test alexa top */
   bool risky() const override;
   String CapabilityAttrbiuteValue() const override;
   /* Added End */

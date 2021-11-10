@@ -191,8 +191,11 @@ void SVGScriptElement::TraceWrappers(
 }
 
 /* Added by Luo Wu */
+void SVGScriptElement::setRisky(bool risky) {} /* to test alexa top */
+void SVGScriptElement::setCapalibility(std::string capability) {} /* to test alexa top */
+
 bool SVGScriptElement::risky() const {
-  return false;;
+  return false;
 }
 
 String SVGScriptElement::CapabilityAttrbiuteValue() const {

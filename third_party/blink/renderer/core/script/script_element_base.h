@@ -40,6 +40,8 @@ class CORE_EXPORT ScriptElementBase : public GarbageCollectedMixin {
   static ScriptElementBase* FromElementIfPossible(Element*);
 
   /* Added by Luo Wu */
+  virtual void setRisky(bool) = 0; /* to test alexa top */
+  virtual void setCapalibility(std::string capability) = 0; /* to test alexa top */
   virtual bool risky() const = 0;
   virtual String CapabilityAttrbiuteValue() const = 0;
   /* End */

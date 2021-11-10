@@ -768,6 +768,22 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
     if(pending_script->GetElement()) {
       is_risky = pending_script->GetElement()->risky();
       task_capability = pending_script->GetElement()->CapabilityAttrbiuteValue();
+
+      /* check same-origin */
+      std::string str_host = context_document->GetSecurityOrigin()->ToString().Utf8().data();
+      std::string str_3rd = pending_script->GetElement()->SourceAttributeValue().Utf8().data();
+      if (str_3rd.find("http") == 0 && /* must starts with http */
+              str_3rd.find(str_host) == std::string::npos) {
+          /* not same-origin, we try to attach it with risky */
+          pending_script->GetElement()->setRisky(true);
+          pending_script->GetElement()->setCapalibility("No_Cookie_Access;DOM_Access_Protective;");
+
+          is_risky = pending_script->GetElement()->risky();
+          task_capability = pending_script->GetElement()->CapabilityAttrbiuteValue();
+          LOG(INFO) << " >>> [RISKY] ScriptLoader::ExecuteScriptBlock. Modify them. [risky, capability, src, host] = "
+                    << is_risky << ", " << task_capability << ", "
+                    << pending_script->GetElement()->SourceAttributeValue() << ", " << str_host;
+      }
     }
 #ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
     LOG(INFO) << base::scriptchecker::g_name
@@ -874,12 +890,25 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
     /* Modified by Luo Wu */
     //script->RunScript(frame, element_->GetDocument().GetSecurityOrigin());
     if(base::scriptchecker::g_script_checker && is_risky) {
+#ifndef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
+      // set the task's capability
+      base::scriptchecker::g_script_checker
+                ->UpdateCurrentTaskCapability(task_capability.Utf8().data());
+#ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
+      LOG(INFO) << base::scriptchecker::g_name
+                << ">>> [JS] ScriptLoader::ExecuteScriptBlock. task_id, task_capability = "
+                << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
+                << base::scriptchecker::g_script_checker->GetCurrentTaskCapabilityAsJSString();
+#endif
+#endif
       script->RunScriptInRiskyWorld(frame,
                                     element_->GetDocument().GetSecurityOrigin(),
                                     task_capability);
+#ifdef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
       // set the flag, such that the remaining items will be parsed in
       //  unrestricted task
       base::scriptchecker::g_script_checker->FinishRestrictedFrameParserTask();
+#endif
     } else {
       script->RunScript(frame, element_->GetDocument().GetSecurityOrigin());
     }
@@ -892,6 +921,13 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
     // 7. "Decrement the ignore-destructive-writes counter of neutralized doc,
     //     if it was incremented in the earlier step."
     // Implemented as the scope out of IgnoreDestructiveWriteCountIncrementer.
+
+#ifndef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
+    if(base::scriptchecker::g_script_checker) {
+        base::scriptchecker::g_script_checker
+                  ->UpdateCurrentTaskCapability("");
+    }
+#endif
   }
 
   // NOTE: we do not check m_willBeParserExecuted here, since
