@@ -799,6 +799,9 @@ bool EventTarget::FireEventListeners(Event* event,
             = registered_listener.GetCapability();
     if(capability && capability->IsRestricted() &&
             base::scriptchecker::g_script_checker) {
+      LOG(INFO) << ">>> [Event] EventTarget::FireEventListeners. start one listener: "
+                << "[event, capability] = " << event->type() << ", "
+                << capability->ToString();
       if(!g_restricted_listener)
         InitRestrictedListenerForScriptChecker();
       g_restricted_listener->AddRestrictedListener(

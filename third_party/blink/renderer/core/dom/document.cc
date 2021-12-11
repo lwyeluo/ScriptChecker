@@ -906,6 +906,12 @@ Element* Document::CreateElementForBinding(const AtomicString& name,
     return nullptr;
   }
 
+  /* Added by Luo Wu */
+  std::string info = "Document::CreateElementForBinding";
+  info = info + "->" + name.Utf8().data();
+  if(head() && !head()->canAccessByScriptChecker(info))
+    return nullptr;
+
   if (IsXHTMLDocument() || IsHTMLDocument()) {
     // 2. If the context object is an HTML document, let localName be
     // converted to ASCII lowercase.
@@ -966,6 +972,12 @@ Element* Document::CreateElementForBinding(
         "The tag name provided ('" + local_name + "') is not a valid name.");
     return nullptr;
   }
+
+  /* Added by Luo Wu */
+  std::string info = "Document::CreateElementForBinding";
+  info = info + "->" + local_name.Utf8().data();
+  if(head() && !head()->canAccessByScriptChecker(info))
+    return nullptr;
 
   // 2. localName converted to ASCII lowercase
   const AtomicString& converted_local_name = ConvertLocalName(local_name);
@@ -3678,6 +3690,12 @@ void Document::write(const String& text,
   if (!has_insertion_point)
     open(entered_document, ASSERT_NO_EXCEPTION);
 
+  /* Added by Luo Wu */
+  std::string info = "Document::write";
+  info = info + "->" + text.Utf8().data();
+  if(head() && !head()->canAccessByScriptChecker(info))
+    return;
+
   DCHECK(parser_);
   PerformanceMonitor::ReportGenericViolation(
       this, PerformanceMonitor::kDiscouragedAPIUse,
@@ -5119,16 +5137,16 @@ String Document::cookie(ExceptionState& exception_state) const {
     UseCounter::Count(*this, WebFeature::kFileAccessedCookies);
   }
 
+#ifdef SCRIPT_CHECKER_TEST_WEBPAGE
   if(base::scriptchecker::g_script_checker &&
            base::scriptchecker::g_script_checker->DisallowedToAccessCookie()) {
-     LOG(INFO) << "!!! Error: the task cannot access cookie";
      std::string message = "The task does not have the permission to "
                       "access the cookie. [host url] = ";
      message = message + Url().GetString().Utf8().data() + ", ";
      GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
          kJSMessageSource, kErrorMessageLevel, message.c_str()));
-     //return String();
   }
+#endif
 
   KURL cookie_url = CookieURL();
   if (cookie_url.IsEmpty())
@@ -5161,15 +5179,16 @@ void Document::setCookie(const String& value, ExceptionState& exception_state) {
     UseCounter::Count(*this, WebFeature::kFileAccessedCookies);
   }
 
+#ifdef SCRIPT_CHECKER_TEST_WEBPAGE
   if(base::scriptchecker::g_script_checker &&
            base::scriptchecker::g_script_checker->DisallowedToAccessCookie()) {
-     LOG(INFO) << "!!! Error: the task cannot access cookie";
      std::string message = "The task does not have the permission to "
-                      "access the cookie";
+                      "set the cookie. [host url, val] = ";
+     message = message + Url().GetString().Utf8().data() + ", " + value.Utf8().data() + ", ";
      GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
          kJSMessageSource, kErrorMessageLevel, message.c_str()));
-     //return;
   }
+#endif
 
   KURL cookie_url = CookieURL();
   if (cookie_url.IsEmpty())
@@ -6459,6 +6478,13 @@ void Document::AddConsoleMessage(ConsoleMessage* console_message) {
         SourceLocation::Create(Url().GetString(), line_number, 0, nullptr));
     console_message->SetNodes(frame_, std::move(nodes));
   }
+
+#ifdef SCRIPT_CHECKER_TEST_WEBPAGE
+  if(console_message->Location() && console_message->Location()->Url().EndsWith(".html")) {
+      // here is triggered by HTML, so we filter
+      return;
+  }
+#endif
 
   if (console_message->Source() == kInterventionMessageSource)
     Intervention::GenerateReport(frame_, console_message->Message());

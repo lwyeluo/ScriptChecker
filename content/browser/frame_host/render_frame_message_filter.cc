@@ -469,8 +469,10 @@ void RenderFrameMessageFilter::SetCookie(int32_t render_frame_id,
               << "[ERROR] the task cannot access COOKIE!!! [url] = "
               << url << ", " << site_for_cookies;
 #endif
+#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
     std::move(callback).Run();
     return;
+#endif
   }
   /* Added End */
 
@@ -526,8 +528,10 @@ void RenderFrameMessageFilter::GetCookies(int render_frame_id,
               << "[ERROR] the task cannot access COOKIE!!! [url] = "
               << url << ", " << site_for_cookies;
 #endif
+#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
     std::move(callback).Run(std::string());
     return;
+#endif
   }
   /* Added End */
 

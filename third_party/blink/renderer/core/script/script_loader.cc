@@ -769,6 +769,7 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
       is_risky = pending_script->GetElement()->risky();
       task_capability = pending_script->GetElement()->CapabilityAttrbiuteValue();
 
+#ifdef SCRIPT_CHECKER_TEST_WEBPAGE
       /* check same-origin */
       std::string str_host = context_document->GetSecurityOrigin()->ToString().Utf8().data();
       std::string str_3rd = pending_script->GetElement()->SourceAttributeValue().Utf8().data();
@@ -776,7 +777,8 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
               str_3rd.find(str_host) == std::string::npos) {
           /* not same-origin, we try to attach it with risky */
           pending_script->GetElement()->setRisky(true);
-          pending_script->GetElement()->setCapalibility("No_Cookie_Access;DOM_Access_Protective;");
+          pending_script->GetElement()->setCapalibility("No_Cookie_Access;DOM_Access_Protective;No_Network_Access;");
+          //pending_script->GetElement()->setCapalibility("No_Cookie_Access;No_DOM_Access;No_Network_Access;");
 
           is_risky = pending_script->GetElement()->risky();
           task_capability = pending_script->GetElement()->CapabilityAttrbiuteValue();
@@ -784,6 +786,7 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
                     << is_risky << ", " << task_capability << ", "
                     << pending_script->GetElement()->SourceAttributeValue() << ", " << str_host;
       }
+#endif
     }
 #ifdef SCRIPT_CHECKER_INSPECT_TASK_SCEDULER
     LOG(INFO) << base::scriptchecker::g_name

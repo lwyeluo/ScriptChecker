@@ -9,6 +9,9 @@
 #include "base/scriptchecker/async_exec_queue.h"
 #include "base/pending_task.h"
 
+// to capture logs for webpages, e.g., Aleax top 1000
+#define SCRIPT_CHECKER_TEST_WEBPAGE
+
 namespace base {
 
 namespace scriptchecker {
@@ -76,7 +79,9 @@ class BASE_EXPORT ScriptChecker {
     /* Security Monitor */
     bool DisallowedToAccessNetwork();
     bool DisallowedToAccessDOM(bool is_ele_has_task_cap_attr);
+#ifdef SCRIPT_CHECKER_TEST_WEBPAGE
     bool DisallowedToAccessCookie();
+#endif
     bool DisallowedToAccessJSObject(std::string object_name);
 
     // update capability information with predefined rules

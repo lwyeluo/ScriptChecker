@@ -400,48 +400,63 @@ bool Element::hasTaskSensitiveAttribute() {
 }
 
 void Element::setTaskSensitiveAttribute() {
+#ifdef SCRIPT_CHECKER_TEST_WEBPAGE
   has_task_sensitve_attr_ = true;
+#endif
 }
 
-bool Element::canAccessByScriptChecker() {
-  /* to test Aleax top 1000 */
+bool Element::canAccessByScriptChecker(std::string info) {
   bool should_be_sensitive = has_task_sensitve_attr_;
-  if (base::scriptchecker::g_script_checker) {
-      String outhtml = OuterHTMLAsString();
-      std::string str_html = outhtml.Utf8().data();
-      size_t idx = str_html.find(">");
-      std::string str_self = "";
-      if (idx != std::string::npos) {
-          str_self = str_html.substr(0, idx + 1);
-      }
-      if (str_self.find("passwd") != std::string::npos ||
-              str_self.find("password") != std::string::npos ||
-              str_self.find("user") != std::string::npos) {
-          setTaskSensitiveAttribute();
-          should_be_sensitive = true;
 
-          std::string msg = ">>> Element::canAccessByScriptChecker. we find passwd/password/user, "
-                            "so we tag it be sensitive... ";
-          LOG(INFO) << msg << ", " << str_self;
+#ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
+  std::string str_node = "";
+  if (base::scriptchecker::g_script_checker) {
+      str_node = str_node + "<" + tagName().LowerASCII().Utf8().data() + " ";
+      auto names = getAttributeNames();
+      for (size_t i = 0; i < names.size(); i++) {
+          Attr *node = getAttributeNode(names[i]);
+          if (node == nullptr)
+              continue;
+          str_node = str_node + names[i].LowerASCII().Utf8().data();
+          str_node = str_node + "=" + node->value().LowerASCII().Utf8().data() + " ";
+      }
+      str_node += "/>";
+  }
+#endif
+
+#ifdef SCRIPT_CHECKER_TEST_WEBPAGE
+  /* to test Alexa top 1000 */
+  std::vector<std::string> feature = {"passwd", "password", "secret", "credential",
+                           "card", "privacy", "private", "security",
+                           "input", "form", "button"};
+  if (base::scriptchecker::g_script_checker) {
+      for (size_t j = 0; j < feature.size(); j++) {
+          if (str_node.find(feature[j]) != std::string::npos) {
+              setTaskSensitiveAttribute();
+              should_be_sensitive = true;
+              info = info + "-" + feature[j];
+              break;
+          }
       }
   }
+#endif
+
   if(base::scriptchecker::g_script_checker &&
            base::scriptchecker::g_script_checker->DisallowedToAccessDOM(
               should_be_sensitive)) {
 #ifdef SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
-    String outhtml = OuterHTMLAsString();
-    std::string str_html = outhtml.Utf8().data();
-
     std::string message = "The task does not have the permission to "
                      "access the DOM [url, info, is_task_sensitive] = ";
     message = message + GetDocument().Url().GetString().Utf8().data() + ", ";
-    message += str_html.substr(0, str_html.size() > 100 ? 100 : str_html.size());
-    message = message + ", "
+    message = message + info.c_str() + ", " + str_node + ", "
             + std::to_string(hasTaskSensitiveAttribute());
     GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
         kJSMessageSource, kErrorMessageLevel, message.c_str()));
 #endif
+#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
+    // we dont block it when testing
     return false;
+#endif
   }
   return true;
 }

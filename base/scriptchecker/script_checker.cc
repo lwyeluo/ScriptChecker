@@ -260,12 +260,15 @@ bool ScriptChecker::DisallowedToAccessJSObject(std::string object_name) {
     return false;
   return !m_current_task_->capability_->ContainsInJSWL(object_name);
 }
+
+#ifdef SCRIPT_CHECKER_TEST_WEBPAGE
 bool ScriptChecker::DisallowedToAccessCookie() {
   if(!m_current_task_->IsTaskRestricted())
     return false;
   return CapabilityDefinition::DisallowedToAccessCookie(
               m_current_task_->capability_->GetBitmap());
 }
+#endif
 
 }
 

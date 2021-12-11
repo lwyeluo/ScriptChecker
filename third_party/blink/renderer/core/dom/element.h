@@ -160,7 +160,7 @@ class CORE_EXPORT Element : public ContainerNode {
  public:
   bool hasTaskSensitiveAttribute();
   void setTaskSensitiveAttribute(); /* to test alexa top */
-  bool canAccessByScriptChecker();
+  bool canAccessByScriptChecker(std::string info="");
  private:
   bool has_task_sensitve_attr_;
  public:

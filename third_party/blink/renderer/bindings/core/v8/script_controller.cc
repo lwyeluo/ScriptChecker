@@ -397,10 +397,12 @@ v8::Local<v8::Value> ScriptController::EvaluateScriptInRiskyWorld(
       !GetFrame()->GetDocument()->CanExecuteScripts(kAboutToExecuteScript))
     return v8::Local<v8::Value>();
 
-  // if(base::scriptchecker::g_script_checker) {
-  //   LOG(INFO) << ">>> [RISKY] ScriptController::EvaluateScriptInRiskyWorld. [task_id]="
-  //             << base::scriptchecker::g_script_checker->GetCurrentTaskID();
-  // }
+#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
+   if(base::scriptchecker::g_script_checker) {
+     LOG(INFO) << ">>> [RISKY] ScriptController::EvaluateScriptInRiskyWorld. [task_id]="
+               << base::scriptchecker::g_script_checker->GetCurrentTaskID();
+   }
+#endif
 
   // TODO(dcheng): Clean this up to not use ScriptState, to match
   // executeScriptInIsolatedWorld.

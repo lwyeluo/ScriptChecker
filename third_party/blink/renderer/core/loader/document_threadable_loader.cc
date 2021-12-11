@@ -361,19 +361,29 @@ void DocumentThreadableLoader::StartBlinkCORS(const ResourceRequest& request) {
   /* Added by Luo Wu */
   if(base::scriptchecker::g_script_checker &&
           base::scriptchecker::g_script_checker->DisallowedToAccessNetwork()) {
+#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
     LOG(INFO) << base::scriptchecker::g_name << ">>> [ERROR] disallowed to issue XHR to "
               << request.Url().GetString();
     probe::documentThreadableLoaderFailedToStartLoadingForClient(
         GetExecutionContext(), client_);
     ThreadableLoaderClient* client = client_;
     Clear();
+#endif
+
+    std::string message = "The task does not have the permission to "
+                     "to issue XHR [host_url, request_url] = ";
+    message = message + GetDocument()->Url().GetString().Utf8().data() + ", ";
+    message = message + request.Url().GetString().Utf8().data();
+
     ResourceError error = ResourceError::CancelledDueToAccessCheckError(
         request.Url(), ResourceRequestBlockedReason::kOther,
-        "The task does not have the permission to issue XHR");
+        message.c_str());
     GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
         kJSMessageSource, kErrorMessageLevel, error.LocalizedDescription()));
+#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
     client->DidFail(error);
     return;
+#endif
   }
   /* End */
 

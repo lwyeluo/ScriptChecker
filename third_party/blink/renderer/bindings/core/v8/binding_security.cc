@@ -75,7 +75,11 @@ bool CanAccessWindowInternal(const LocalDOMWindow* accessing_window,
       if(cannot_access_) {
         LOG(INFO) << base::scriptchecker::g_name << "[ERROR] The current task cannot access object ["
                   << object_name << "] in main context from sandbox context";
+#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
         return false;
+#else
+        return true;
+#endif
       }
       // Note that passing the capability check does not mean the access is allowed,
       //   it also has to check SOP
