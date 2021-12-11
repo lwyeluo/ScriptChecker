@@ -39,6 +39,8 @@
 #include "third_party/blink/renderer/core/html_names.h"
 #include "third_party/blink/renderer/platform/wtf/hash_set.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 using namespace HTMLNames;
@@ -207,7 +209,15 @@ unsigned HTMLCollection::length() const {
 }
 
 Element* HTMLCollection::item(unsigned offset) const {
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  Element *ele = collection_items_cache_.NodeAt(*this, offset);
+  if (ele) {
+    ele->recordDOMAccess();
+  }
+  return ele;
+#else
   return collection_items_cache_.NodeAt(*this, offset);
+#endif
 }
 
 static inline bool IsMatchingHTMLElement(const HTMLCollection& html_collection,

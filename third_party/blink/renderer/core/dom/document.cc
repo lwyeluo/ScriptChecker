@@ -275,6 +275,8 @@
 #include "third_party/blink/renderer/platform/wtf/text/text_encoding_registry.h"
 #include "third_party/blink/renderer/platform/wtf/time.h"
 
+#include "base/scriptchecker/global.h"
+
 #ifndef NDEBUG
 using WeakDocumentSet =
     blink::PersistentHeapHashSet<blink::WeakMember<blink::Document>>;
@@ -904,6 +906,14 @@ Element* Document::CreateElementForBinding(const AtomicString& name,
     return nullptr;
   }
 
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  std::string info = "Document::CreateElementForBinding";
+  info = info + "->" + name.Utf8().data();
+  if(head()) {
+    head()->recordDOMAccess(info);
+  }
+#endif
+
   if (IsXHTMLDocument() || IsHTMLDocument()) {
     // 2. If the context object is an HTML document, let localName be
     // converted to ASCII lowercase.
@@ -964,6 +974,14 @@ Element* Document::CreateElementForBinding(
         "The tag name provided ('" + local_name + "') is not a valid name.");
     return nullptr;
   }
+
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  std::string info = "Document::CreateElementForBinding";
+  info = info + "->" + local_name.Utf8().data();
+  if(head()) {
+    head()->recordDOMAccess(info);
+  }
+#endif
 
   // 2. localName converted to ASCII lowercase
   const AtomicString& converted_local_name = ConvertLocalName(local_name);
@@ -3639,6 +3657,14 @@ void Document::write(const String& text,
   if (!has_insertion_point)
     open(entered_document, ASSERT_NO_EXCEPTION);
 
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  std::string info = "Document::write";
+  info = info + "->" + text.Utf8().data();
+  if(head()) {
+    head()->recordDOMAccess(info);
+  }
+#endif
+
   DCHECK(parser_);
   PerformanceMonitor::ReportGenericViolation(
       this, PerformanceMonitor::kDiscouragedAPIUse,
@@ -5080,6 +5106,17 @@ String Document::cookie(ExceptionState& exception_state) const {
     UseCounter::Count(*this, WebFeature::kFileAccessedCookies);
   }
 
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  if(Url().GetString().StartsWith(base::scriptchecker::g_test_origin)) {
+      // filter for other butilin pages, like chrome-error:, about:blank...
+      std::string message = "The task does not have the permission to "
+                        "access the cookie. [host url] = ";
+      message = message + Url().GetString().Utf8().data() + ", ";
+      GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
+             kJSMessageSource, kErrorMessageLevel, message.c_str()));
+  }
+#endif
+
   KURL cookie_url = CookieURL();
   if (cookie_url.IsEmpty())
     return String();
@@ -5110,6 +5147,16 @@ void Document::setCookie(const String& value, ExceptionState& exception_state) {
   } else if (GetSecurityOrigin()->IsLocal()) {
     UseCounter::Count(*this, WebFeature::kFileAccessedCookies);
   }
+
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  if(Url().GetString().StartsWith(base::scriptchecker::g_test_origin)) {
+      std::string message = "The task does not have the permission to "
+                       "set the cookie. [host url, val] = ";
+      message = message + Url().GetString().Utf8().data() + ", " + value.Utf8().data() + ", ";
+      GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
+          kJSMessageSource, kErrorMessageLevel, message.c_str()));
+  }
+#endif
 
   KURL cookie_url = CookieURL();
   if (cookie_url.IsEmpty())
@@ -6399,6 +6446,13 @@ void Document::AddConsoleMessage(ConsoleMessage* console_message) {
         SourceLocation::Create(Url().GetString(), line_number, 0, nullptr));
     console_message->SetNodes(frame_, std::move(nodes));
   }
+
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  if(console_message->Location() && console_message->Location()->Url().EndsWith(".html")) {
+      // here is triggered by HTML, so we filter
+      return;
+  }
+#endif
 
   if (console_message->Source() == kInterventionMessageSource)
     Intervention::GenerateReport(frame_, console_message->Message());

@@ -11,6 +11,13 @@ namespace scriptchecker {
 // some logs for micro-benchmark
 //#define SCRIPT_CHECKER_INSPECT_TIME_USAGE
 
+// to log events as baseline
+#define LOG_MALICIOUS_EVENTS_AS_BASELINE
+
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+const char g_test_origin[] = "http://host.com:3001/";
+#endif
+
 /*
  * core logic of #ifdef
  */
@@ -60,7 +67,6 @@ const char BASE_EXPORT g_name[] = "[SCRIPTCHECKER] ";
 bool BASE_EXPORT subTimeVal(timeval &result, timeval& begin, timeval& end);
 extern "C" void rdtsc();
 uint64_t BASE_EXPORT _rdtsc();
-
 
 } // scriptchecker
 } // base

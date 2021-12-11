@@ -160,6 +160,9 @@
 #include "third_party/blink/renderer/platform/wtf/text/string_builder.h"
 #include "third_party/blink/renderer/platform/wtf/text/text_position.h"
 
+#include "base/scriptchecker/global.h"
+#include "third_party/blink/renderer/core/inspector/console_message.h"
+
 namespace blink {
 
 namespace {
@@ -388,6 +391,34 @@ Node::NodeType Element::getNodeType() const {
 
 bool Element::hasAttribute(const QualifiedName& name) const {
   return hasAttributeNS(name.NamespaceURI(), name.LocalName());
+}
+
+bool Element::recordDOMAccess(std::string info) {
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  if(!GetDocument().Url().GetString().StartsWith(base::scriptchecker::g_test_origin)) {
+      // filter for other butilin pages, like chrome-error:, about:blank...
+      return true;
+  }
+  std::string str_node = "";
+  str_node = str_node + "<" + tagName().LowerASCII().Utf8().data() + " ";
+  auto names = getAttributeNames();
+  for (size_t i = 0; i < names.size(); i++) {
+      Attr *node = getAttributeNode(names[i]);
+      if (node == nullptr)
+          continue;
+      str_node = str_node + names[i].LowerASCII().Utf8().data();
+      str_node = str_node + "=" + node->value().LowerASCII().Utf8().data() + " ";
+  }
+  str_node += "/>";
+
+  std::string message = "The task does not have the permission to "
+                   "access the DOM [url, info, is_task_sensitive] = ";
+  message = message + GetDocument().Url().GetString().Utf8().data() + ", ";
+  message = message + info.c_str() + ", " + str_node + ", 0";
+  GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
+      kJSMessageSource, kErrorMessageLevel, message.c_str()));
+#endif
+  return true;
 }
 
 void Element::SynchronizeAllAttributes() const {

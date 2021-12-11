@@ -156,6 +156,9 @@ class CORE_EXPORT Element : public ContainerNode {
   DEFINE_ATTRIBUTE_EVENT_LISTENER(search);
   DEFINE_ATTRIBUTE_EVENT_LISTENER(selectstart);
 
+public:
+  bool recordDOMAccess(std::string info="");
+
   bool hasAttribute(const QualifiedName&) const;
   const AtomicString& getAttribute(const QualifiedName&) const;
 

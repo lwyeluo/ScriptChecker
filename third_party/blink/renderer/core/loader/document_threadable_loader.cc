@@ -69,6 +69,8 @@
 #include "third_party/blink/renderer/platform/weborigin/security_policy.h"
 #include "third_party/blink/renderer/platform/wtf/assertions.h"
 
+#include "base/scriptchecker/global.h"
+
 namespace blink {
 
 namespace {
@@ -355,6 +357,20 @@ void DocumentThreadableLoader::StartBlinkCORS(const ResourceRequest& request) {
   } else {
     cors_flag_ = !GetSecurityOrigin()->CanRequest(request.Url());
   }
+
+#ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
+  if(GetDocument()->Url().GetString().StartsWith(base::scriptchecker::g_test_origin)) {
+    std::string message = "The task does not have the permission to "
+                     "to issue XHR [host_url, request_url] = ";
+    message = message + GetDocument()->Url().GetString().Utf8().data() + ", ";
+    message = message + request.Url().GetString().Utf8().data();
+    ResourceError error = ResourceError::CancelledDueToAccessCheckError(
+        request.Url(), ResourceRequestBlockedReason::kOther,
+        message.c_str());
+    GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
+        kJSMessageSource, kErrorMessageLevel, error.LocalizedDescription()));
+  }
+#endif
 
   // The CORS flag variable is not yet used at the step in the spec that
   // corresponds to this line, but divert |cors_flag_| here for convenience.
