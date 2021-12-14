@@ -361,7 +361,7 @@ void DocumentThreadableLoader::StartBlinkCORS(const ResourceRequest& request) {
   /* Added by Luo Wu */
   if(base::scriptchecker::g_script_checker &&
           base::scriptchecker::g_script_checker->DisallowedToAccessNetwork()) {
-#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
+#ifdef SCRIPT_CHECKER_BLOCK_ACCESS
     LOG(INFO) << base::scriptchecker::g_name << ">>> [ERROR] disallowed to issue XHR to "
               << request.Url().GetString();
     probe::documentThreadableLoaderFailedToStartLoadingForClient(
@@ -380,7 +380,7 @@ void DocumentThreadableLoader::StartBlinkCORS(const ResourceRequest& request) {
         message.c_str());
     GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
         kJSMessageSource, kErrorMessageLevel, error.LocalizedDescription()));
-#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
+#ifdef SCRIPT_CHECKER_BLOCK_ACCESS
     client->DidFail(error);
     return;
 #endif

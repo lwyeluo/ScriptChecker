@@ -453,7 +453,7 @@ bool Element::canAccessByScriptChecker(std::string info) {
     GetExecutionContext()->AddConsoleMessage(ConsoleMessage::Create(
         kJSMessageSource, kErrorMessageLevel, message.c_str()));
 #endif
-#ifndef SCRIPT_CHECKER_TEST_WEBPAGE
+#ifdef SCRIPT_CHECKER_BLOCK_ACCESS
     // we dont block it when testing
     return false;
 #endif

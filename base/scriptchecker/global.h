@@ -20,6 +20,8 @@ namespace scriptchecker {
 //seperate frame parser
 //#define SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
 
+#define SCRIPT_CHECKER_BLOCK_ACCESS
+
 #ifdef SCRIPT_CHECKER_TEST_WEBPAGE
 #define SCRIPT_CHECKER_PRINT_SECURITY_MONITOR_LOG
 #endif

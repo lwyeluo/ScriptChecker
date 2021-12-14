@@ -11,6 +11,8 @@
 // to capture logs for webpages, e.g., Aleax top 1000
 #define SCRIPT_CHECKER_TEST_WEBPAGE
 
+#define SCRIPT_CHECKER_BLOCK_ACCESS
+
 namespace base {
 
 namespace scriptchecker {

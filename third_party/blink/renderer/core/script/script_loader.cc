@@ -794,7 +794,8 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
                  "[task_id, url, risky, capability] is "
               << base::scriptchecker::g_script_checker->GetCurrentTaskID() << ", "
               << context_document->Url().GetString() << ", " << is_risky << ", "
-              << task_capability << ", " << pending_script->GetElement()->SourceAttributeValue();
+              << task_capability << ", " << pending_script->GetElement()->SourceAttributeValue()
+              << ", " << pending_script->GetElement()->CapabilityAttrbiuteValue();
 #endif
   }
   /* Added End */
@@ -892,6 +893,8 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
     //    2. "Run the module script given by the script's script."
     /* Modified by Luo Wu */
     //script->RunScript(frame, element_->GetDocument().GetSecurityOrigin());
+    std::string current_cap =
+            base::scriptchecker::g_script_checker->GetCurrentTaskCapabilityAsJSString();
     if(base::scriptchecker::g_script_checker && is_risky) {
 #ifndef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
       // set the task's capability
@@ -926,9 +929,9 @@ void ScriptLoader::ExecuteScriptBlock(PendingScript* pending_script,
     // Implemented as the scope out of IgnoreDestructiveWriteCountIncrementer.
 
 #ifndef SCRIPT_CHECKER_SEPERATE_FRAME_PARSER
-    if(base::scriptchecker::g_script_checker) {
+    if(base::scriptchecker::g_script_checker && is_risky) {
         base::scriptchecker::g_script_checker
-                  ->UpdateCurrentTaskCapability("");
+                  ->UpdateCurrentTaskCapability(current_cap);
     }
 #endif
   }

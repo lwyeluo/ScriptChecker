@@ -909,7 +909,7 @@ Element* Document::CreateElementForBinding(const AtomicString& name,
   /* Added by Luo Wu */
   std::string info = "Document::CreateElementForBinding";
   info = info + "->" + name.Utf8().data();
-  if(head() && !head()->canAccessByScriptChecker(info))
+  if(headForLog() && !headForLog()->canAccessByScriptChecker(info))
     return nullptr;
 
   if (IsXHTMLDocument() || IsHTMLDocument()) {
@@ -976,7 +976,7 @@ Element* Document::CreateElementForBinding(
   /* Added by Luo Wu */
   std::string info = "Document::CreateElementForBinding";
   info = info + "->" + local_name.Utf8().data();
-  if(head() && !head()->canAccessByScriptChecker(info))
+  if(headForLog() && !headForLog()->canAccessByScriptChecker(info))
     return nullptr;
 
   // 2. localName converted to ASCII lowercase
@@ -3083,6 +3083,13 @@ DocumentParser* Document::ImplicitOpen(
   return parser_;
 }
 
+HTMLElement* Document::bodyNoLog() const {
+  HTMLElement* ele = body();
+  if (ele && ele->canAccessByScriptChecker())
+    return ele;
+  return nullptr;
+}
+
 HTMLElement* Document::body() const {
   if (!documentElement() || !IsHTMLHtmlElement(documentElement()))
     return nullptr;
@@ -3165,8 +3172,22 @@ HTMLHeadElement* Document::head() const {
   if (!de)
     return nullptr;
 
+  /* Modified by Luo Wu to check */
+  HTMLHeadElement* ele = Traversal<HTMLHeadElement>::FirstChild(*de);
+  if (ele && ele->canAccessByScriptChecker())
+      return ele;
+  return nullptr;
+}
+
+/* Added by Luo Wu */
+HTMLHeadElement* Document::headForLog() const {
+  Node* de = documentElement();
+  if (!de)
+    return nullptr;
+
   return Traversal<HTMLHeadElement>::FirstChild(*de);
 }
+/* End */
 
 Element* Document::ViewportDefiningElement(
     const ComputedStyle* root_style) const {
@@ -3693,7 +3714,7 @@ void Document::write(const String& text,
   /* Added by Luo Wu */
   std::string info = "Document::write";
   info = info + "->" + text.Utf8().data();
-  if(head() && !head()->canAccessByScriptChecker(info))
+  if(headForLog() && !headForLog()->canAccessByScriptChecker(info))
     return;
 
   DCHECK(parser_);
