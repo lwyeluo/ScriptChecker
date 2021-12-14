@@ -909,8 +909,8 @@ Element* Document::CreateElementForBinding(const AtomicString& name,
 #ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
   std::string info = "Document::CreateElementForBinding";
   info = info + "->" + name.Utf8().data();
-  if(head()) {
-    head()->recordDOMAccess(info);
+  if(headForLog()) {
+    headForLog()->recordDOMAccess(info);
   }
 #endif
 
@@ -978,8 +978,8 @@ Element* Document::CreateElementForBinding(
 #ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
   std::string info = "Document::CreateElementForBinding";
   info = info + "->" + local_name.Utf8().data();
-  if(head()) {
-    head()->recordDOMAccess(info);
+  if(headForLog()) {
+    headForLog()->recordDOMAccess(info);
   }
 #endif
 
@@ -3050,6 +3050,13 @@ DocumentParser* Document::ImplicitOpen(
   return parser_;
 }
 
+HTMLElement* Document::bodyNoLog() const {
+  HTMLElement* ele = body();
+  if (ele && ele->recordDOMAccess())
+    return ele;
+  return nullptr;
+}
+
 HTMLElement* Document::body() const {
   if (!documentElement() || !IsHTMLHtmlElement(documentElement()))
     return nullptr;
@@ -3132,8 +3139,23 @@ HTMLHeadElement* Document::head() const {
   if (!de)
     return nullptr;
 
+  /* Modified by Luo Wu to check */
+  HTMLHeadElement* ele = Traversal<HTMLHeadElement>::FirstChild(*de);
+  if (ele && ele->recordDOMAccess())
+      return ele;
+  return nullptr;
+}
+
+/* Added by Luo Wu */
+HTMLHeadElement* Document::headForLog() const {
+  Node* de = documentElement();
+  if (!de)
+    return nullptr;
+
   return Traversal<HTMLHeadElement>::FirstChild(*de);
 }
+/* End */
+
 
 Element* Document::ViewportDefiningElement(
     const ComputedStyle* root_style) const {
@@ -3660,8 +3682,8 @@ void Document::write(const String& text,
 #ifdef LOG_MALICIOUS_EVENTS_AS_BASELINE
   std::string info = "Document::write";
   info = info + "->" + text.Utf8().data();
-  if(head()) {
-    head()->recordDOMAccess(info);
+  if(headForLog()) {
+    headForLog()->recordDOMAccess(info);
   }
 #endif
 

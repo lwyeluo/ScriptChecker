@@ -126,8 +126,15 @@ inline Element* TreeOrderedMap::Get(const AtomicString& key,
     return nullptr;
 
   DCHECK(entry->count);
-  if (entry->element)
-    return entry->element;
+  if (entry->element) {
+    //return entry->element;
+    /* Added by Luo Wu */
+    if(entry->element->recordDOMAccess())
+      return entry->element;
+    return nullptr;
+    /* Added End */
+
+  }
 
   // Iterate to find the node that matches. Nothing will match iff an element
   // with children having duplicate IDs is being removed -- the tree traversal
@@ -137,7 +144,13 @@ inline Element* TreeOrderedMap::Get(const AtomicString& key,
     if (!keyMatches(key, element))
       continue;
     entry->element = &element;
-    return &element;
+    //return &element;
+    /* Added by Luo Wu */
+    if(entry->element->recordDOMAccess())
+      return entry->element;
+    return nullptr;
+    /* Added End */
+
   }
 // As get()/getElementById() can legitimately be called while handling element
 // removals, allow failure iff we're in the scope of node removals.

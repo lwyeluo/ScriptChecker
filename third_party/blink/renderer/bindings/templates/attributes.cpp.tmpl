@@ -194,6 +194,10 @@ const v8::FunctionCallbackInfo<v8::Value>& info
 
   {% if world_suffix %}
   {{attribute.v8_set_return_value_for_main_world}};
+  {# Added by Luo Wu #}
+  {% elif attribute.name == "body" and cpp_class_or_partial == "Document" %}
+  V8SetReturnValueFast(info, WTF::GetPtr(impl->bodyNoLog()), impl);
+  {# Added End #}
   {% else %}
   {{attribute.v8_set_return_value}};
   {% endif %}

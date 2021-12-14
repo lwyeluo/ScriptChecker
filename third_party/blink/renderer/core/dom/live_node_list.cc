@@ -55,7 +55,13 @@ unsigned LiveNodeList::length() const {
 }
 
 Element* LiveNodeList::item(unsigned offset) const {
-  return collection_items_cache_.NodeAt(*this, offset);
+//  return collection_items_cache_.NodeAt(*this, offset);
+  /* Added by Luo Wu */
+  Element* ele = collection_items_cache_.NodeAt(*this, offset);
+  if(ele && !ele->recordDOMAccess())
+    return nullptr;
+  return ele;
+
 }
 
 Element* LiveNodeList::TraverseToFirst() const {

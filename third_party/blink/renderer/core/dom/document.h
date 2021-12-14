@@ -959,6 +959,11 @@ class CORE_EXPORT Document : public ContainerNode,
   void WillInsertBody();
 
   HTMLHeadElement* head() const;
+  /* Added by Luo Wu */
+  // only to log info
+  HTMLHeadElement* headForLog() const;
+  HTMLElement* bodyNoLog() const;
+  /* End */
 
   // Decide which element is to define the viewport's overflow policy. If
   // |rootStyle| is set, use that as the style for the root element, rather than
