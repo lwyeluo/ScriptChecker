@@ -23,15 +23,17 @@ void RunRestrictedListener(size_t idx_for_pending_tasks,
                            EventTarget* event_target,
                            Event* event,
                            ExecutionContext* context) {
+  bool is_last_task = (idx_for_pending_tasks + 1 == g_restricted_listener->GetNumberOfTasks());
   ListenerTaskArgs* args = g_restricted_listener->
           GetListenerTaskArgs(idx_for_pending_tasks);
-  RunEventListener(event_target, &args->registered_listener, event,
-                   context, args->flag_should_report,
-                   args->report_time);
-  if(idx_for_pending_tasks == g_restricted_listener->GetNumberOfTasks() - 1) {
+  if(is_last_task) {
+      g_restricted_listener->ResetRestrictedListenerFlag();
       // all pending listeners are run, so clear it
       g_restricted_listener->Clear();
   }
+  RunEventListener(event_target, &args->registered_listener, event,
+                   context, args->flag_should_report,
+                   args->report_time);
 }
 
 ListenerTaskArgs::ListenerTaskArgs(
@@ -99,6 +101,10 @@ size_t RestrictedListener::GetNumberOfTasks() {
 
 bool RestrictedListener::HasRestrictedListener() {
   return has_restricted_listener_;
+}
+
+void RestrictedListener::ResetRestrictedListenerFlag() {
+  has_restricted_listener_ = false;
 }
 
 void RestrictedListener::Clear() {

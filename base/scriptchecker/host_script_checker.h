@@ -9,7 +9,7 @@
 #include "base/scriptchecker/host_script_checker_helper.h"
 
 // to capture logs for webpages, e.g., Aleax top 1000
-#define SCRIPT_CHECKER_TEST_WEBPAGE
+//#define SCRIPT_CHECKER_TEST_WEBPAGE
 
 #define SCRIPT_CHECKER_BLOCK_ACCESS
 

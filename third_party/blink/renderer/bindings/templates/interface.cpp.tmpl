@@ -30,6 +30,13 @@ static void indexedPropertyGetter(uint32_t index, const v8::PropertyCallbackInfo
   {% set getter_arguments = getter_arguments + ['exceptionState'] %}
   {% endif %}
   {{getter.cpp_type}} result = impl->{{getter_name}}({{getter_arguments | join(', ')}});
+
+  {% if v8_class == "V8HTMLCollection" %}
+  // ScriptChecker may block the access
+  if (!result)
+    return;
+  {% endif %}
+
   {{getter.v8_set_return_value}};
 }
 

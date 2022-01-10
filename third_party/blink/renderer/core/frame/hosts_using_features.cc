@@ -51,7 +51,7 @@ void HostsUsingFeatures::CountHostOrIsolatedWorldHumanReadableName(
   Document* document = DocumentFromEventTarget(target);
   if (!document)
     return;
-  if (script_state->World().IsMainWorld()) {
+  if (script_state->World().IsMainWorld() || script_state->World().IsRiskyWorld()) {
     document->HostsUsingFeaturesValue().Count(feature);
     return;
   }

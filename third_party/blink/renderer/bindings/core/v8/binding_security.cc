@@ -393,8 +393,10 @@ bool BindingSecurity::ShouldAllowAccessToCreationContext(
   }
   const DOMWrapperWorld& current_world =
       DOMWrapperWorld::World(isolate->GetCurrentContext());
-  CHECK_EQ(current_world.GetWorldId(),
-           DOMWrapperWorld::World(creation_context).GetWorldId());
+  if (current_world.IsMainWorld() && DOMWrapperWorld::World(creation_context).IsMainWorld()) {
+    CHECK_EQ(current_world.GetWorldId(),
+             DOMWrapperWorld::World(creation_context).GetWorldId());
+  }
 
   return !current_world.IsMainWorld() ||
          ShouldAllowAccessToFrame(CurrentDOMWindow(isolate), frame,

@@ -12,6 +12,7 @@ namespace scriptchecker {
 Capability::Capability() {
   capability_ = "";
   capability_ipc_ = "";
+  capability_js_wl.clear();
   is_restricted_ = false;
 }
 

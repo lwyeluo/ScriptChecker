@@ -38,6 +38,7 @@ class CORE_EXPORT RestrictedListener {
   size_t GetNumberOfTasks();
 
   bool HasRestrictedListener();
+  void ResetRestrictedListenerFlag();
   void Clear();
 
  private:

@@ -33,17 +33,19 @@ v8::Local<v8::Value> ToV8(DOMWindow* window,
 
   /* Added by Luo Wu */
   // distinguish the main world and risky world
-  if(frame->DomWindowForRiskyWorld() == window) {
-    // access the object in risky world
-    if(DOMWrapperWorld::Current(isolate).IsMainWorld()) {
-      // main world accesses risky world
+  if (window->getWorld()) {
+    if(frame->DomWindowForRiskyWorld() == window) {
+      // access the object in risky world
+      if(DOMWrapperWorld::Current(isolate).IsMainWorld()) {
+        // main world accesses risky world
+        return frame->GetWindowProxy(*window->getWorld())
+            ->GlobalProxyIfNotDetached();
+      }
+    } else if(DOMWrapperWorld::Current(isolate).IsRiskyWorld()) {
+      // risky world accesses normal world
       return frame->GetWindowProxy(*window->getWorld())
           ->GlobalProxyIfNotDetached();
     }
-  } else if(DOMWrapperWorld::Current(isolate).IsRiskyWorld()) {
-    // risky world accesses normal world
-    return frame->GetWindowProxy(*window->getWorld())
-        ->GlobalProxyIfNotDetached();
   }
   /* Added End */
 
